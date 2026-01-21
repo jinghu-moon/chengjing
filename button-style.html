@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Button Interaction Collection (Click & Hover)</title>
+<style>
+  /* =========================================
+     1. Design Tokens (全局变量)
+     ========================================= */
+  :root {
+    /* --- 颜色变量 --- */
+    --td-brand-color: #0052d9;
+    --td-brand-color-hover: #266fe8;
+    --td-brand-color-active: #003cab;
+
+    --td-error-color: #d54941;
+    --td-error-color-hover: #e7695d;
+    --td-error-color-active: #ad352f;
+    
+    --td-success-color: #2ba471;
+
+    --td-gray-color-bg: #e7e7e7;
+    --td-gray-color-bg-hover: #f0f0f0;
+    --td-gray-color-bg-active: #dcdcdc;
+
+    --td-text-color-primary: #1d1d1f;
+    --td-text-color-anti: #ffffff;
+    
+    /* --- 动画曲线 --- */
+    --td-ease-out: cubic-bezier(0.38, 0, 0.24, 1);
+    --td-ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+    --td-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --td-ease-shake: cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    
+    /* --- 阴影与光环 --- */
+    --pulse-brand-shadow: rgba(0, 82, 217, 0.2);
+    --pulse-error-shadow: rgba(213, 73, 65, 0.2);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    min-height: 100vh;
+    background-color: #fff;
+    font-family: "Microsoft YaHei", sans-serif;
+    padding: 60px 20px;
+  }
+
+  h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .section {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #eee;
+  }
+
+  /* =========================================
+     2. 按钮基础样式
+     ========================================= */
+  .t-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+    
+    /* 基础过渡 */
+    transition: all 0.2s linear; 
+    
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .t-button__text {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* =========================================
+     3. 按钮主题定义
+     ========================================= */
+  
+  /* Primary */
+  .t-button--primary {
+    background-color: var(--td-brand-color);
+    border-color: var(--td-brand-color);
+    color: var(--td-text-color-anti);
+    --ripple-color: rgba(255, 255, 255, 0.35);
+    --pulse-shadow-color: var(--pulse-brand-shadow);
+  }
+  .t-button--primary:hover {
+    background-color: var(--td-brand-color-hover);
+    border-color: var(--td-brand-color-hover);
+  }
+
+  /* Danger */
+  .t-button--danger {
+    background-color: var(--td-error-color);
+    border-color: var(--td-error-color);
+    color: var(--td-text-color-anti);
+    --ripple-color: rgba(255, 255, 255, 0.35);
+    --pulse-shadow-color: var(--pulse-error-shadow);
+  }
+  .t-button--danger:hover {
+    background-color: var(--td-error-color-hover);
+    border-color: var(--td-error-color-hover);
+  }
+
+  /* White/Ghost */
+  .t-button--white {
+    background-color: #fff;
+    border-color: #e0e0e0;
+    color: var(--td-text-color-primary);
+  }
+  .t-button--white:hover {
+    border-color: var(--td-brand-color);
+    color: var(--td-brand-color);
+  }
+  
+  /* Black (用于 Sheen 效果演示) */
+  .t-button--black {
+    background-color: #1d1d1f;
+    border-color: #1d1d1f;
+    color: #fff;
+  }
+  .t-button--black:hover {
+    background-color: #333;
+  }
+
+
+  /* =========================================
+     CLICK 1: Scale / Press
+     ========================================= */
+  .effect-scale {
+    transition: transform 0.1s var(--td-ease-out), background-color 0.2s linear;
+  }
+  .effect-scale:active {
+    transform: scale(0.95);
+  }
+
+  /* =========================================
+     CLICK 2: Pulse / Ring
+     ========================================= */
+  .effect-pulse::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: inherit;
+    border: 0px solid var(--td-brand-color);
+    box-shadow: 0 0 0 0 var(--pulse-shadow-color);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .effect-pulse.is-pulsing::after {
+    animation: ant-wave-effect 0.4s var(--td-ease-out);
+  }
+  @keyframes ant-wave-effect {
+    0% { box-shadow: 0 0 0 0 var(--pulse-shadow-color); opacity: 1; }
+    100% { box-shadow: 0 0 0 8px var(--pulse-shadow-color); opacity: 0; }
+  }
+
+  /* =========================================
+     CLICK 3: Ripple
+     ========================================= */
+  .t-ripple-wave {
+    position: absolute;
+    border-radius: 50%;
+    background-color: var(--ripple-color);
+    transform: scale(0);
+    animation: ripple-anim 0.6s var(--td-ease-out);
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .effect-ripple { overflow: hidden; }
+  @keyframes ripple-anim {
+    to { transform: scale(2.5); opacity: 0; }
+  }
+
+  /* =========================================
+     CLICK 4: Sweep
+     ========================================= */
+  .effect-sweep { overflow: hidden; }
+  .effect-sweep::before {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0; width: 150%; left: -160%;
+    transform: skewX(-20deg);
+    background-color: rgba(0,0,0,0.1);
+    z-index: 1;
+    opacity: 0; pointer-events: none;
+  }
+  .effect-sweep.is-sweeping::before {
+    opacity: 1;
+    animation: sweep-anim 0.4s var(--td-ease-out) forwards;
+  }
+  @keyframes sweep-anim {
+    0% { left: -160%; }
+    100% { left: -10%; }
+  }
+
+  /* =========================================
+     CLICK 5: Slide Feedback
+     ========================================= */
+  .effect-slide__content {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+  }
+  .slide-init,
+  .slide-done {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .slide-done {
+    transform: translateY(150%);
+    opacity: 0;
+  }
+  .effect-slide.is-sliding .slide-init {
+    transform: translateY(-150%);
+    opacity: 0;
+  }
+  .effect-slide.is-sliding .slide-done {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .effect-slide.is-sliding.t-button--primary {
+    background-color: var(--td-success-color);
+    border-color: var(--td-success-color);
+  }
+
+  /* =========================================
+     CLICK 6: Border Progress
+     ========================================= */
+  .effect-progress { overflow: hidden; }
+  .effect-progress::after {
+    content: "";
+    position: absolute;
+    left: 0; bottom: 0;
+    height: 3px; width: 0%;
+    background-color: var(--td-brand-color);
+    transition: width 0s;
+    z-index: 3;
+  }
+  .effect-progress.is-loading::after {
+    width: 100%;
+    transition: width 2s linear; 
+  }
+  .effect-progress.is-loading {
+    color: #999;
+    pointer-events: none;
+  }
+  .effect-progress.is-success {
+    border-color: var(--td-success-color);
+    color: var(--td-success-color);
+    transition: all 0.3s;
+  }
+  .effect-progress.is-success::after {
+    width: 100%;
+    background-color: var(--td-success-color);
+    height: 100%;
+    opacity: 0.1;
+    transition: height 0.3s, opacity 0.3s, background-color 0.3s;
+  }
+
+  /* =========================================
+     CLICK 7: Shake (错误)
+     ========================================= */
+  .effect-shake { will-change: transform; }
+  .effect-shake.is-shaking {
+    animation: shake-anim 0.5s var(--td-ease-shake) both;
+    background-color: var(--td-error-color) !important;
+    border-color: var(--td-error-color) !important;
+    color: var(--td-text-color-anti) !important;
+  }
+  @keyframes shake-anim {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+
+  /* =========================================
+     HOVER 1: Sheen (流光)
+     ========================================= */
+  .hover-sheen {
+    overflow: hidden;
+  }
+  .hover-sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 创建一个半透明的白色光带 */
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    /* 倾斜 */
+    transform: skewX(-20deg) translateX(-150%);
+    transition: transform 0.5s;
+    pointer-events: none;
+  }
+  .hover-sheen:hover::after {
+    /* 鼠标移入时，光带从左划到右 */
+    transform: skewX(-20deg) translateX(150%);
+    transition: transform 0.5s;
+  }
+
+  /* =========================================
+     HOVER 2: Icon Slide (图标滑入)
+     ========================================= */
+  .hover-icon-slide .t-button__text {
+    transition: transform 0.3s var(--td-ease-out);
+  }
+  
+  .hover-icon-slide svg {
+    position: absolute;
+    /* 初始隐藏在右侧，且透明 */
+    right: 14px;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.3s var(--td-ease-out);
+  }
+  
+  .hover-icon-slide:hover .t-button__text {
+    /* 文字向左让位 */
+    transform: translateX(-10px);
+  }
+  
+  .hover-icon-slide:hover svg {
+    /* 图标显示 */
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* =========================================
+     HOVER 3: Lift (悬浮升起)
+     ========================================= */
+  .hover-lift {
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .hover-lift:hover {
+    /* 向上浮动 2px */
+    transform: translateY(-2px);
+    /* 阴影加深扩散 */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+  }
+
+</style>
+</head>
+<body>
+
+  <!-- 点击效果展示 -->
+  <div class="section">
+    <h3>1. Scale (拟物按压 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-scale"><span>按住我</span></button>
+      <button class="t-button t-button--danger effect-scale"><span>有弹性</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>2. Pulse (外部光环 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-pulse" onclick="triggerPulse(this)"><span>点击扩散</span></button>
+      <button class="t-button t-button--danger effect-pulse" onclick="triggerPulse(this)"><span>状态感知</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>3. Ripple (水波纹 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-ripple" onclick="triggerRipple(event)"><span>从鼠标位置扩散</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>4. Sweep (斜向填充 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-sweep" onclick="triggerSweep(this)"><span>快速扫过</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>5. Slide Feedback (滑轨反馈 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-slide" style="min-width: 140px;" onclick="triggerSlide(this)">
+        <div class="effect-slide__content">
+          <div class="slide-init"><span>加入购物车</span></div>
+          <div class="slide-done">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>已加入</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>6. Border Progress (边框进度 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--white effect-progress" style="min-width: 120px;" onclick="triggerProgress(this)">
+        <span class="btn-text">Download File</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>7. Shake (错误拒绝 - Click)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary effect-shake" onclick="triggerShake(this)"><span>Login</span></button>
+      <button class="t-button t-button--white effect-shake" onclick="triggerShake(this)"><span>Delete</span></button>
+    </div>
+  </div>
+
+  <!-- 新增 Hover 效果展示 -->
+  <div class="section" style="border-top: 2px solid #eee; padding-top: 30px; margin-top: 20px;">
+    <h3>8. Sheen (流光 - Hover)</h3>
+    <div class="row">
+      <button class="t-button t-button--black hover-sheen"><span>立即购买</span></button>
+      <button class="t-button t-button--primary hover-sheen"><span>Premium Plan</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>9. Icon Slide (图标滑入 - Hover)</h3>
+    <div class="row">
+      <button class="t-button t-button--primary hover-icon-slide" style="padding-right: 28px;">
+        <span class="t-button__text">了解更多</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+      
+      <button class="t-button t-button--white hover-icon-slide" style="padding-right: 28px;">
+        <span class="t-button__text">下一步</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>10. Lift (悬浮升起 - Hover)</h3>
+    <div class="row">
+      <button class="t-button t-button--white hover-lift"><span>Card Button</span></button>
+      <button class="t-button t-button--primary hover-lift"><span>Elevated</span></button>
+    </div>
+  </div>
+
+  <script>
+    /* 1. Scale: CSS only */
+
+    /* 2. Pulse */
+    function triggerPulse(btn) {
+      btn.classList.remove('is-pulsing');
+      void btn.offsetWidth; 
+      btn.classList.add('is-pulsing');
+      setTimeout(() => btn.classList.remove('is-pulsing'), 400);
+    }
+
+    /* 3. Ripple */
+    function triggerRipple(e) {
+      const btn = e.currentTarget;
+      const circle = document.createElement('span');
+      const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+      const radius = diameter / 2;
+      const rect = btn.getBoundingClientRect();
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${e.clientX - rect.left - radius}px`;
+      circle.style.top = `${e.clientY - rect.top - radius}px`;
+      circle.classList.add('t-ripple-wave');
+      btn.appendChild(circle);
+      setTimeout(() => circle.remove(), 600);
+    }
+
+    /* 4. Sweep */
+    function triggerSweep(btn) {
+      btn.classList.remove('is-sweeping');
+      void btn.offsetWidth;
+      btn.classList.add('is-sweeping');
+    }
+
+    /* 5. Slide */
+    function triggerSlide(btn) {
+      if (btn.classList.contains('is-sliding')) return;
+      btn.classList.add('is-sliding');
+      setTimeout(() => btn.classList.remove('is-sliding'), 2000);
+    }
+
+    /* 6. Progress */
+    function triggerProgress(btn) {
+      if (btn.classList.contains('is-loading')) return;
+      const textSpan = btn.querySelector('.btn-text');
+      const originalText = textSpan.innerText;
+      btn.classList.add('is-loading');
+      textSpan.innerText = "Processing...";
+      setTimeout(() => {
+        btn.classList.remove('is-loading');
+        btn.classList.add('is-success');
+        textSpan.innerText = "Completed";
+        setTimeout(() => {
+          btn.classList.remove('is-success');
+          textSpan.innerText = originalText;
+        }, 1500);
+      }, 2000); 
+    }
+
+    /* 7. Shake */
+    function triggerShake(btn) {
+      if (btn.classList.contains('is-shaking')) return;
+      btn.classList.add('is-shaking');
+      setTimeout(() => btn.classList.remove('is-shaking'), 500);
+    }
+  </script>
+
+</body>
+</html>

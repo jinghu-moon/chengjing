@@ -1,0 +1,126 @@
+/* src/style.css */
+
+/* 1. 引入 Design Tokens */
+@import './variables.css';
+
+/* 2. 全局重置 (Reset & Base) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* 防止移动端点击高亮 */
+  -webkit-tap-highlight-color: transparent;
+  /* 禁用默认拖拽 */
+  -webkit-user-drag: none;
+  user-select: none;
+  /* 统一字体 */
+  font-family: var(--font-family-base);
+}
+
+/* 允许输入框和文本域选择文字 */
+input,
+textarea {
+  user-select: text;
+  font-family: inherit;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+
+  /* 布局 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 22vh; /* 保持原有的视觉重心 */
+
+  /* 颜色 */
+  color: var(--text-primary);
+  background-color: var(--nord0); /* 图片加载前的底色 */
+
+  /* 字体平滑 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 3. 通用工具类 (Utilities) */
+
+/* 遮罩层 (Overlay) - 用于壁纸变暗 */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-back); /* 使用变量 */
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 100%);
+  transition: background 0.6s var(--ease-smooth);
+}
+
+/* 聚焦模式下的遮罩加深 */
+body.focus-mode .overlay {
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* 隐藏类 */
+.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(10px);
+}
+
+/* 过渡类 */
+.transition-all {
+  transition: all 0.3s var(--ease-elastic);
+}
+
+/* 4. 滚动条美化 (Global Scrollbar) */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-active);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* 5. 动画关键帧 (Animations) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

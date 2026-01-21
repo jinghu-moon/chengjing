@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+/* =================================================================
+   变量定义 (保持不变)
+   ================================================================= */
+:root {
+   --nord0 : #2e3440;
+   --nord1 : #3b4252;
+   --nord4 : #d8dee9;
+   --nord6 : #eceff4;
+   --nord8 : #88c0d0;
+   --nord10: #5e81ac;
+
+   --color-primary      : var(--nord10);
+   --text-primary    : rgb(from var(--nord6) r g b / 0.95);
+   --text-secondary  : rgb(from var(--nord4) r g b / 0.75);
+   --text-tertiary   : rgb(from var(--nord4) r g b / 0.45);
+   
+   --bg-panel        : rgb(from var(--nord0) r g b / 0.75);
+   --bg-panel-dark   : rgb(from var(--nord1) r g b / 0.4); 
+   --bg-hover        : rgb(from var(--nord6) r g b / 0.08);
+   --bg-active       : rgb(from var(--nord6) r g b / 0.12);
+   
+   --border-glass    : 1px solid rgb(from var(--nord6) r g b / 0.2);
+   --border-divider  : 1px solid rgb(from var(--nord6) r g b / 0.15);
+   
+   --radius-md  : 8px;
+   --radius-lg  : 16px;
+   --blur-md    : 20px;
+   --shadow-lg  : 0 10px 40px rgb(from var(--nord0) r g b / 0.5);
+   
+   /* 动画变量 */
+   --duration-normal: 0.3s;
+   --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+    background-color: #1F232A;
+    background-image: linear-gradient(135deg, #2e3440 0%, #1f232a 100%);
+    font-family: system-ui, sans-serif;
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    overflow: hidden;
+}
+
+.bm-panel {
+    width: 800px;
+    height: 500px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(var(--blur-md));
+    -webkit-backdrop-filter: blur(var(--blur-md));
+    border: var(--border-glass);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    overflow: hidden;
+    font-size: 14px;
+}
+
+/* --- 侧边栏 --- */
+.bm-sidebar {
+    width: 240px;
+    background: var(--bg-panel-dark);
+    border-right: var(--border-divider);
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0;
+    user-select: none; /* 防止点击时选中文本 */
+}
+
+.bm-sidebar-header {
+    padding: 0 16px 8px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.bm-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.bm-tree-item {
+    position: relative;
+    cursor: pointer;
+}
+
+.bm-tree-content {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 12px;
+    margin: 2px 8px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    transition: background 0.2s, color 0.2s;
+}
+
+.bm-tree-content:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.bm-tree-item.active > .bm-tree-content {
+    background: var(--bg-active);
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+/* 箭头动画 */
+.bm-arrow {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+    font-size: 10px;
+    opacity: 0.6;
+    /* 箭头旋转动画 */
+    transition: transform var(--duration-normal) var(--ease-smooth);
+}
+
+.bm-tree-item.expanded > .bm-tree-content > .bm-arrow {
+    transform: rotate(90deg);
+}
+
+.bm-icon { margin-right: 8px; font-size: 16px; }
+
+/* =================================================================
+   核心动画逻辑: Grid Height Transition
+   ================================================================= */
+
+/* 1. 动画容器：控制高度 */
+.bm-collapse-wrapper {
+    display: grid;
+    grid-template-rows: 0fr; /* 默认闭合 */
+    transition: grid-template-rows var(--duration-normal) var(--ease-smooth);
+}
+
+/* 2. 展开状态 */
+.bm-tree-item.expanded > .bm-collapse-wrapper {
+    grid-template-rows: 1fr; /* 展开为自适应高度 */
+}
+
+/* 3. 内容容器：控制位移与透明度 */
+.bm-sub-tree {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-left: 20px; /* 缩进 */
+    overflow: hidden; /* 必须：隐藏溢出内容 */
+    min-height: 0;    /* 必须：Grid 子项约束 */
+    
+    /* 初始状态：向上偏移且透明 */
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity var(--duration-normal) var(--ease-smooth),
+                transform var(--duration-normal) var(--ease-smooth);
+}
+
+/* 4. 展开时的内容状态 */
+.bm-tree-item.expanded > .bm-collapse-wrapper > .bm-sub-tree {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* --- 右侧内容 (保持不变) --- */
+.bm-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.bm-main-header {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: var(--border-divider);
+}
+.bm-folder-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.bm-list-container {
+    flex: 1;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    align-content: start;
+}
+.bm-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: var(--bg-hover);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: transform 0.2s, background 0.2s;
+}
+.bm-card:hover {
+    background: var(--bg-active);
+    transform: translateY(-2px);
+}
+.bm-card-icon { width: 32px; height: 32px; margin-bottom: 8px; border-radius: 6px; }
+.bm-card-url { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+</style>
+</head>
+<body>
+
+<div class="bm-panel">
+    <!-- 侧边栏 -->
+    <aside class="bm-sidebar">
+        <div class="bm-sidebar-header">Library</div>
+        <ul class="bm-tree">
+            
+            <!-- 文件夹 1 (默认展开) -->
+            <!-- 注意结构变化：增加了 bm-collapse-wrapper -->
+            <li class="bm-tree-item expanded active" onclick="toggleFolder(event, this)">
+                <div class="bm-tree-content">
+                    <span class="bm-arrow">▶</span>
+                    <span class="bm-icon">💻</span>
+                    <span>Development</span>
+                </div>
+                
+                <!-- 动画包裹层 -->
+                <div class="bm-collapse-wrapper">
+                    <ul class="bm-sub-tree">
+                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
+                            <div class="bm-tree-content">
+                                <span class="bm-arrow"></span>
+                                <span class="bm-icon">🛠</span>
+                                <span>Tools</span>
+                            </div>
+                        </li>
+                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
+                            <div class="bm-tree-content">
+                                <span class="bm-arrow"></span>
+                                <span class="bm-icon">📚</span>
+                                <span>Docs</span>
+                            </div>
+                        </li>
+                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
+                            <div class="bm-tree-content">
+                                <span class="bm-arrow"></span>
+                                <span class="bm-icon">⚙️</span>
+                                <span>APIs</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- 文件夹 2 (默认折叠) -->
+            <li class="bm-tree-item" onclick="toggleFolder(event, this)">
+                <div class="bm-tree-content">
+                    <span class="bm-arrow">▶</span>
+                    <span class="bm-icon">🎨</span>
+                    <span>Design</span>
+                </div>
+                
+                <div class="bm-collapse-wrapper">
+                    <ul class="bm-sub-tree">
+                        <li class="bm-tree-item">
+                            <div class="bm-tree-content">
+                                <span class="bm-arrow"></span>
+                                <span>Inspiration</span>
+                            </div>
+                        </li>
+                        <li class="bm-tree-item">
+                            <div class="bm-tree-content">
+                                <span class="bm-arrow"></span>
+                                <span>Figma Resources</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
+            <!-- 文件夹 3 (无子级) -->
+            <li class="bm-tree-item" onclick="toggleFolder(event, this)">
+                <div class="bm-tree-content">
+                    <span class="bm-arrow"></span>
+                    <span class="bm-icon">🎮</span>
+                    <span>Entertainment</span>
+                </div>
+            </li>
+
+        </ul>
+    </aside>
+
+    <!-- 右侧内容 -->
+    <main class="bm-main">
+        <header class="bm-main-header">
+            <div class="bm-folder-title">
+                <span style="color: var(--nord8)">💻</span> Development
+            </div>
+        </header>
+
+        <div class="bm-list-container">
+            <a href="#" class="bm-card">
+                <img src="https://github.githubassets.com/favicons/favicon.png" class="bm-card-icon" alt="icon">
+                <div class="bm-card-title">GitHub</div>
+                <div class="bm-card-url">github.com</div>
+            </a>
+            <a href="#" class="bm-card">
+                <div class="bm-card-icon" style="background:var(--nord11); display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;">S</div>
+                <div class="bm-card-title">Stack Overflow</div>
+                <div class="bm-card-url">stackoverflow.com</div>
+            </a>
+            <a href="#" class="bm-card">
+                <div class="bm-card-icon" style="background:var(--nord9); display:flex;align-items:center;justify-content:center;color:white;">R</div>
+                <div class="bm-card-title">React</div>
+                <div class="bm-card-url">react.dev</div>
+            </a>
+        </div>
+    </main>
+</div>
+
+<script>
+    function toggleFolder(e, element) {
+        e.stopPropagation();
+
+        // 1. 激活状态处理 (高亮)
+        document.querySelectorAll('.bm-tree-item.active').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+        
+        // 更新标题
+        const folderName = element.querySelector('.bm-tree-content span:last-child').innerText;
+        const iconEl = element.querySelector('.bm-icon');
+        const folderIcon = iconEl ? iconEl.innerText : '📁';
+        document.querySelector('.bm-folder-title').innerHTML = `<span style="color: var(--nord8)">${folderIcon}</span> ${folderName}`;
+
+        // 2. 展开/折叠动画逻辑
+        // 检查是否有子级 wrapper
+        const wrapper = element.querySelector('.bm-collapse-wrapper');
+        if (wrapper) {
+            // 只需切换 expanded 类，CSS grid-template-rows 会自动处理高度动画
+            element.classList.toggle('expanded');
+        }
+    }
+</script>
+
+</body>
+</html>

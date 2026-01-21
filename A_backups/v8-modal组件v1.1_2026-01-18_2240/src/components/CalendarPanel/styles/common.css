@@ -1,0 +1,102 @@
+/* Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--text-placeholder);
+  border-radius: 2px;
+}
+
+/* Common Button Styles */
+.nav-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: var(--border-glass);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+}
+
+.nav-arrow-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--color-primary);
+}
+
+/* Common Animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.zoom-in-enter-active,
+.zoom-in-leave-active,
+.zoom-out-enter-active,
+.zoom-out-leave-active {
+  transition:
+    transform var(--zoom-speed, 0.5s) cubic-bezier(0.4, 0, 0.2, 1),
+    opacity var(--zoom-speed, 0.5s) cubic-bezier(0.4, 0, 0.2, 1),
+    filter var(--zoom-speed, 0.5s) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-in-leave-to {
+  opacity: 0;
+  transform: scale(3);
+  filter: blur(12px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.zoom-in-enter-from {
+  opacity: 0;
+  transform: scale(0.1);
+  filter: blur(4px);
+}
+
+.zoom-out-leave-to {
+  opacity: 0;
+  transform: scale(0.1);
+  filter: blur(12px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.zoom-out-enter-from {
+  opacity: 0;
+  transform: scale(3);
+  filter: blur(4px);
+}

@@ -1,0 +1,56 @@
+/* Button Theme Colors */
+
+/* Default Theme (灰色 - 信息色) */
+.lime-btn--theme-default {
+  --btn-color: var(--text-primary);
+  --btn-bg: var(--color-info);
+  --btn-bg-hover: var(--color-info-hover);
+  --btn-bg-active: var(--color-info-active);
+  --btn-border: var(--color-info);
+  --btn-border-hover: var(--color-info-hover);
+  --btn-focus-color: var(--color-info);
+}
+
+/* Primary Theme (蓝色) */
+.lime-btn--theme-primary {
+  --btn-color: #fff;
+  --btn-bg: var(--color-primary);
+  --btn-bg-hover: var(--color-primary-hover);
+  --btn-bg-active: var(--color-primary-active);
+  --btn-border: var(--color-primary);
+  --btn-border-hover: var(--color-primary-hover);
+  --btn-focus-color: var(--color-primary);
+}
+
+/* Success Theme (绿色) */
+.lime-btn--theme-success {
+  --btn-color: #fff;
+  --btn-bg: var(--color-success);
+  --btn-bg-hover: var(--color-success-hover);
+  --btn-bg-active: var(--color-success-active);
+  --btn-border: var(--color-success);
+  --btn-border-hover: var(--color-success-hover);
+  --btn-focus-color: var(--color-success);
+}
+
+/* Warning Theme (黄色) */
+.lime-btn--theme-warning {
+  --btn-color: #fff;
+  --btn-bg: var(--color-warning);
+  --btn-bg-hover: var(--color-warning-hover);
+  --btn-bg-active: var(--color-warning-active);
+  --btn-border: var(--color-warning);
+  --btn-border-hover: var(--color-warning-hover);
+  --btn-focus-color: var(--color-warning);
+}
+
+/* Danger Theme (红色) */
+.lime-btn--theme-danger {
+  --btn-color: #fff;
+  --btn-bg: var(--color-danger);
+  --btn-bg-hover: var(--color-danger-hover);
+  --btn-bg-active: var(--color-danger-active);
+  --btn-border: var(--color-danger);
+  --btn-border-hover: var(--color-danger-hover);
+  --btn-focus-color: var(--color-danger);
+}

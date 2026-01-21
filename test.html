@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>滑动胶囊 Tab - 全功能整合版</title>
+    <link rel="stylesheet" href="./src/styles/variables.css" />
+    <link rel="stylesheet" href="variables.css" />
+    <style>
+      :root {
+        --ease-elastic-gentle: cubic-bezier(0.34, 1.25, 0.64, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family-base);
+        background-color: var(--nord);
+        color: var(--text-primary);
+        padding: var(--space-10);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-8);
+        min-height: 100vh;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+        padding: var(--space-2) var(--space-5);
+        background: var(--bg-panel);
+        border: var(--border-divider);
+        border-radius: var(--radius-full);
+        backdrop-filter: blur(var(--blur-md));
+      }
+
+      .capsule-tabs-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+        padding: var(--space-2);
+        scrollbar-width: none;
+      }
+      .capsule-tabs-wrapper::-webkit-scrollbar {
+        display: none;
+      }
+
+      .capsule-tabs {
+        position: relative;
+        display: inline-flex;
+        padding: var(--space-1);
+        background: var(--bg-panel-dark);
+        border-radius: var(--radius-ml);
+        border: var(--border-divider);
+        z-index: var(--z-base);
+        outline: none; /* 移除容器默认轮廓 */
+      }
+
+      .capsule-indicator {
+        position: absolute;
+        top: var(--space-1);
+        bottom: var(--space-1);
+        left: 0;
+        background: var(--bg-active);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        z-index: 0;
+        opacity: 0;
+        transition: transform var(--duration-normal) var(--ease-elastic-gentle),
+          width var(--duration-normal) var(--ease-elastic-gentle);
+      }
+      .capsule-indicator.initialized {
+        opacity: 1;
+      }
+
+      .capsule-tab {
+        position: relative;
+        z-index: 1;
+        padding: var(--space-2) var(--space-6);
+        min-width: var(--height-xl);
+        cursor: pointer;
+        user-select: none;
+        display: inline-grid;
+        grid-template-areas: "stack";
+        place-items: center;
+        color: var(--text-secondary);
+        font-size: var(--text-base);
+        outline: none;
+        transition: color var(--duration-fast) var(--ease-smooth),
+          width var(--duration-normal) var(--ease-elastic-gentle),
+          text-shadow var(--duration-fast) var(--ease-smooth),
+          transform 0.1s var(--ease-smooth);
+      }
+
+      /* 键盘导航时的视觉反馈 */
+      .capsule-tab:focus-visible {
+        background: var(--bg-hover);
+        border-radius: var(--radius-md);
+        box-shadow: 0 0 0 2px var(--color-primary-alpha);
+      }
+
+      .capsule-tab:active {
+        transform: scale(0.92);
+      }
+
+      .capsule-tab.active {
+        color: var(--color-primary-hover);
+        font-weight: var(--weight-semibold);
+        text-shadow: 0 0 0.5px var(--color-primary-hover);
+      }
+
+      .tab-content {
+        grid-area: stack;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        white-space: nowrap;
+      }
+
+      .tab-ghost {
+        grid-area: stack;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-weight: var(--weight-semibold);
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .icon {
+        width: var(--icon-md);
+        height: var(--icon-md);
+        fill: currentColor;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--nord3);
+        transition: var(--duration-normal);
+        border-radius: var(--radius-full);
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--nord6);
+        transition: var(--duration-normal) var(--ease-elastic-gentle);
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: var(--color-primary);
+      }
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <span>所有 Tab 等宽</span>
+      <label class="switch">
+        <input type="checkbox" id="widthToggle" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="capsule-tabs-wrapper">
+      <div class="capsule-tabs" id="tabs" role="tablist" tabindex="0">
+        <div class="capsule-indicator"></div>
+
+        <div
+          class="capsule-tab active"
+          role="tab"
+          aria-selected="true"
+          tabindex="-1"
+        >
+          <div class="tab-content">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+            <span>首页概览</span>
+          </div>
+        </div>
+
+        <div class="capsule-tab" role="tab" aria-selected="false" tabindex="-1">
+          <div class="tab-content"><span>API 接口</span></div>
+        </div>
+
+        <div class="capsule-tab" role="tab" aria-selected="false" tabindex="-1">
+          <div class="tab-content"><span>详细指南</span></div>
+        </div>
+
+        <div class="capsule-tab" role="tab" aria-selected="false" tabindex="-1">
+          <div class="tab-content">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+              />
+            </svg>
+            <span>账户安全</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".capsule-tab");
+      const indicator = document.querySelector(".capsule-indicator");
+      const container = document.querySelector(".capsule-tabs");
+      const wrapper = document.querySelector(".capsule-tabs-wrapper");
+      const widthToggle = document.querySelector("#widthToggle");
+
+      let maxTabWidth = 0;
+
+      function scrollActiveIntoView(tab) {
+        const tabLeft = tab.offsetLeft;
+        const tabWidth = tab.offsetWidth;
+        const wrapperWidth = wrapper.offsetWidth;
+        const scrollTo = tabLeft - wrapperWidth / 2 + tabWidth / 2;
+        wrapper.scrollTo({ left: scrollTo, behavior: "smooth" });
+      }
+
+      function updateIndicator() {
+        const activeTab = document.querySelector(".capsule-tab.active");
+        if (!activeTab) return;
+
+        const tabRect = activeTab.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        indicator.style.width = `${tabRect.width}px`;
+        indicator.style.transform = `translateX(${
+          tabRect.left - containerRect.left
+        }px)`;
+
+        scrollActiveIntoView(activeTab);
+      }
+
+      function setActiveTab(tab) {
+        tabs.forEach((t) => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        updateIndicator();
+      }
+
+      function handleWidthMode() {
+        tabs.forEach(
+          (tab) =>
+            (tab.style.width = widthToggle.checked ? `${maxTabWidth}px` : ``)
+        );
+        setTimeout(updateIndicator, 50);
+      }
+
+      // 核心修复：键盘导航监听
+      function initKeyboardNav() {
+        container.addEventListener("keydown", (e) => {
+          if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+
+          e.preventDefault();
+          const activeTab = document.querySelector(".capsule-tab.active");
+          const tabList = Array.from(tabs);
+          let index = tabList.indexOf(activeTab);
+
+          if (e.key === "ArrowRight") {
+            index = (index + 1) % tabList.length;
+          } else {
+            index = (index - 1 + tabList.length) % tabList.length;
+          }
+
+          setActiveTab(tabList[index]);
+        });
+      }
+
+      window.addEventListener("load", () => {
+        tabs.forEach((tab) => {
+          const content = tab.querySelector(".tab-content");
+          const ghost = content.cloneNode(true);
+          ghost.classList.replace("tab-content", "tab-ghost");
+          tab.appendChild(ghost);
+
+          tab.addEventListener("click", () => {
+            setActiveTab(tab);
+            container.focus(); // 点击后让容器获焦，确保方向键生效
+          });
+        });
+
+        tabs.forEach((tab) => {
+          const w = tab.getBoundingClientRect().width;
+          if (w > maxTabWidth) maxTabWidth = w;
+        });
+
+        initKeyboardNav();
+        updateIndicator();
+        setTimeout(() => indicator.classList.add("initialized"), 50);
+      });
+
+      widthToggle.addEventListener("change", handleWidthMode);
+      window.addEventListener("resize", updateIndicator);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "青柠起始页",
+  "version": "1.0.0",
+  "description": "极简、高效、毛玻璃风格的新标签页 (Vue3 + TS)",
+  "action": { "default_popup": "index.html" },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": ["storage", "bookmarks"],
+  "host_permissions": [
+    "https://icons.bitwarden.net/*",
+    "https://cdn.simpleicons.org/*",
+    "https://images.unsplash.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' blob: data: https://*.google.com https://*.gstatic.com https://icons.bitwarden.net https://cdn.simpleicons.org https://images.unsplash.com;"
+  }
+}
