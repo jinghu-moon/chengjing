@@ -180,9 +180,18 @@ async function main() {
     // 推送到远程仓库
     console.log(format.highlight('\n▶ 正在推送到远程仓库...'));
     try {
-      exec(`git push origin ${branch}`);
+      // 使用 silent: true 以便捕获错误信息(stderr)用于判断，虽然这会隐藏实时进度条，但能保证错误处理正常工作
+      exec(`git push origin ${branch}`, { silent: true });
     } catch (pushError) {
-      if (pushError.message.includes('Updates were rejected') || pushError.message.includes('git pull')) {
+      // 获取错误信息 (stderr)
+      const errorMessage = pushError.stderr || pushError.message || '';
+      
+      // 先把错误信息打印出来给用户看
+      if (errorMessage) {
+        console.error(format.error(errorMessage.trim()));
+      }
+
+      if (errorMessage.includes('Updates were rejected') || errorMessage.includes('git pull') || errorMessage.includes('non-fast-forward')) {
         console.log(format.warning('\n⚠ 远程仓库包含您本地没有的更改'));
         const answer = await getUserInput('是否尝试拉取远程更改并合并 (git pull --rebase)? (y/n): ');
         
@@ -195,7 +204,6 @@ async function main() {
             console.log(format.highlight('\n▶ 再次尝试推送...'));
             exec(`git push origin ${branch}`);
           } catch (pullError) {
-             // 如果 pull 也失败了（可能有冲突），就真的没办法了
              console.error(format.error('\n拉取/合并失败，可能存在冲突。请手动解决冲突后再试。'));
              process.exit(1);
           }
@@ -204,7 +212,8 @@ async function main() {
           process.exit(0);
         }
       } else {
-        throw pushError;
+        // 如果不是远程冲突（或者是其他网络错误等），则抛出异常让外层处理或退出
+        process.exit(1);
       }
     }
 
