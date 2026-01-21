@@ -179,7 +179,34 @@ async function main() {
 
     // 推送到远程仓库
     console.log(format.highlight('\n▶ 正在推送到远程仓库...'));
-    exec(`git push origin ${branch}`);
+    try {
+      exec(`git push origin ${branch}`);
+    } catch (pushError) {
+      if (pushError.message.includes('Updates were rejected') || pushError.message.includes('git pull')) {
+        console.log(format.warning('\n⚠ 远程仓库包含您本地没有的更改'));
+        const answer = await getUserInput('是否尝试拉取远程更改并合并 (git pull --rebase)? (y/n): ');
+        
+        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+          console.log(format.highlight('\n▶ 正在拉取远程更改...'));
+          try {
+            exec('git pull --rebase origin ' + branch);
+            console.log(format.success('拉取成功'));
+            
+            console.log(format.highlight('\n▶ 再次尝试推送...'));
+            exec(`git push origin ${branch}`);
+          } catch (pullError) {
+             // 如果 pull 也失败了（可能有冲突），就真的没办法了
+             console.error(format.error('\n拉取/合并失败，可能存在冲突。请手动解决冲突后再试。'));
+             process.exit(1);
+          }
+        } else {
+          console.log(format.info('已取消操作'));
+          process.exit(0);
+        }
+      } else {
+        throw pushError;
+      }
+    }
 
     console.log('');
     console.log(format.success(`成功推送到 GitHub! (${branch})`));
