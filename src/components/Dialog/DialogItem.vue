@@ -52,8 +52,8 @@ const handleAfterClose = () => {
   <Dialog
     v-bind="instance"
     v-model="instance.visible"
-    @ok="handleOk"
-    @cancel="handleCancel"
+    @positive-click="handleOk"
+    @negative-click="handleCancel"
     @after-close="handleAfterClose"
   >
     <!-- 支持自定义组件内容 -->

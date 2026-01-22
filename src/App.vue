@@ -7,7 +7,7 @@ import Background from './components/Background.vue'
 import ClockWeather from './components/ClockWeather.vue'
 import Pomodoro from './components/Pomodoro.vue'
 import SearchBar from './components/SearchBar.vue'
-import ShortcutGrid from './components/ShortcutGrid.vue'
+import ShortcutGrid from './components/ShortcutGrid'
 import TodoList from './components/TodoList.vue'
 
 import ToastProvider from './components/Toast/index.vue'
@@ -19,8 +19,10 @@ const BookmarkPanel = defineAsyncComponent(() => import('./components/BookmarkPa
 const NotePad = defineAsyncComponent(() => import('./components/NotePad/index.vue'))
 
 import { useImageGC } from './composables/useImageGC'
+import { useSettings } from './composables/useSettings'
 import './styles/variables.css'
 
+const { settings } = useSettings()
 const { scheduleImageGC } = useImageGC()
 
 onMounted(() => {
@@ -52,21 +54,18 @@ const handleBlur = () => {
     <TodoList />
 
     <SettingsPanel
-      v-if="isSettingsOpen"
       :is-open="isSettingsOpen"
-      @close="isSettingsOpen = false"
+      @update:is-open="isSettingsOpen = $event"
     />
 
     <CalendarPanel
-      v-if="isCalendarOpen"
       :is-open="isCalendarOpen"
-      @close="isCalendarOpen = false"
+      @update:is-open="isCalendarOpen = $event"
     />
 
     <BookmarkPanel
-      v-if="isBookmarkOpen"
       :is-open="isBookmarkOpen"
-      @close="isBookmarkOpen = false"
+      @update:is-open="isBookmarkOpen = $event"
     />
 
     <div class="top-actions" :class="{ hidden: isFocusMode }">
@@ -81,7 +80,13 @@ const handleBlur = () => {
       </button>
     </div>
 
-    <div class="container">
+    <div
+      class="container"
+      :style="{
+        paddingTop: settings.layoutPaddingTop + 'vh',
+        gap: settings.layoutGap + 'px',
+      }"
+    >
       <ClockWeather class="app-component" :class="{ dimmed: isFocusMode }" />
 
       <Pomodoro class="app-component" :class="{ dimmed: isFocusMode }" />
@@ -100,12 +105,14 @@ const handleBlur = () => {
   position: relative;
   z-index: 1;
   width: 100vw;
+  min-height: 100vh; /* 确保高度 */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  align-items: center;
+  /* gap: 48px; replaced by inline style */
   animation: fadeIn 0.8s var(--ease-elastic);
-  padding: 0 20px;
+  padding: 0 20px 0; /* padding-top replaced by inline style */
 }
 
 /* ...原有的 .top-actions 等样式保持不变... */

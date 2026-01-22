@@ -91,6 +91,14 @@ const close = () => {
                     :step="4"
                     unit="px"
                   />
+                  <SettingSlider
+                    v-model="settings.folderInnerSpacing"
+                    label="文件夹内部间距"
+                    :min="2"
+                    :max="20"
+                    :step="1"
+                    unit="px"
+                  />
                 </div>
               </div>
             </div>

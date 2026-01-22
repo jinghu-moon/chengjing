@@ -24,6 +24,7 @@ interface Settings {
 
   deleteEmptyFolder: boolean
   folderPreviewMode: FolderLayoutMode
+  folderInnerSpacing: number
   wallpaperBlur: number
   wallpaperMask: number
   gridRows: number
@@ -31,6 +32,10 @@ interface Settings {
   gridGapX: number
   gridGapY: number
   compressLargeFolders: boolean
+
+  // 布局
+  layoutPaddingTop: number
+  layoutGap: number
 
   // 搜索框
   showSearchBar: boolean
@@ -83,6 +88,7 @@ const defaultSettings: Settings = {
 
   deleteEmptyFolder: true,
   folderPreviewMode: '2x2',
+  folderInnerSpacing: 8,
   wallpaperBlur: 0,
   wallpaperMask: 20,
   gridRows: 2,
@@ -90,6 +96,10 @@ const defaultSettings: Settings = {
   gridGapX: 32,
   gridGapY: 40,
   compressLargeFolders: true,
+
+  // 布局
+  layoutPaddingTop: 22,
+  layoutGap: 48,
 
   showSearchBar: true,
   showSearchIcon: true,

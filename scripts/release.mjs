@@ -24,6 +24,8 @@ const format = {
     if (status.includes('M')) return `${style.yellow}● Modified: ${filename}${style.reset}`;
     if (status.includes('A')) return `${style.green}+ Added: ${filename}${style.reset}`;
     if (status.includes('D')) return `${style.red}- Deleted: ${filename}${style.reset}`;
+    if (status.includes('R')) return `${style.magenta}→ Renamed: ${filename}${style.reset}`;
+    if (status.includes('?')) return `${style.cyan}? Untracked: ${filename}${style.reset}`;
     return `  ${filename}`;
   }
 };

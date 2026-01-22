@@ -493,6 +493,23 @@ const resetNotePadPos = () => {
 
                 <div class="divider" style="margin: 8px 0"></div>
 
+                <SettingSlider
+                  v-model="settings.layoutPaddingTop"
+                  label="顶部留白"
+                  :min="0"
+                  :max="40"
+                  unit="vh"
+                />
+                <SettingSlider
+                  v-model="settings.layoutGap"
+                  label="组件间距"
+                  :min="0"
+                  :max="100"
+                  :step="4"
+                  unit="px"
+                />
+                <div class="divider" style="margin: 8px 0"></div>
+
                 <div class="control-row">
                   <span>文件夹预览样式</span>
                   <SelectMenu
