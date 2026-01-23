@@ -10,19 +10,27 @@ export function useShortcutLayout(
 
   const pageCapacity = computed(() => settings.gridRows * settings.gridCols)
 
+  /**
+   * 计算单个 item 占用的槽位数
+   * 支持每个文件夹独立的 folderMode
+   */
   const getItemSlots = (item: Shortcut) => {
     if (item.type === 'app') return 1
-    const [fc, fr] = settings.folderPreviewMode.split('x').map(Number)
 
-    if (settings.compressLargeFolders) {
-      const actualCols = Math.min(fc, settings.gridCols)
-      const actualRows = Math.min(fr, settings.gridRows)
-      return actualCols * actualRows
-    } else {
-      return fc * fr
-    }
+    // 优先使用 item 自身的 folderMode，否则用全局默认
+    const mode = item.folderMode || settings.defaultFolderMode || settings.folderPreviewMode
+    const [r, c] = mode.split('x').map(Number)
+
+    // 1x8 扁平化适配：桌面只有 1 行时，强制高度为 1
+    const actualR = settings.gridRows === 1 ? 1 : Math.min(r, settings.gridRows)
+    const actualC = Math.min(c, settings.gridCols)
+
+    return actualR * actualC
   }
 
+  /**
+   * 重新计算分页布局
+   */
   const reflowShortcuts = () => {
     const flat = shortcuts.value
     const maxSlots = pageCapacity.value
@@ -48,6 +56,9 @@ export function useShortcutLayout(
     pagedShortcuts.value = newPages
   }
 
+  /**
+   * 从分页数据同步回主数据
+   */
   const syncFromPages = () => {
     const flat = pagedShortcuts.value.flat()
     if (JSON.stringify(flat) !== JSON.stringify(shortcuts.value)) {
@@ -62,6 +73,7 @@ export function useShortcutLayout(
       () => settings.gridRows,
       () => settings.gridCols,
       () => settings.folderPreviewMode,
+      () => settings.defaultFolderMode,
       () => settings.compressLargeFolders,
     ],
     () => {

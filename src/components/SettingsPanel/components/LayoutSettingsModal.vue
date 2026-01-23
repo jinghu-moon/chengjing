@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { IconX, IconArrowsMinimize, IconArrowsMaximize } from '@tabler/icons-vue'
-// [自动导入] useSettings 无需显式导入
 import LayoutSelector from './LayoutSelector.vue'
-import SettingSlider from './SettingSlider.vue' // 直接复用
+import SettingSlider from './SettingSlider.vue'
 
 const props = defineProps<{
   isOpen: boolean
@@ -14,16 +13,18 @@ const emit = defineEmits(['close'])
 const { settings } = useSettings()
 
 // 控制自定义区域是否展开
-const isCustomExpanded = ref(false)
+const isCustomExpanded = ref(true)
 
 const updateDesktopLayout = (layout: { rows: number; cols: number }) => {
   settings.gridRows = layout.rows
   settings.gridCols = layout.cols
 }
 
-// 处理来自 LayoutSelector 的切换请求
 const handleToggleCustom = (shouldExpand: boolean) => {
   isCustomExpanded.value = shouldExpand
+  if (shouldExpand) {
+    settings.desktopPreset = 'custom'
+  }
 }
 
 const close = () => {
@@ -43,6 +44,7 @@ const close = () => {
         </div>
 
         <div class="modal-body layout-body">
+          <!-- 网格选择器和自定义参数 -->
           <div class="setting-group">
             <div class="group-label">网格大小</div>
             <LayoutSelector
@@ -104,6 +106,7 @@ const close = () => {
             </div>
           </transition>
 
+          <!-- 大文件夹显示策略 -->
           <div class="setting-group">
             <div class="group-label">大文件夹显示策略</div>
             <div class="strategy-cards">
@@ -159,10 +162,8 @@ const close = () => {
   z-index: 200;
   display: flex;
   justify-content: flex-end;
-  /* 靠右 */
   align-items: center;
   padding-right: 396px;
-  /* 避让 SettingsPanel */
   background: rgba(0, 0, 0, 0.1);
 }
 
@@ -185,7 +186,6 @@ const close = () => {
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  /* 加上 transition 以便高度变化时平滑过渡 (如果用了 auto height) */
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -228,10 +228,13 @@ const close = () => {
 
 .modal-body.layout-body {
   padding: 24px;
+  padding-bottom: 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .setting-group {
@@ -248,12 +251,83 @@ const close = () => {
   letter-spacing: 0.5px;
 }
 
+/* 预设卡片 */
+.preset-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.preset-card {
+  padding: 12px 8px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.preset-card.active {
+  background: rgba(0, 122, 255, 0.15);
+  border-color: #007aff;
+}
+
+.preset-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+}
+
+.preset-card.active .preset-label {
+  color: #007aff;
+  font-weight: 500;
+}
+
+/* 文件夹模式选择器 */
+.folder-mode-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mode-chip {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mode-chip.active {
+  background: rgba(0, 122, 255, 0.15);
+  border-color: #007aff;
+  color: #007aff;
+  font-weight: 500;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: -4px;
+}
+
 /* 自定义滑块区域样式 */
 .custom-sliders-wrapper {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   margin-top: -10px;
-  /* 紧贴上方 */
   overflow: hidden;
 }
 
@@ -396,7 +470,6 @@ const close = () => {
 .expand-leave-active {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   max-height: 400px;
-  /* 足够高即可 */
   opacity: 1;
 }
 

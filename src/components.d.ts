@@ -22,6 +22,7 @@ declare module 'vue' {
     ButtonGroup: typeof import('./components/Button/ButtonGroup.vue')['default']
     CalendarGrid: typeof import('./components/DatePicker/components/CalendarGrid.vue')['default']
     CalendarPanel: typeof import('./components/CalendarPanel/index.vue')['default']
+    CapsuleTabs: typeof import('./components/SettingsPanel/components/CapsuleTabs.vue')['default']
     ClockWeather: typeof import('./components/ClockWeather.vue')['default']
     ContextMenu: typeof import('./components/SelectMenu/components/ContextMenu.vue')['default']
     DashboardCards: typeof import('./components/CalendarPanel/components/DashboardCards.vue')['default']

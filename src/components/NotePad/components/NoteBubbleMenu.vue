@@ -102,8 +102,8 @@ const closeLinkInput = () => {
   z-index: 9999;
   padding: 4px;
   background: var(--bg-panel-dark, rgba(30, 34, 44, 0.95));
-  backdrop-filter: blur(var(--blur-md, 12px));
-  -webkit-backdrop-filter: blur(var(--blur-md, 12px));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass, 1px solid rgba(255, 255, 255, 0.08));
   border-radius: var(--radius-md, 8px);
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.2));

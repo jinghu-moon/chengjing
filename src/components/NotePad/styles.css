@@ -9,7 +9,7 @@
   border: var(--border-glass);
   border-radius: 50%;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -34,7 +34,7 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
 }
 
 .mini-header {
@@ -109,7 +109,7 @@
   position: fixed;
   inset: 0;
   background: var(--mask-dark);
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
   z-index: var(--z-modal);
   display: flex;
   align-items: center;
@@ -464,9 +464,9 @@
   line-height: 1.6;
 }
 
-.divider {
+.note-divider {
   width: 1px;
-  background: var(--border-glass);
+  background: var(--color-border-glass);
 }
 
 .empty-preview {

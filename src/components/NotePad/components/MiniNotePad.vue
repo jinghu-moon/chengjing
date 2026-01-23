@@ -99,7 +99,7 @@ const content = computed({
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
 }
 
 .mini-header {

@@ -85,14 +85,17 @@
   /* =================================================================
      3. 边框与圆角 (Borders & Radius)
      ================================================================= */
-  --border-glass: 1px solid rgb(from var(--nord6) r g b / 0.2);
-  --border-divider: 1px solid rgb(from var(--nord6) r g b / 0.06);
-  /* [新增] 单独定义分隔线颜色，供 gradient 使用 */
+  /* 定义基础边框颜色 */
+  --color-border-glass: rgba(255, 255, 255, 0.08);
+  --color-border-light: rgba(255, 255, 255, 0.04);
+  /* 分隔线颜色 */
   --color-divider: rgb(from var(--nord6) r g b / 0.15);
 
-  --border-glass: 1px solid rgb(from var(--nord6) r g b / 0.2);
-  /* [修改] 引用上面的颜色变量 */
+  /* 边框简写变量 (用于 border 属性) */
+  --border-glass: 1px solid var(--color-border-glass);
   --border-divider: 1px solid var(--color-divider);
+  --border-light: 1px solid var(--color-border-light);
+
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -101,24 +104,40 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* =================================================================
+/* =================================================================
      4. 模糊与阴影 (Effects)
+     优化：基于 r=2 感知阶梯与 Nord 色调优化的复合材质
      ================================================================= */
+  
+  /* --- 1. 基础原子模糊 (遵循 r=2 等比级数) --- */
   --blur-none: 0;
-  --blur-xs: 4px;
-  --blur-sm: 8px;
-  --blur-md: 20px;
-  --blur-lg: 40px;
-  --blur-xl: 60px;
-  --blur-2xl: 100px;
-  /* 完美符合 T-shirt 扩充逻辑 */
+  --blur-xs:   4px;   /* 极轻微隔离 */
+  --blur-sm:   8px;   /* 柔和隔离 */
+  --blur-md:   16px;  /* 标准材质起点 */
+  --blur-lg:   32px;  /* 显著层级隔离 */
+  --blur-xl:   64px;  /* 深度背景抽象 */
+  --blur-2xl:  128px; /* 极致氛围渲染 */
 
-  /* 阴影基准色 - 统一管理 */
+  /* --- 2. 玻璃材质调节参数 (针对 Nord 深色系优化) --- */
+  /* Nord 色系偏冷灰，150% 饱和度能找回被模糊滤除的色彩生命力 */
+  --glass-saturate:   150%; 
+  /* 110% 亮度能让深色背景（如 nord0）产生更高级的通透感 */
+  --glass-brightness: 110%; 
+
+  /* --- 3. 复合材质 Token (Backdrop Filter 专用) --- */
+  /* 使用方式：backdrop-filter: var(--glass-md); */
+  --glass-xs: blur(var(--blur-xs)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  --glass-sm: blur(var(--blur-sm)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  --glass-md: blur(var(--blur-md)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  --glass-lg: blur(var(--blur-lg)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  --glass-xl: blur(var(--blur-xl)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+  --glass-2xl: blur(var(--blur-2xl)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+
+  /* --- 4. 阴影系统 (Shadows) --- */
   --shadow-color: var(--nord0);
-
   --shadow-sm: 0 2px 4px rgb(from var(--shadow-color) r g b / 0.2);
-  --shadow-md: 0 4px 12px rgb(from var(--shadow-color) r g b / 0.3);
-  --shadow-lg: 0 10px 40px rgb(from var(--shadow-color) r g b / 0.5);
+  --shadow-md: 0 8px 16px rgb(from var(--shadow-color) r g b / 0.3);
+  --shadow-lg: 0 16px 48px rgb(from var(--shadow-color) r g b / 0.5);
 
   --text-shadow: 0 2px 10px rgb(from var(--shadow-color) r g b / 0.3);
   --text-shadow-lg: 0 4px 16px rgb(from var(--shadow-color) r g b / 0.2);

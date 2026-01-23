@@ -31,6 +31,8 @@ const props = withDefaults(defineProps<DialogProps>(), {
   placement: 'center',
   destroyOnClose: false,
   lockScroll: true,
+  rootClass: '',
+  maskClass: '',
 })
 
 const emit = defineEmits<{
@@ -283,13 +285,13 @@ const onAfterLeave = () => {
 
 <template>
   <Teleport to="body">
-    <div v-if="shouldRender" class="dialog-root" :style="{ zIndex: props.zIndex || 2000 }">
+    <div v-if="shouldRender" class="dialog-root" :class="[props.rootClass]" :style="{ zIndex: props.zIndex || 2000 }">
       <!-- 遮罩层 -->
       <Transition name="fade">
         <div
           v-if="visible && mask"
           class="dialog-mask"
-          :class="{ transparent: isFollowMode }"
+          :class="[{ transparent: isFollowMode }, props.maskClass]"
           @click="handleMaskClick"
         />
       </Transition>
@@ -416,8 +418,8 @@ const onAfterLeave = () => {
 /* 对话框面板 */
 .dialog-panel {
   pointer-events: auto;
-  background: rgb(from var(--nord0) r g b / 0.98);
-  backdrop-filter: var(--blur-lg);
+  background: var(--bg-panel);
+  backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -432,7 +434,7 @@ const onAfterLeave = () => {
 .dialog-header {
   padding: 20px 24px 12px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 

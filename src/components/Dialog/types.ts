@@ -51,6 +51,8 @@ export interface DialogProps {
   contentClass?: string // 内容区域类名
   headerClass?: string // 头部区域类名
   footerClass?: string // 底部区域类名
+  rootClass?: string // 根节点类名
+  maskClass?: string // 遮罩层类名
 
   // 图标
   showIcon?: boolean

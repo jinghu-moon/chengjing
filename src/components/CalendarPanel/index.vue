@@ -173,7 +173,7 @@ const onSelectMonth = ({ month, target }: { month: number; target: EventTarget |
   width: 100vw;
   height: 100vh;
   background: var(--mask-dark);
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
   z-index: var(--z-modal);
   display: flex;
   justify-content: center;

@@ -25,6 +25,7 @@ import { saveImage, removeImage } from '@/utils/db'
 import SettingSlider from './components/SettingSlider.vue'
 import SettingSwitch from './components/SettingSwitch.vue'
 import LayoutSettingsModal from './components/LayoutSettingsModal.vue'
+import CapsuleTabs from './components/CapsuleTabs.vue'
 // Select 组件由 unplugin-vue-components 自动导入
 
 const props = defineProps<{ isOpen: boolean }>()
@@ -103,18 +104,22 @@ const openLayoutModal = () => {
   isLayoutModalOpen.value = true
 }
 
-const layoutOptions = [
-  { value: '2x1', label: '2列 x 1行 (横向双格)' },
-  { value: '3x1', label: '3列 x 1行 (横向长条)' },
-  { value: 'divider' },
-  { value: '2x2', label: '2列 x 2行 (标准方形)' },
-  { value: '1x2', label: '1列 x 2行 (竖向双格)' },
-  { value: '3x2', label: '3列 x 2行 (大号横条)' },
-  { value: 'divider' },
-  { value: '3x3', label: '3列 x 3行 (巨大方形)' },
-  { value: '1x3', label: '1列 x 3行 (竖向长条)' },
-  { value: '2x3', label: '2列 x 3行 (大号竖条)' },
-]
+// 文件夹大小常用预设
+const folderPresets = ['2x2', '2x3', '3x2', '3x3', '4x4']
+
+// 更新文件夹行数
+const updateFolderRows = (e: Event) => {
+  const rows = (e.target as HTMLInputElement).value
+  const cols = settings.defaultFolderMode.split('x')[1]
+  settings.defaultFolderMode = `${rows}x${cols}` as any
+}
+
+// 更新文件夹列数
+const updateFolderCols = (e: Event) => {
+  const rows = settings.defaultFolderMode.split('x')[0]
+  const cols = (e.target as HTMLInputElement).value
+  settings.defaultFolderMode = `${rows}x${cols}` as any
+}
 
 const triggerUpload = () => {
   fileInput.value?.click()
@@ -508,17 +513,43 @@ const resetNotePadPos = () => {
                   :step="4"
                   unit="px"
                 />
+
                 <div class="divider" style="margin: 8px 0"></div>
 
-                <div class="control-row">
-                  <span>文件夹预览样式</span>
-                  <SelectMenu
-                    v-model="settings.folderPreviewMode"
-                    :options="layoutOptions"
-                    trigger-width="200px"
-                    placeholder="选择布局..."
+                <div class="setting-sub-group">
+                  <span class="sub-label">文件夹默认大小</span>
+                  <CapsuleTabs
+                    v-model="settings.defaultFolderMode"
+                    :items="folderPresets.map(p => ({ label: p, value: p }))"
+                    :equal-width="true"
                   />
+                  <div class="folder-sliders">
+                    <div class="slider-row">
+                      <span class="slider-label">行</span>
+                      <input
+                        type="range"
+                        :min="1"
+                        :max="5"
+                        :value="parseInt(settings.defaultFolderMode.split('x')[0])"
+                        @input="updateFolderRows($event)"
+                      />
+                      <span class="slider-value">{{ settings.defaultFolderMode.split('x')[0] }}</span>
+                    </div>
+                    <div class="slider-row">
+                      <span class="slider-label">列</span>
+                      <input
+                        type="range"
+                        :min="1"
+                        :max="5"
+                        :value="parseInt(settings.defaultFolderMode.split('x')[1])"
+                        @input="updateFolderCols($event)"
+                      />
+                      <span class="slider-value">{{ settings.defaultFolderMode.split('x')[1] }}</span>
+                    </div>
+                  </div>
                 </div>
+
+                <div class="divider" style="margin: 8px 0"></div>
 
                 <SettingSlider
                   v-model="settings.wallpaperBlur"

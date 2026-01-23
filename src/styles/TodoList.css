@@ -7,8 +7,8 @@
   /* 宽度由内联 style 控制 */
 
   background: var(--bg-panel);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-xl);

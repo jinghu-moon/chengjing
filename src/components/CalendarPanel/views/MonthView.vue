@@ -291,7 +291,7 @@ const changeMonth = (step: number) => {
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
 }
 
 .slide-down-enter-active,

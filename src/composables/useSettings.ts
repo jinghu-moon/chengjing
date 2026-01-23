@@ -1,6 +1,16 @@
 import { reactive, ref, watch } from 'vue'
 
-export type FolderLayoutMode = '2x2' | '3x3' | '1x2' | '2x1' | '2x3' | '3x2' | '1x3' | '3x1'
+// 任意 RxC 布局类型
+export type FolderLayoutMode = `${number}x${number}`
+
+// 桌面预设
+export const DESKTOP_PRESETS = {
+  compact: { gridRows: 1, gridCols: 8, gridGapX: 24, gridGapY: 32, boxSize: 72, label: '极简 1×8' },
+  standard: { gridRows: 2, gridCols: 6, gridGapX: 32, gridGapY: 40, boxSize: 84, label: '标准 2×6' },
+  spacious: { gridRows: 3, gridCols: 8, gridGapX: 40, gridGapY: 48, boxSize: 80, label: '宽敞 3×8' },
+} as const
+
+export type DesktopPreset = keyof typeof DESKTOP_PRESETS | 'custom'
 
 interface Settings {
   openNewTab: boolean
@@ -32,6 +42,11 @@ interface Settings {
   gridGapX: number
   gridGapY: number
   compressLargeFolders: boolean
+
+  // 桌面预设
+  desktopPreset: DesktopPreset
+  defaultFolderMode: FolderLayoutMode
+  enableSmartFolderSuggestion: boolean
 
   // 布局
   layoutPaddingTop: number
@@ -96,6 +111,11 @@ const defaultSettings: Settings = {
   gridGapX: 32,
   gridGapY: 40,
   compressLargeFolders: true,
+
+  // 桌面预设
+  desktopPreset: 'standard',
+  defaultFolderMode: '2x2',
+  enableSmartFolderSuggestion: true,
 
   // 布局
   layoutPaddingTop: 22,

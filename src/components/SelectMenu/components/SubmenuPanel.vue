@@ -294,8 +294,8 @@ watch(
 <style scoped>
 .submenu-panel {
   background: var(--bg-panel-dark);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);

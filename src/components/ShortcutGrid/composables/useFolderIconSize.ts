@@ -1,93 +1,80 @@
 import { computed } from 'vue'
 
 /**
- * 计算文件夹内部小图标的精确尺寸
- * 使用统一的间距系统：边距 = 行间距 = 列间距
+ * 通用 CSS 变量计算引擎
+ * 支持任意 RxC 文件夹布局模式
  */
 export function useFolderIconSize(settings: any, iconConfig: any) {
   /**
-   * 计算指定文件夹模式下的内部图标尺寸
-   * @param mode 文件夹模式，如 "2x2", "3x3" 等
-   * @returns 内部小图标的尺寸（px）
+   * 计算任意 RxC 模式的 CSS 变量
+   * @param mode 文件夹模式，如 "2x2", "3x3", "1x1" 等
+   * @returns CSS 变量对象
    */
-  const getInnerIconSize = (mode: string) => {
-    const [cols, rows] = mode.split('x').map(Number)
+  const calculateModeVars = (mode: string) => {
+    const [r, c] = mode.split('x').map(Number)
+    const itemSize = iconConfig.boxSize
+    const gapX = settings.gridGapX
+    const gapY = settings.gridGapY
 
-    // 外部网格参数
-    const itemSize = iconConfig.boxSize // 单个格子大小
-    const gapX = settings.gridGapX // 列间距
-    const gapY = settings.gridGapY // 行间距
+    // 1x1 特殊处理：内部强制 3x3 网格
+    const isSmall = r === 1 && c === 1
+    const innerRows = isSmall ? 3 : r
+    const innerCols = isSmall ? 3 : c
+    // 大文件夹：行间距 = 列间距 = 边距
+    const spacing = settings.folderInnerSpacing || 8
+    const innerGap = isSmall ? 4 : spacing
+    const innerPad = isSmall ? 6 : spacing
 
-    // 统一间距：边距 = 行间距 = 列间距（从设置中读取）
-    const innerSpacing = settings.folderInnerSpacing || 8
+    // 计算文件夹物理尺寸
+    const totalW = c * itemSize + (c - 1) * gapX
+    const totalH = r * itemSize + (r - 1) * gapY
 
-    // 计算文件夹外部尺寸（使用正确的行列间距）
-    const folderWidth = cols * itemSize + (cols - 1) * gapX
-    const folderHeight = rows * itemSize + (rows - 1) * gapY
+    // 计算内部可用空间
+    const availW = totalW - innerPad * 2 - (innerCols - 1) * innerGap
+    const availH = totalH - innerPad * 2 - (innerRows - 1) * innerGap
 
-    // 计算内部可用空间（减去边距）
-    const availableWidth = folderWidth - innerSpacing * 2
-    const availableHeight = folderHeight - innerSpacing * 2
-
-    // 计算每个小图标的尺寸（减去内部间距）
-    const iconWidth = (availableWidth - innerSpacing * (cols - 1)) / cols
-    const iconHeight = (availableHeight - innerSpacing * (rows - 1)) / rows
-
-    // 取较小值确保图标不会溢出，并保持正方形
-    const iconSize = Math.min(iconWidth, iconHeight)
+    // 计算内部图标尺寸（取较小值保证正方形且不溢出）
+    const iconSize = Math.floor(Math.min(availW / innerCols, availH / innerRows))
 
     return {
-      iconSize: Math.floor(iconSize), // 向下取整避免溢出
-      innerSpacing, // 统一间距
-      cols,
-      rows,
-      folderWidth,
-      folderHeight,
-      availableWidth,
-      availableHeight,
+      '--f-rows': r,
+      '--f-cols': c,
+      '--f-inner-rows': innerRows,
+      '--f-inner-cols': innerCols,
+      '--f-inner-gap': `${innerGap}px`,
+      '--f-inner-pad': `${innerPad}px`,
+      '--f-icon-size': `${iconSize}px`,
     }
   }
 
   /**
-   * 获取所有文件夹模式的尺寸信息
+   * 获取文件夹容量（可容纳的图标数量）
    */
-  const allFolderSizes = computed(() => {
-    const modes = ['1x2', '2x1', '2x2', '1x3', '3x1', '2x3', '3x2', '3x3']
-    const result: Record<string, ReturnType<typeof getInnerIconSize>> = {}
-
-    modes.forEach(mode => {
-      result[mode] = getInnerIconSize(mode)
-    })
-
-    return result
-  })
+  const getCapacity = (mode: string) => {
+    const [r, c] = mode.split('x').map(Number)
+    // 1x1 文件夹内部 3x3，容量为 9
+    return r === 1 && c === 1 ? 9 : r * c
+  }
 
   /**
-   * 获取当前文件夹预览模式的尺寸
-   */
-  const currentFolderSize = computed(() => {
-    return getInnerIconSize(settings.folderPreviewMode)
-  })
-
-  /**
-   * 生成 CSS 变量用于样式
+   * 预计算所有常用模式的变量（用于 CSS 变量注入）
    */
   const folderSizeVars = computed(() => {
-    const sizes = allFolderSizes.value
+    const modes = ['1x1', '1x2', '2x1', '2x2', '1x3', '3x1', '2x3', '3x2', '3x3']
     const vars: Record<string, string> = {}
 
-    Object.entries(sizes).forEach(([mode, size]) => {
-      vars[`--folder-${mode}-icon-size`] = `${size.iconSize}px`
-      vars[`--folder-${mode}-spacing`] = `${size.innerSpacing}px`
+    modes.forEach(mode => {
+      const modeVars = calculateModeVars(mode)
+      vars[`--folder-${mode}-icon-size`] = modeVars['--f-icon-size']
+      vars[`--folder-${mode}-gap`] = modeVars['--f-inner-gap']
     })
 
     return vars
   })
 
   return {
-    getInnerIconSize,
-    allFolderSizes,
-    currentFolderSize,
+    calculateModeVars,
+    getCapacity,
     folderSizeVars,
   }
 }

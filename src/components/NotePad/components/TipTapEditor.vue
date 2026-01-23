@@ -244,7 +244,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <div class="toolbar-group">
         <Tooltip content="撤销 (Ctrl+Z)">
@@ -266,7 +266,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <!-- 标题 -->
       <div class="toolbar-group">
@@ -298,7 +298,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <!-- 文本样式 -->
       <div class="toolbar-group">
@@ -357,7 +357,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <!-- 列表 -->
       <div class="toolbar-group">
@@ -389,7 +389,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <!-- 缩进 -->
       <div class="toolbar-group">
@@ -412,7 +412,7 @@ const triggerImageInput = () => {
           </button>
         </Tooltip>
       </div>
-      <div class="divider"></div>
+      <div class="note-divider"></div>
 
       <!-- 块元素 -->
       <div class="toolbar-group">

@@ -151,88 +151,13 @@
 
 /* =========================================
    外部容器跨度 (External Spans)
+   使用 CSS 变量驱动，支持任意 RxC 布局
    ========================================= */
 
-/* 1. 基础规则 */
-.shortcut-item.is-folder.mode-2x2 {
-  grid-column: span 2;
-  grid-row: span 2;
-}
-
-.shortcut-item.is-folder.mode-3x3 {
-  grid-column: span 3;
-  grid-row: span 3;
-}
-
-.shortcut-item.is-folder.mode-1x2 {
-  grid-column: span 1;
-  grid-row: span 2;
-}
-
-.shortcut-item.is-folder.mode-1x3 {
-  grid-column: span 1;
-  grid-row: span 3;
-}
-
-.shortcut-item.is-folder.mode-2x3 {
-  grid-column: span 2;
-  grid-row: span 3;
-}
-
-.shortcut-item.is-folder.mode-2x1 {
-  grid-column: span 2;
-  grid-row: span 1;
-}
-
-.shortcut-item.is-folder.mode-3x1 {
-  grid-column: span 3;
-  grid-row: span 1;
-}
-
-.shortcut-item.is-folder.mode-3x2 {
-  grid-column: span 3;
-  grid-row: span 2;
-}
-
-/* 2. 压缩模式 */
-.compress-mode .shortcut-item.is-folder.mode-2x2 {
-  grid-column: span min(2, var(--grid-cols));
-  grid-row: span min(2, var(--grid-rows));
-}
-
-.compress-mode .shortcut-item.is-folder.mode-3x3 {
-  grid-column: span min(3, var(--grid-cols));
-  grid-row: span min(3, var(--grid-rows));
-}
-
-.compress-mode .shortcut-item.is-folder.mode-1x2 {
-  grid-column: span 1;
-  grid-row: span min(2, var(--grid-rows));
-}
-
-.compress-mode .shortcut-item.is-folder.mode-1x3 {
-  grid-column: span 1;
-  grid-row: span min(3, var(--grid-rows));
-}
-
-.compress-mode .shortcut-item.is-folder.mode-2x3 {
-  grid-column: span min(2, var(--grid-cols));
-  grid-row: span min(3, var(--grid-rows));
-}
-
-.compress-mode .shortcut-item.is-folder.mode-2x1 {
-  grid-column: span min(2, var(--grid-cols));
-  grid-row: span 1;
-}
-
-.compress-mode .shortcut-item.is-folder.mode-3x1 {
-  grid-column: span min(3, var(--grid-cols));
-  grid-row: span 1;
-}
-
-.compress-mode .shortcut-item.is-folder.mode-3x2 {
-  grid-column: span min(3, var(--grid-cols));
-  grid-row: span min(2, var(--grid-rows));
+/* 变量驱动的文件夹跨度 */
+.shortcut-item.is-folder {
+  grid-row: span var(--f-rows, 1);
+  grid-column: span var(--f-cols, 1);
 }
 
 /* 拖拽镜像 */
@@ -363,70 +288,18 @@
   transform: translateY(-4px);
 }
 
-/* Folder Internal Grid */
+/* Folder Internal Grid - 变量驱动 */
 .folder-grid {
   width: 100%;
   height: 100%;
   display: grid;
+  padding: var(--f-inner-pad, 8px);
+  gap: var(--f-inner-gap, 8px);
+  grid-template-rows: repeat(var(--f-inner-rows, 2), 1fr);
+  grid-template-columns: repeat(var(--f-inner-cols, 2), 1fr);
   transition: gap 0.3s ease;
   align-items: center;
   justify-items: center;
-}
-
-.folder-grid.mode-2x2 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: var(--folder-2x2-spacing, 8px);
-  padding: var(--folder-2x2-spacing, 8px);
-}
-
-.folder-grid.mode-3x3 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: var(--folder-3x3-spacing, 8px);
-  padding: var(--folder-3x3-spacing, 8px);
-}
-
-.folder-grid.mode-1x2 {
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(2, 1fr);
-  gap: var(--folder-1x2-spacing, 8px);
-  padding: var(--folder-1x2-spacing, 8px);
-}
-
-.folder-grid.mode-1x3 {
-  grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, 1fr);
-  gap: var(--folder-1x3-spacing, 8px);
-  padding: var(--folder-1x3-spacing, 8px);
-}
-
-.folder-grid.mode-2x3 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: var(--folder-2x3-spacing, 8px);
-  padding: var(--folder-2x3-spacing, 8px);
-}
-
-.folder-grid.mode-2x1 {
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
-  gap: var(--folder-2x1-spacing, 8px);
-  padding: var(--folder-2x1-spacing, 8px);
-}
-
-.folder-grid.mode-3x1 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: 1fr;
-  gap: var(--folder-3x1-spacing, 8px);
-  padding: var(--folder-3x1-spacing, 8px);
-}
-
-.folder-grid.mode-3x2 {
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: var(--folder-3x2-spacing, 8px);
-  padding: var(--folder-3x2-spacing, 8px);
 }
 
 .mini-app {
@@ -446,12 +319,12 @@
 }
 
 .mini-icon-wrapper {
-  width: 100%;
-  height: auto;
+  width: var(--f-icon-size, 100%);
+  height: var(--f-icon-size, auto);
   aspect-ratio: 1 / 1;
   max-width: 100%;
   max-height: 100%;
-  border-radius: 14px;
+  border-radius: calc(var(--f-icon-size, 40px) * 0.2);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -464,17 +337,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.folder-grid.mode-3x3 .mini-icon-wrapper,
-.folder-grid.mode-2x3 .mini-icon-wrapper,
-.folder-grid.mode-3x2 .mini-icon-wrapper {
-  border-radius: 10px;
-}
-
-.folder-grid.mode-1x3 .mini-icon-wrapper,
-.folder-grid.mode-3x1 .mini-icon-wrapper {
-  border-radius: 8px;
 }
 
 /* Misc */
@@ -956,6 +818,19 @@
 .inner-item .icon-box {
   width: 64px;
   height: 64px;
+}
+
+.inner-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inner-item .shortcut-name {
+  position: static;
+  transform: none;
+  margin-top: 6px;
+  width: 100%;
 }
 
 .folder-expand-enter-active,

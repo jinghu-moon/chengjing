@@ -7,6 +7,7 @@
 export {}
 declare global {
   const COMMON_DICT: typeof import('./utils/pinyinDict').COMMON_DICT
+  const DESKTOP_PRESETS: typeof import('./composables/useSettings').DESKTOP_PRESETS
   const EffectScope: typeof import('vue').EffectScope
   const VIP_MAP: typeof import('./utils/pinyinDict').VIP_MAP
   const buildFolderMap: typeof import('./utils/bookmarksApi').buildFolderMap
@@ -121,7 +122,7 @@ declare global {
   export type { Note, SortMode } from './composables/useNotes'
   import('./composables/useNotes')
   // @ts-ignore
-  export type { FolderLayoutMode } from './composables/useSettings'
+  export type { FolderLayoutMode, DesktopPreset } from './composables/useSettings'
   import('./composables/useSettings')
   // @ts-ignore
   export type { TodoItem } from './composables/useTodos'
@@ -146,6 +147,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly COMMON_DICT: UnwrapRef<typeof import('./utils/pinyinDict')['COMMON_DICT']>
+    readonly DESKTOP_PRESETS: UnwrapRef<typeof import('./composables/useSettings')['DESKTOP_PRESETS']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly VIP_MAP: UnwrapRef<typeof import('./utils/pinyinDict')['VIP_MAP']>
     readonly buildFolderMap: UnwrapRef<typeof import('./utils/bookmarksApi')['buildFolderMap']>

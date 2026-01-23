@@ -343,8 +343,8 @@ watch(calendar.viewDate, () => {
 
 .picker-dropdown {
   background: var(--bg-panel);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   box-shadow: var(--shadow-lg);
   padding: var(--space-3);
@@ -357,8 +357,8 @@ watch(calendar.viewDate, () => {
 
 .year-month-dropdown {
   background: var(--bg-panel-overlay);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   border-radius: var(--radius-ml);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);

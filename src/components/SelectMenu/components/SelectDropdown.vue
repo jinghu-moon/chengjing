@@ -488,8 +488,8 @@ const getTransitionName = (parentRect: DOMRect | null) => {
 .select-dropdown {
   width: max-content;
   background: var(--bg-panel-dark);
-  backdrop-filter: blur(var(--blur-md));
-  -webkit-backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
+  -webkit-backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   border-radius: var(--radius-ml);
   box-shadow: var(--shadow-md);

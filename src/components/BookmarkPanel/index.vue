@@ -317,7 +317,7 @@ onUnmounted(() => {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(var(--blur-sm));
+  backdrop-filter: var(--glass-sm);
   z-index: var(--z-modal);
   display: flex;
   justify-content: flex-end;
@@ -334,7 +334,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
 }
 
 /* Header */

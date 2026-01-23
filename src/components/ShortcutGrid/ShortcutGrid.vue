@@ -106,12 +106,7 @@ const openFolder = (item: Shortcut) => {
   isDraggingOut.value = false
 }
 
-const folderCapacity = computed(() => {
-  const [c, r] = settings.folderPreviewMode.split('x').map(Number)
-  return c * r
-})
-
-const folderGridClass = computed(() => `mode-${settings.folderPreviewMode}`)
+// folderCapacity 和 folderGridClass 已移至 ShortcutItem 组件内部计算
 
 const gridStyle = computed(() => ({
   '--item-size': `${iconConfig.boxSize}px`,
@@ -336,8 +331,6 @@ onMounted(() => {
             :key="item.id"
             :item="item"
             :is-drag-target="String(dragTargetFolderId) === String(item.id)"
-            :folder-grid-class="folderGridClass"
-            :folder-capacity="folderCapacity"
             @click="item.type === 'app' ? openShortcut(item.url) : openFolder(item)"
             @contextmenu="showContextMenu($event, item)"
             @open-shortcut="openShortcut"

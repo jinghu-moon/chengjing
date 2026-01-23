@@ -48,7 +48,7 @@ const triggerStyle = computed(() => ({
   border: var(--border-glass);
   border-radius: 50%;
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(var(--blur-md));
+  backdrop-filter: var(--glass-md);
   display: flex;
   align-items: center;
   justify-content: center;
