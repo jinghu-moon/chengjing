@@ -236,7 +236,6 @@ declare module 'vue' {
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNotes: UnwrapRef<typeof import('./composables/useNotes')['useNotes']>
     readonly useSettings: UnwrapRef<typeof import('./composables/useSettings')['useSettings']>
-    readonly useShortcutDrag: UnwrapRef<typeof import('./composables/useShortcutDrag')['useShortcutDrag']>
     readonly useSimpleDrag: UnwrapRef<typeof import('./composables/useSimpleDrag')['useSimpleDrag']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>

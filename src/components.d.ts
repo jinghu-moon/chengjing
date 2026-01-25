@@ -31,6 +31,7 @@ declare module 'vue' {
     DialogItem: typeof import('./components/Dialog/DialogItem.vue')['default']
     DialogProvider: typeof import('./components/Dialog/DialogProvider.vue')['default']
     DynamicCalendarIcon: typeof import('./components/DynamicCalendarIcon.vue')['default']
+    EditDialog: typeof import('./components/ShortcutGrid/components/EditDialog.vue')['default']
     EditForm: typeof import('./components/ShortcutGrid/components/EditForm.vue')['default']
     FolderModal: typeof import('./components/ShortcutGrid/components/FolderModal.vue')['default']
     FolderTabs: typeof import('./components/BookmarkPanel/components/FolderTabs.vue')['default']

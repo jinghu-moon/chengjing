@@ -281,6 +281,11 @@ const onAfterLeave = () => {
     shouldRender.value = false
   }
 }
+
+// 暴露 dialogRef 供父组件使用
+defineExpose({
+  dialogRef
+})
 </script>
 
 <template>

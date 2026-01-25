@@ -11,7 +11,7 @@ import {
 } from '@tabler/icons-vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useSettings } from '../../composables/useSettings'
-import { useShortcutDrag } from '../../composables/useShortcutDrag'
+import { useShortcutDrag } from './composables/useShortcutDrag'
 import { useShortcutData } from './composables/useShortcutData'
 import { useShortcutLayout } from './composables/useShortcutLayout'
 import { useFolderIconSize } from './composables/useFolderIconSize'
@@ -71,9 +71,15 @@ const openedFolderId = ref<string | number | null>(null)
 const currentOpenedFolder = computed(() =>
   shortcuts.value.find(i => String(i.id) === String(openedFolderId.value))
 )
+const folderModalRef = ref<InstanceType<typeof FolderModal> | null>(null)
+
+// 🔑 新增：拖动过程中的实时预览数据
+const previewFolderId = ref<string | number | null>(null)
+const previewChildren = ref<Shortcut[] | null>(null)
 
 const {
   dragTargetFolderId,
+  mergeTargetId,
   isDraggingOut,
   draggableGroup,
   onStart,
@@ -81,6 +87,8 @@ const {
   onDragEnd,
   onFolderDragStart,
   onFolderDragEnd,
+  onFolderMove, // [新增]
+  folderContainerRef,
 } = useShortcutDrag(
   shortcuts,
   settings,
@@ -96,14 +104,57 @@ const {
   }
 )
 
+// 当文件夹打开时，设置 folderContainerRef
+watch(
+  () => folderModalRef.value?.folderContentRef,
+  (containerElement) => {
+    if (containerElement) {
+      folderContainerRef.value = containerElement as HTMLElement
+    }
+  },
+  { immediate: true }
+)
+
+
+
 const handlePageDragEnd = () => {
   syncFromPages()
   nextTick(() => onDragEnd())
 }
 
+// 🔑 文件夹内部拖拽排序变化时，强制刷新 shortcuts 数组以触发桌面预览更新
+const handleFolderUpdate = () => {
+  // 清除预览数据
+  previewChildren.value = null
+  previewFolderId.value = null
+  
+  const folderIndex = shortcuts.value.findIndex(s => String(s.id) === String(openedFolderId.value))
+  if (folderIndex > -1) {
+    const folder = shortcuts.value[folderIndex]
+    // 创建 folder 对象的浅拷贝，强制让 Vue 认为这是一个新对象
+    shortcuts.value[folderIndex] = { ...folder }
+    // 强制替换数组引用
+    shortcuts.value = [...shortcuts.value]
+  }
+}
+
+// 拖动过程中的实时预览更新
+const handlePreviewUpdate = (children: Shortcut[] | null) => {
+  if (children) {
+    previewFolderId.value = openedFolderId.value
+    previewChildren.value = children
+  } else {
+    previewFolderId.value = null
+    previewChildren.value = null
+  }
+}
+
 const openFolder = (item: Shortcut) => {
-  openedFolderId.value = item.id
-  isDraggingOut.value = false
+  // 只在打开不同的文件夹时才重置 isDraggingOut
+  if (openedFolderId.value !== item.id) {
+    openedFolderId.value = item.id
+    isDraggingOut.value = false
+  }
 }
 
 // folderCapacity 和 folderGridClass 已移至 ShortcutItem 组件内部计算
@@ -331,6 +382,8 @@ onMounted(() => {
             :key="item.id"
             :item="item"
             :is-drag-target="String(dragTargetFolderId) === String(item.id)"
+            :is-merge-target="String(mergeTargetId) === String(item.id)"
+            :preview-children="String(previewFolderId) === String(item.id) ? previewChildren : null"
             @click="item.type === 'app' ? openShortcut(item.url) : openFolder(item)"
             @contextmenu="showContextMenu($event, item)"
             @open-shortcut="openShortcut"
@@ -366,6 +419,7 @@ onMounted(() => {
     </div>
 
     <FolderModal
+      ref="folderModalRef"
       :folder="currentOpenedFolder || null"
       :is-dragging-out="isDraggingOut"
       :draggable-group="draggableGroup"
@@ -373,6 +427,9 @@ onMounted(() => {
       @open-shortcut="openShortcut"
       @folder-drag-start="onFolderDragStart"
       @folder-drag-end="onFolderDragEnd"
+      @folder-move="onFolderMove"
+      @folder-update="handleFolderUpdate"
+      @preview-update="handlePreviewUpdate"
     />
 
     <ContextMenu ref="contextMenuRef" />

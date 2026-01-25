@@ -1,123 +1,215 @@
 ﻿ChengJing/
+├── .editorconfig
+├── .svconfig.json
 ├── A_backups/
+├── button-style.html
+├── index.html
+├── package-lock.json
+├── package.json
 ├── releases/
 ├── scripts/
-└── src/
-    ├── App.vue
-    ├── components/
-    │   ├── Background.vue
-    │   ├── BookmarkPanel/
-    │   │   ├── components/
-    │   │   │   ├── BookmarkCard.vue
-    │   │   │   ├── BookmarkGrid.vue
-    │   │   │   ├── Breadcrumb.vue
-    │   │   │   ├── FolderTabs.vue
-    │   │   │   ├── FolderTree.vue
-    │   │   │   ├── FolderTreeItem.vue
-    │   │   │   ├── SearchInput.vue
-    │   │   │   └── SearchResults.vue
-    │   │   ├── composables/
-    │   │   ├── index.vue
-    │   │   ├── styles/
-    │   │   │   └── drag.css
-    │   │   └── utils/
-    │   ├── Button/
-    │   │   ├── Button.vue
-    │   │   ├── ButtonGroup.vue
-    │   │   └── theme.css
-    │   ├── CalendarPanel/
-    │   │   ├── components/
-    │   │   │   ├── DashboardCards.vue
-    │   │   │   ├── TimeCapsule.vue
-    │   │   │   └── TodoItem.vue
-    │   │   ├── composables/
-    │   │   ├── index.vue
-    │   │   ├── styles/
-    │   │   │   └── common.css
-    │   │   └── views/
-    │   │       ├── MonthView.vue
-    │   │       ├── WeekView.vue
-    │   │       └── YearView.vue
-    │   ├── ClockWeather.vue
-    │   ├── DatePicker/
-    │   │   ├── components/
-    │   │   │   ├── CalendarGrid.vue
-    │   │   │   ├── PickerFooter.vue
-    │   │   │   ├── TimePanel.vue
-    │   │   │   └── YearMonthWheel.vue
-    │   │   ├── composables/
-    │   │   ├── index.vue
-    │   │   └── styles.css
-    │   ├── Dialog/
-    │   │   ├── composables/
-    │   │   ├── Dialog.vue
-    │   │   ├── DialogItem.vue
-    │   │   └── DialogProvider.vue
-    │   ├── DynamicCalendarIcon.vue
-    │   ├── NotePad/
-    │   │   ├── components/
-    │   │   │   ├── BubbleMenu/
-    │   │   │   │   ├── BubbleLinkForm.vue
-    │   │   │   │   └── BubbleToolbar.vue
-    │   │   │   ├── ImageNodeView.vue
-    │   │   │   ├── MiniNotePad.vue
-    │   │   │   ├── NoteBubbleMenu.vue
-    │   │   │   ├── NotePadEditor.vue
-    │   │   │   ├── NotePadSidebar.vue
-    │   │   │   ├── NotePadTrigger.vue
-    │   │   │   └── TipTapEditor.vue
-    │   │   ├── composables/
-    │   │   ├── index.vue
-    │   │   └── styles.css
-    │   ├── Pomodoro.vue
-    │   ├── SearchBar.vue
-    │   ├── SelectMenu/
-    │   │   ├── components/
-    │   │   │   ├── ContextMenu.vue
-    │   │   │   ├── SelectDropdown.vue
-    │   │   │   ├── SelectTrigger.vue
-    │   │   │   └── SubmenuPanel.vue
-    │   │   ├── composables/
-    │   │   └── index.vue
-    │   ├── SettingsPanel/
-    │   │   ├── components/
-    │   │   │   ├── CapsuleTabs.vue
-    │   │   │   ├── LayoutSelector.vue
-    │   │   │   ├── LayoutSettingsModal.vue
-    │   │   │   ├── SettingSlider.vue
-    │   │   │   └── SettingSwitch.vue
-    │   │   ├── index.vue
-    │   │   └── styles.css
-    │   ├── ShortcutGrid/
-    │   │   ├── components/
-    │   │   │   ├── EditForm.vue
-    │   │   │   ├── FolderModal.vue
-    │   │   │   └── ShortcutItem.vue
-    │   │   ├── composables/
-    │   │   ├── ShortcutGrid.vue
-    │   │   └── styles/
-    │   │       └── index.css
-    │   ├── SvgIcon.vue
-    │   ├── TimePicker/
-    │   │   └── index.vue
-    │   ├── Toast/
-    │   │   ├── composables/
-    │   │   ├── index.vue
-    │   │   └── ToastItem.vue
-    │   ├── TodoList.vue
-    │   └── Tooltip/
-    │       ├── composables/
-    │       ├── index.vue
-    │       └── TooltipProvider.vue
-    ├── composables/
-    ├── constants/
-    ├── demo.vue
-    ├── styles/
-    │   ├── base/
-    │   ├── components/
-    │   ├── drag.css
-    │   ├── index.css
-    │   ├── TodoList.css
-    │   └── variables.css
-    ├── types/
-    └── utils/
+│   ├── pack.mjs
+│   └── release.mjs
+├── src/
+│   ├── App.vue
+│   ├── auto-imports.d.ts
+│   ├── components/
+│   │   ├── Background.vue
+│   │   ├── BookmarkPanel/
+│   │   │   ├── components/
+│   │   │   │   ├── BookmarkCard.vue
+│   │   │   │   ├── BookmarkGrid.vue
+│   │   │   │   ├── Breadcrumb.vue
+│   │   │   │   ├── FolderTabs.vue
+│   │   │   │   ├── FolderTree.vue
+│   │   │   │   ├── FolderTreeItem.vue
+│   │   │   │   ├── SearchInput.vue
+│   │   │   │   └── SearchResults.vue
+│   │   │   ├── composables/
+│   │   │   │   ├── useBookmarkDrag.ts
+│   │   │   │   ├── useBookmarks.ts
+│   │   │   │   ├── useBookmarkSearch.ts
+│   │   │   │   ├── useFavicon.ts
+│   │   │   │   └── useFolderOrder.ts
+│   │   │   ├── index.ts
+│   │   │   ├── index.vue
+│   │   │   ├── styles/
+│   │   │   │   └── drag.css
+│   │   │   ├── types.ts
+│   │   │   └── utils/
+│   │   │       └── flatten.ts
+│   │   ├── Button/
+│   │   │   ├── Button.vue
+│   │   │   ├── ButtonGroup.vue
+│   │   │   ├── config.ts
+│   │   │   ├── index.ts
+│   │   │   ├── theme.css
+│   │   │   └── types.ts
+│   │   ├── CalendarPanel/
+│   │   │   ├── components/
+│   │   │   │   ├── DashboardCards.vue
+│   │   │   │   ├── TimeCapsule.vue
+│   │   │   │   └── TodoItem.vue
+│   │   │   ├── composables/
+│   │   │   │   └── useCalendarPanelState.ts
+│   │   │   ├── index.ts
+│   │   │   ├── index.vue
+│   │   │   ├── styles/
+│   │   │   │   └── common.css
+│   │   │   ├── types.ts
+│   │   │   └── views/
+│   │   │       ├── MonthView.vue
+│   │   │       ├── WeekView.vue
+│   │   │       └── YearView.vue
+│   │   ├── ClockWeather.vue
+│   │   ├── DatePicker/
+│   │   │   ├── components/
+│   │   │   │   ├── CalendarGrid.vue
+│   │   │   │   ├── PickerFooter.vue
+│   │   │   │   ├── TimePanel.vue
+│   │   │   │   └── YearMonthWheel.vue
+│   │   │   ├── composables/
+│   │   │   │   ├── useCalendar.ts
+│   │   │   │   ├── usePickerPosition.ts
+│   │   │   │   ├── useTimeLogic.ts
+│   │   │   │   └── useYearWheel.ts
+│   │   │   ├── index.ts
+│   │   │   ├── index.vue
+│   │   │   └── styles.css
+│   │   ├── Dialog/
+│   │   │   ├── composables/
+│   │   │   │   ├── useDialog.ts
+│   │   │   │   └── useDialogPosition.ts
+│   │   │   ├── config.ts
+│   │   │   ├── dialo-api.md
+│   │   │   ├── Dialog.vue
+│   │   │   ├── DialogItem.vue
+│   │   │   ├── DialogProvider.vue
+│   │   │   ├── EVALUATION.md
+│   │   │   ├── index.ts
+│   │   │   └── types.ts
+│   │   ├── DynamicCalendarIcon.vue
+│   │   ├── NotePad/
+│   │   │   ├── components/
+│   │   │   │   ├── BubbleMenu/
+│   │   │   │   │   ├── BubbleLinkForm.vue
+│   │   │   │   │   └── BubbleToolbar.vue
+│   │   │   │   ├── ImageNodeView.vue
+│   │   │   │   ├── MiniNotePad.vue
+│   │   │   │   ├── NoteBubbleMenu.vue
+│   │   │   │   ├── NotePadEditor.vue
+│   │   │   │   ├── NotePadSidebar.vue
+│   │   │   │   ├── NotePadTrigger.vue
+│   │   │   │   └── TipTapEditor.vue
+│   │   │   ├── composables/
+│   │   │   │   ├── CustomImage.ts
+│   │   │   │   └── useBubbleMenuPosition.ts
+│   │   │   ├── index.vue
+│   │   │   └── styles.css
+│   │   ├── Pomodoro.vue
+│   │   ├── SearchBar.vue
+│   │   ├── SelectMenu/
+│   │   │   ├── components/
+│   │   │   │   ├── ContextMenu.vue
+│   │   │   │   ├── SelectDropdown.vue
+│   │   │   │   ├── SelectTrigger.vue
+│   │   │   │   └── SubmenuPanel.vue
+│   │   │   ├── composables/
+│   │   │   │   ├── useKeyboardNav.ts
+│   │   │   │   ├── usePosition.ts
+│   │   │   │   ├── useSafeTriangle.ts
+│   │   │   │   └── useSubmenuPosition.ts
+│   │   │   ├── index.ts
+│   │   │   ├── index.vue
+│   │   │   └── types.ts
+│   │   ├── SettingsPanel/
+│   │   │   ├── components/
+│   │   │   │   ├── CapsuleTabs.vue
+│   │   │   │   ├── LayoutSelector.vue
+│   │   │   │   ├── LayoutSettingsModal.vue
+│   │   │   │   ├── SettingSlider.vue
+│   │   │   │   └── SettingSwitch.vue
+│   │   │   ├── index.vue
+│   │   │   └── styles.css
+│   │   ├── ShortcutGrid/
+│   │   │   ├── components/
+│   │   │   │   ├── EditDialog.vue
+│   │   │   │   ├── EditForm.vue
+│   │   │   │   ├── FolderModal.vue
+│   │   │   │   └── ShortcutItem.vue
+│   │   │   ├── composables/
+│   │   │   │   ├── useFolderIconSize.ts
+│   │   │   │   ├── useShortcutData.ts
+│   │   │   │   ├── useShortcutDrag.ts
+│   │   │   │   └── useShortcutLayout.ts
+│   │   │   ├── config.ts
+│   │   │   ├── index.ts
+│   │   │   ├── LAYOUT_DESIGN.md
+│   │   │   ├── ShortcutGrid.vue
+│   │   │   └── styles/
+│   │   │       └── index.css
+│   │   ├── SvgIcon.vue
+│   │   ├── TimePicker/
+│   │   │   └── index.vue
+│   │   ├── Toast/
+│   │   │   ├── composables/
+│   │   │   │   └── useToast.ts
+│   │   │   ├── index.vue
+│   │   │   ├── ToastItem.vue
+│   │   │   └── types.ts
+│   │   ├── TodoList.vue
+│   │   └── Tooltip/
+│   │       ├── composables/
+│   │       │   ├── useTooltipPosition.ts
+│   │       │   └── useTooltipSingleton.ts
+│   │       ├── index.ts
+│   │       ├── index.vue
+│   │       ├── TooltipProvider.vue
+│   │       └── vTooltip.ts
+│   ├── components.d.ts
+│   ├── composables/
+│   │   ├── useAsyncWordCount.ts
+│   │   ├── useCalendarData.ts
+│   │   ├── useContextMenu.ts
+│   │   ├── useDraggableCard.ts
+│   │   ├── useImageGC.ts
+│   │   ├── useImageUpload.ts
+│   │   ├── useNotes.ts
+│   │   ├── useSettings.ts
+│   │   ├── useSimpleDrag.ts
+│   │   ├── useTodoDrag.ts
+│   │   └── useTodos.ts
+│   ├── constants/
+│   │   └── keys.ts
+│   ├── demo.vue
+│   ├── main.ts
+│   ├── manifest.json
+│   ├── styles/
+│   │   ├── base/
+│   │   ├── components/
+│   │   ├── drag.css
+│   │   ├── index.css
+│   │   ├── TodoList.css
+│   │   └── variables.css
+│   ├── types/
+│   │   └── index.ts
+│   └── utils/
+│       ├── bookmarksApi.ts
+│       ├── db.ts
+│       ├── debounce.ts
+│       ├── export.ts
+│       ├── imageProcessor.ts
+│       ├── pinyin.ts
+│       ├── pinyinDict.ts
+│       ├── positioning.ts
+│       ├── throttle.ts
+│       ├── wordCount.test.ts
+│       └── wordCount.ts
+├── test-bookmarks.html
+├── test-bookmarks.json
+├── test.html
+├── test2.html
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts

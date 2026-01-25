@@ -8,6 +8,8 @@ import { useFolderIconSize } from '../composables/useFolderIconSize'
 interface Props {
   item: Shortcut
   isDragTarget?: boolean
+  isMergeTarget?: boolean
+  previewChildren?: Shortcut[] | null // 🔑 新增：拖动过程中的实时预览数据
 }
 
 const props = defineProps<Props>()
@@ -52,30 +54,36 @@ const capacity = computed(() => {
   return getCapacity(mode)
 })
 
+// 优先使用预览数据，否则使用真实数据
+const effectiveChildren = computed(() => {
+  return props.previewChildren || props.item.children || []
+})
+
 // 是否需要嵌套预览（children 数量超过容量）
 const needsNesting = computed(() => {
-  return (props.item.children?.length || 0) > capacity.value
+  return effectiveChildren.value.length > capacity.value
 })
 
 // 显示的普通图标（前 capacity-1 个，如果需要嵌套）
 const visibleChildren = computed(() => {
-  if (!props.item.children) return []
+  const children = effectiveChildren.value
+  if (children.length === 0) return []
   if (needsNesting.value) {
-    return props.item.children.slice(0, capacity.value - 1)
+    return children.slice(0, capacity.value - 1)
   }
-  return props.item.children.slice(0, capacity.value)
+  return children.slice(0, capacity.value)
 })
 
 // 嵌套预览的图标（第 capacity-1 到 capacity+2 个）
 const nestedChildren = computed(() => {
-  if (!props.item.children || !needsNesting.value) return []
-  return props.item.children.slice(capacity.value - 1, capacity.value + 3)
+  if (effectiveChildren.value.length === 0 || !needsNesting.value) return []
+  return effectiveChildren.value.slice(capacity.value - 1, capacity.value + 3)
 })
 
 // 最后一个普通图标（当不需要嵌套时）
 const lastChild = computed(() => {
-  if (needsNesting.value || !props.item.children) return null
-  return props.item.children[capacity.value - 1] || null
+  if (needsNesting.value || effectiveChildren.value.length === 0) return null
+  return effectiveChildren.value[capacity.value - 1] || null
 })
 
 const getIconSrc = (item: Shortcut) => {
@@ -130,7 +138,7 @@ const handleSubItemClick = (e: Event, url?: string) => {
     <div
       v-if="item.type === 'app'"
       class="icon-box"
-      :class="{ filled: item.filled, inverted: item.inverted }"
+      :class="{ filled: item.filled, inverted: item.inverted, 'is-merge-target': isMergeTarget }"
     >
       <img
         :src="getIconSrc(item)"
@@ -148,7 +156,7 @@ const handleSubItemClick = (e: Event, url?: string) => {
       class="folder-box"
       :class="{ 'is-drag-target': isDragTarget }"
     >
-      <div v-if="item.children && item.children.length > 0" class="folder-grid">
+      <div v-if="effectiveChildren.length > 0" class="folder-grid">
         <!-- 普通槽位 -->
         <div
           v-for="subItem in visibleChildren"
