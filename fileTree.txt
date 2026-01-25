@@ -133,7 +133,6 @@
 │   │   │   └── styles.css
 │   │   ├── ShortcutGrid/
 │   │   │   ├── components/
-│   │   │   │   ├── EditDialog.vue
 │   │   │   │   ├── EditForm.vue
 │   │   │   │   ├── FolderModal.vue
 │   │   │   │   └── ShortcutItem.vue
@@ -205,6 +204,7 @@
 │       ├── throttle.ts
 │       ├── wordCount.test.ts
 │       └── wordCount.ts
+├── template-A.html
 ├── test-bookmarks.html
 ├── test-bookmarks.json
 ├── test.html

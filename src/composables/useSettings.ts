@@ -1,7 +1,5 @@
 import { reactive, ref, watch } from 'vue'
-
-// 任意 RxC 布局类型
-export type FolderLayoutMode = `${number}x${number}`
+import type { Settings, IconConfig } from '../types'
 
 // 桌面预设
 export const DESKTOP_PRESETS = {
@@ -10,76 +8,7 @@ export const DESKTOP_PRESETS = {
   spacious: { gridRows: 3, gridCols: 8, gridGapX: 40, gridGapY: 48, boxSize: 80, label: '宽敞 3×8' },
 } as const
 
-export type DesktopPreset = keyof typeof DESKTOP_PRESETS | 'custom'
 
-interface Settings {
-  openNewTab: boolean
-  showClock: boolean
-  showShortcuts: boolean
-  showTodo: boolean
-  dailyWallpaper: boolean
-  todoDefaultCollapsed: boolean
-  // [新增] 待办面板尺寸配置
-  todoWidth: number
-  todoListMaxHeight: number
-
-  // [新增] 便签设置
-  showNotePad: boolean
-  notePadWidth: number
-  notePadHeight: number
-  notePadEditorMode: 'rich' | 'plain'
-  compressImages: boolean
-  maxImageSizeMB: number
-  maxImageWidth: number
-
-  deleteEmptyFolder: boolean
-  folderPreviewMode: FolderLayoutMode
-  folderInnerSpacing: number
-  wallpaperBlur: number
-  wallpaperMask: number
-  gridRows: number
-  gridCols: number
-  gridGapX: number
-  gridGapY: number
-  compressLargeFolders: boolean
-
-  // 桌面预设
-  desktopPreset: DesktopPreset
-  defaultFolderMode: FolderLayoutMode
-  enableSmartFolderSuggestion: boolean
-
-  // 布局
-  layoutPaddingTop: number
-  layoutGap: number
-
-  // 搜索框
-  showSearchBar: boolean
-  showSearchIcon: boolean
-  searchBarWidth: number
-  searchBarHeight: number
-  searchBarRadius: number
-  searchBarOpacity: number
-
-  // 天气
-  weatherAutoLocation: boolean
-  weatherCity: string
-
-  // 番茄钟
-  pomodoroWorkMinutes: number
-  pomodoroBreakMinutes: number
-  pomodoroAutoBreak: boolean
-  pomodoroAutoWork: boolean
-  pomodoroIntent: string
-}
-
-interface IconConfig {
-  hideLabel: boolean
-  boxSize: number
-  iconScale: number
-  radius: number
-  opacity: number
-  showShadow: boolean
-}
 
 const defaultSettings: Settings = {
   openNewTab: false,
@@ -177,17 +106,28 @@ const loadSettings = () => {
   }
 }
 
-watch(settings, () => localStorage.setItem('lime-settings', JSON.stringify(settings)), {
-  deep: true,
-})
-watch(iconConfig, () => localStorage.setItem('lime-icon-config', JSON.stringify(iconConfig)), {
-  deep: true,
-})
+// 延迟启动 watch，避免初始化时触发循环
+let watchersInitialized = false
+
+const initWatchers = () => {
+  if (watchersInitialized) return
+
+  watch(settings, () => localStorage.setItem('lime-settings', JSON.stringify(settings)), {
+    deep: true,
+  })
+  watch(iconConfig, () => localStorage.setItem('lime-icon-config', JSON.stringify(iconConfig)), {
+    deep: true,
+  })
+
+  watchersInitialized = true
+}
 
 export function useSettings() {
   if (!isLoaded) {
     loadSettings()
     isLoaded = true
+    // 数据加载完成后，启动 watchers
+    setTimeout(() => initWatchers(), 0)
     localStorage.removeItem('loaded')
   }
 

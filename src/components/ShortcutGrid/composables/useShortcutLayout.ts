@@ -1,9 +1,9 @@
 import { ref, computed, watch, type Ref } from 'vue'
-import type { Shortcut } from '../../../types'
+import type { Shortcut, Settings } from '../../../types'
 
 export function useShortcutLayout(
   shortcuts: Ref<Shortcut[]>,
-  settings: any,
+  settings: Settings,
   saveData: () => void
 ) {
   const pagedShortcuts = ref<Shortcut[][]>([])
@@ -68,6 +68,8 @@ export function useShortcutLayout(
   }
 
   // 监听设置变化自动重新布局
+  // 添加 immediate: false 避免初始化时立即触发
+  // 添加 flush: 'post' 确保在 DOM 更新后执行
   watch(
     [
       () => settings.gridRows,
@@ -78,6 +80,10 @@ export function useShortcutLayout(
     ],
     () => {
       reflowShortcuts()
+    },
+    {
+      flush: 'post',
+      deep: false
     }
   )
 

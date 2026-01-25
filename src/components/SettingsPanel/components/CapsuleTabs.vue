@@ -4,40 +4,58 @@ import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue'
 export interface CapsuleTabItem {
   value: string | number
   label: string
-  icon?: any // Component or string
+  icon?: any
 }
 
 const props = withDefaults(defineProps<{
   modelValue: string | number
   items: CapsuleTabItem[]
   equalWidth?: boolean
+  layout?: 'flex' | 'grid'
+  gridCols?: number
 }>(), {
-  equalWidth: false
+  equalWidth: false,
+  layout: 'flex',
+  gridCols: 2
 })
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | number): void
 }>()
 
+const tabsWrapperRef = ref<HTMLElement | null>(null)
 const tabsRef = ref<HTMLElement | null>(null)
 const tabRefs = ref<HTMLElement[]>([])
 const indicatorStyle = ref({
   width: '0px',
-  transform: 'translateX(0px)',
-  opacity: 0
+  height: '0px',
+  transform: 'translate(0px, 0px)',
+  opacity: 0,
+  transition: ''
 })
 
 const activeIndex = computed(() => {
   return props.items.findIndex(item => item.value === props.modelValue)
 })
 
+const gridStyle = computed(() => {
+  if (props.layout === 'grid') {
+    return {
+      display: 'grid',
+      gridTemplateColumns: `repeat(${props.gridCols}, 1fr)`
+    }
+  }
+  return {}
+})
+
 // Max width calculation for equal width mode
 const maxTabWidth = ref(0)
 const updateMaxTabWidth = () => {
+  if (!props.equalWidth || props.layout === 'grid') return
+  
   let max = 0
   tabRefs.value.forEach(tab => {
     if (tab) {
-      // Temporarily remove width style to measure natural width
       const originalWidth = tab.style.width
       tab.style.width = ''
       const w = tab.getBoundingClientRect().width
@@ -48,25 +66,55 @@ const updateMaxTabWidth = () => {
   maxTabWidth.value = max
 }
 
-const updateIndicator = () => {
+const updateIndicator = (enableTransition = true) => {
   const container = tabsRef.value
   if (!container || activeIndex.value === -1) return
 
   const activeTab = tabRefs.value[activeIndex.value]
   if (!activeTab) return
 
-  // 使用 offsetLeft/offsetWidth 获取相对布局坐标
-  // 这种方式不受父容器 transform 动画影响，只要 DOM 布局稳定，数值就是准确的
-  // 从而解决了面板滑入动画导致的计算抖动问题
+  // Temporarily disable transition if requested
+  const transitionStyle = enableTransition 
+    ? 'transform 0.35s cubic-bezier(0.34, 1.25, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.25, 0.64, 1), height 0.35s cubic-bezier(0.34, 1.25, 0.64, 1)' 
+    : 'none'
+
   indicatorStyle.value = {
     width: `${activeTab.offsetWidth}px`,
-    transform: `translateX(${activeTab.offsetLeft}px)`,
-    opacity: 1
+    height: `${activeTab.offsetHeight}px`,
+    transform: `translate(${activeTab.offsetLeft}px, ${activeTab.offsetTop}px)`,
+    opacity: 1,
+    transition: transitionStyle
   }
 
-  // Scroll into view logic handled by parent scroll container if needed
-  // In `test.html`, there is a wrapper. We might need logic to scroll the active tab into view if the container is scrollable.
-  // The provided CSS for .capsule-tabs doesn't imply it scrolls itself, but a wrapper might.
+  // Restore transition in next frame if it was disabled
+  if (!enableTransition) {
+     requestAnimationFrame(() => {
+        indicatorStyle.value.transition = 'transform 0.35s cubic-bezier(0.34, 1.25, 0.64, 1), width 0.35s cubic-bezier(0.34, 1.25, 0.64, 1), height 0.35s cubic-bezier(0.34, 1.25, 0.64, 1)'
+     })
+  }
+
+  scrollActiveIntoView(activeTab)
+}
+
+const scrollActiveIntoView = (tab: HTMLElement) => {
+  const wrapper = tabsWrapperRef.value
+  if (!wrapper) return
+
+  const tabLeft = tab.offsetLeft
+  const tabTop = tab.offsetTop
+  const tabWidth = tab.offsetWidth
+  const tabHeight = tab.offsetHeight
+  const wrapperWidth = wrapper.offsetWidth
+  const wrapperHeight = wrapper.clientHeight
+
+  if (props.layout === 'grid') {
+    const scrollTop = tabTop - wrapperHeight / 2 + tabHeight / 2
+    wrapper.scrollTo({ top: scrollTop, behavior: 'smooth' })
+  } else {
+    // Horizontal scroll
+    const scrollTo = tabLeft - wrapperWidth / 2 + tabWidth / 2
+    wrapper.scrollTo({ left: scrollTo, behavior: 'smooth' })
+  }
 }
 
 const handleTabClick = (value: string | number) => {
@@ -75,40 +123,50 @@ const handleTabClick = (value: string | number) => {
 
 // Keyboard Navigation
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
+  const navKeys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown']
+  if (!navKeys.includes(e.key)) return
+  
   e.preventDefault()
 
   const len = props.items.length
   if (len === 0) return
 
   let newIndex = activeIndex.value
-  if (e.key === 'ArrowRight') {
-    newIndex = (newIndex + 1) % len
+  const cols = props.gridCols || 2
+
+  if (props.layout === 'grid') {
+    if (e.key === 'ArrowRight') newIndex = newIndex + 1
+    if (e.key === 'ArrowLeft') newIndex = newIndex - 1
+    if (e.key === 'ArrowDown') newIndex = newIndex + cols
+    if (e.key === 'ArrowUp') newIndex = newIndex - cols
   } else {
-    newIndex = (newIndex - 1 + len) % len
+    if (e.key === 'ArrowRight') newIndex = (newIndex + 1) % len
+    if (e.key === 'ArrowLeft') newIndex = (newIndex - 1 + len) % len
   }
 
-  emit('update:modelValue', props.items[newIndex].value)
-  // Focus logic is a bit tricky with Vue reactivity, but we can try to focus the new tab?
-  // Actually, standard ARIA tabs usually focus the active tab.
+  // Boundary check
+  if (newIndex >= 0 && newIndex < len) {
+    emit('update:modelValue', props.items[newIndex].value)
+  }
 }
 
-// Watchers and Lifecycle
+// Watchers
 watch(
   () => props.modelValue,
   async () => {
     await nextTick()
-    updateIndicator()
+    updateIndicator(true)
   }
 )
 
 watch(
-  () => props.equalWidth,
+  [() => props.equalWidth, () => props.layout, () => props.gridCols, () => props.items],
   async () => {
     await nextTick()
     updateMaxTabWidth()
-    updateIndicator()
-  }
+    updateIndicator(false) // No transition when layout changes
+  },
+  { deep: true }
 )
 
 let resizeObserver: ResizeObserver | null = null
@@ -116,15 +174,13 @@ let resizeObserver: ResizeObserver | null = null
 onMounted(async () => {
   await nextTick()
   updateMaxTabWidth()
-  updateIndicator()
+  updateIndicator(false)
 
-  // ResizeObserver is still useful for responsive layout changes
   if (tabsRef.value) {
     resizeObserver = new ResizeObserver(() => {
-      // Use requestAnimationFrame to avoid "ResizeObserver loop limit exceeded"
       requestAnimationFrame(() => {
         updateMaxTabWidth()
-        updateIndicator()
+        updateIndicator(false)
       })
     })
     resizeObserver.observe(tabsRef.value)
@@ -141,12 +197,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="capsule-tabs-wrapper">
+  <div class="capsule-tabs-wrapper" ref="tabsWrapperRef">
     <div 
       class="capsule-tabs" 
       ref="tabsRef" 
       role="tablist" 
       tabindex="0"
+      :class="{ 'layout-grid': layout === 'grid' }"
+      :style="gridStyle"
       @keydown="handleKeyDown"
     >
       <div 
@@ -163,10 +221,9 @@ onUnmounted(() => {
         role="tab"
         :aria-selected="modelValue === item.value"
         :tabindex="modelValue === item.value ? 0 : -1"
-        :style="equalWidth ? { width: `${maxTabWidth}px` } : {}"
+        :style="(equalWidth && layout !== 'grid') ? { width: `${maxTabWidth}px` } : {}"
         @click="handleTabClick(item.value)"
       >
-        <!-- Stack Logic for Ghost Element -->
         <div class="tab-content">
           <component 
             v-if="item.icon" 
@@ -175,7 +232,7 @@ onUnmounted(() => {
           />
           <span>{{ item.label }}</span>
         </div>
-        <!-- Ghost element to reserve space for bold font weight -->
+        <!-- Ghost element for spacing stability -->
         <div class="tab-ghost" aria-hidden="true">
           <component 
             v-if="item.icon" 
@@ -185,79 +242,127 @@ onUnmounted(() => {
           <span>{{ item.label }}</span>
         </div>
       </div>
+      <!-- Slot for custom items -->
+      <slot name="extra" />
     </div>
   </div>
 </template>
 
 <style scoped>
 .capsule-tabs-wrapper {
-  max-width: 100%;
-  overflow-x: auto;
-  /* padding: var(--space-2);  Use locally or inherit? */
+  width: 100%;
+  transition: max-width 0.3s, max-height 0.3s;
+  background: rgba(0, 0, 0, 0.2); /* var(--bg-panel-dark) fallback */
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 4px;
-  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  
+  overflow: hidden; /* Changed to hidden by default, or auto based on logic */
 }
+
+/* Horizontal Scroll Mode */
+.capsule-tabs-wrapper:not(:has(.layout-grid)) {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Vertical Scroll Mode (Grid) */
+.capsule-tabs-wrapper:has(.layout-grid) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 400px; /* Default limit, can be overridden */
+}
+
+/* Scrollbar Styles */
 .capsule-tabs-wrapper::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+  height: 6px;
+}
+.capsule-tabs-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 6px 0;
+}
+.capsule-tabs-wrapper::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+.capsule-tabs-wrapper:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+.capsule-tabs-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Hide scrollbar buttons */
+.capsule-tabs-wrapper::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 .capsule-tabs {
   position: relative;
   display: inline-flex;
-  padding: 4px;
-  background: rgba(0, 0, 0, 0.2); /* var(--bg-panel-dark) fallback */
-  border-radius: 12px; /* var(--radius-ml) fallback */
-  border: 1px solid rgba(255, 255, 255, 0.05); /* var(--border-divider) fallback */
-  z-index: 1;
+  background: transparent;
+  border: none;
+  padding: 0;
+  transition: gap 0.3s;
+  box-sizing: border-box;
   outline: none;
+}
+
+.capsule-tabs.layout-grid {
+  display: grid;
+  gap: 8px; /* Default gap */
+  width: 100%;
+  padding-right: 4px; /* Visual compensation */
 }
 
 .capsule-indicator {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
+  top: 0;
   left: 0;
   background: var(--bg-active, rgba(255, 255, 255, 0.1));
-  border-radius: 8px; /* var(--radius-md) fallback */
+  border-radius: 8px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   z-index: 0;
   pointer-events: none;
-  transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1),
-              width 0.3s cubic-bezier(0.34, 1.25, 0.64, 1),
-              opacity 0.2s ease;
+  /* Transition handled by inline style */
 }
 
 .capsule-tab {
   position: relative;
   z-index: 1;
-  padding: 6px 16px; /* var(--space-2) var(--space-6) */
-  min-width: 40px; /* var(--height-xl) */
+  padding: 6px 16px;
+  min-width: 40px;
   cursor: pointer;
   user-select: none;
   display: inline-grid;
   grid-template-areas: "stack";
   place-items: center;
-  color: rgba(255, 255, 255, 0.6); /* var(--text-secondary) */
-  font-size: 14px; /* var(--text-base) */
-  outline: none;
-  transition: color 0.2s ease,
-              width 0.3s cubic-bezier(0.34, 1.25, 0.64, 1),
-              transform 0.1s ease;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
   border-radius: 8px;
+  transition: color 0.2s ease;
+}
+
+.capsule-tabs.layout-grid .capsule-tab {
+  width: 100%; /* Fill grid cell */
+  padding: 12px 0;
 }
 
 .capsule-tab:focus-visible {
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 2px var(--color-primary, #007bff);
-}
-
-.capsule-tab:active {
-  transform: scale(0.96);
+  outline: none; /* Focus indicator usually handled by custom logic or default browser ring if needed */
 }
 
 .capsule-tab.active {
   color: var(--color-primary-hover, #fff);
-  font-weight: 600; /* var(--weight-semibold) */
+  font-weight: 600;
   text-shadow: 0 0 0.5px currentColor;
 }
 
@@ -265,7 +370,8 @@ onUnmounted(() => {
   grid-area: stack;
   display: flex;
   align-items: center;
-  gap: 6px; /* var(--space-2) */
+  justify-content: center;
+  gap: 6px;
   white-space: nowrap;
 }
 
@@ -273,15 +379,16 @@ onUnmounted(() => {
   grid-area: stack;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-weight: 600; /* var(--weight-semibold) */
+  font-weight: 600;
   visibility: hidden;
   pointer-events: none;
   opacity: 0;
 }
 
 .icon {
-  width: 18px; /* var(--icon-md) */
+  width: 18px;
   height: 18px;
   fill: currentColor;
 }

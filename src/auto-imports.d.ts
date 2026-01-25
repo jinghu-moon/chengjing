@@ -122,9 +122,6 @@ declare global {
   export type { Note, SortMode } from './composables/useNotes'
   import('./composables/useNotes')
   // @ts-ignore
-  export type { FolderLayoutMode, DesktopPreset } from './composables/useSettings'
-  import('./composables/useSettings')
-  // @ts-ignore
   export type { TodoItem } from './composables/useTodos'
   import('./composables/useTodos')
   // @ts-ignore

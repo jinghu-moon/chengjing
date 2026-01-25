@@ -35,6 +35,15 @@ export function useFolderIconSize(settings: any, iconConfig: any) {
 
     // 计算内部图标尺寸（取较小值保证正方形且不溢出）
     const iconSize = Math.floor(Math.min(availW / innerCols, availH / innerRows))
+    
+    // 计算动态圆角：基于最短边长的 22%，模仿 iOS icon 比例
+    // 对于 2x1 这样的扁长形状，最短边是 height (itemSize)，圆角将基于 height 计算，保持圆形而非椭圆
+    const minDimension = Math.min(totalW, totalH)
+    const radius = Math.floor(minDimension * 0.22)
+    
+    // 内部图标的圆角：基于图标自身尺寸的 22%
+    // 这样自然形成了 "外圆角大(因为容器大)，内圆角小(因为图标小)" 的层级关系
+    const iconRadius = Math.floor(iconSize * 0.22)
 
     return {
       '--f-rows': r,
@@ -44,6 +53,8 @@ export function useFolderIconSize(settings: any, iconConfig: any) {
       '--f-inner-gap': `${innerGap}px`,
       '--f-inner-pad': `${innerPad}px`,
       '--f-icon-size': `${iconSize}px`,
+      '--f-radius': `${radius}px`,
+      '--f-icon-radius': `${iconRadius}px`,
     }
   }
 

@@ -1,365 +1,467 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<style>
-/* =================================================================
-   变量定义 (保持不变)
-   ================================================================= */
-:root {
-   --nord0 : #2e3440;
-   --nord1 : #3b4252;
-   --nord4 : #d8dee9;
-   --nord6 : #eceff4;
-   --nord8 : #88c0d0;
-   --nord10: #5e81ac;
+  <head>
+    <meta charset="UTF-8" />
+    <title>滑动胶囊 Tab - 无按钮滚动条版</title>
+    <style>
+      :root {
+        --ease-elastic: cubic-bezier(0.34, 1.25, 0.64, 1);
+        --color-primary: #5e81ac;
+        --bg-panel: #e5e9f0;
+        --bg-active: #ffffff;
+        --radius-box: 12px;
+        --radius-item: 8px;
+        --grid-gap: 8px; 
+      }
 
-   --color-primary      : var(--nord10);
-   --text-primary    : rgb(from var(--nord6) r g b / 0.95);
-   --text-secondary  : rgb(from var(--nord4) r g b / 0.75);
-   --text-tertiary   : rgb(from var(--nord4) r g b / 0.45);
-   
-   --bg-panel        : rgb(from var(--nord0) r g b / 0.75);
-   --bg-panel-dark   : rgb(from var(--nord1) r g b / 0.4); 
-   --bg-hover        : rgb(from var(--nord6) r g b / 0.08);
-   --bg-active       : rgb(from var(--nord6) r g b / 0.12);
-   
-   --border-glass    : 1px solid rgb(from var(--nord6) r g b / 0.2);
-   --border-divider  : 1px solid rgb(from var(--nord6) r g b / 0.15);
-   
-   --radius-md  : 8px;
-   --radius-lg  : 16px;
-   --blur-md    : 20px;
-   --shadow-lg  : 0 10px 40px rgb(from var(--nord0) r g b / 0.5);
-   
-   /* 动画变量 */
-   --duration-normal: 0.3s;
-   --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
-}
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-    background-color: #1F232A;
-    background-image: linear-gradient(135deg, #2e3440 0%, #1f232a 100%);
-    font-family: system-ui, sans-serif;
-    color: var(--text-primary);
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0;
-    overflow: hidden;
-}
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: #eceff4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px;
+        min-height: 100vh;
+        color: #2e3440;
+      }
 
-.bm-panel {
-    width: 800px;
-    height: 500px;
-    background: var(--bg-panel);
-    backdrop-filter: blur(var(--blur-md));
-    -webkit-backdrop-filter: blur(var(--blur-md));
-    border: var(--border-glass);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    overflow: hidden;
-    font-size: 14px;
-}
+      /* --- 控制面板 --- */
+      .controls-group {
+        display: flex;
+        gap: 20px;
+        background: #fff;
+        padding: 15px 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
 
-/* --- 侧边栏 --- */
-.bm-sidebar {
-    width: 240px;
-    background: var(--bg-panel-dark);
-    border-right: var(--border-divider);
-    display: flex;
-    flex-direction: column;
-    padding: 12px 0;
-    user-select: none; /* 防止点击时选中文本 */
-}
+      .control-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4c566a; transition: opacity 0.3s; }
+      .control-item.disabled { opacity: 0.4; pointer-events: none; }
+      .divider { width: 1px; height: 20px; background: #d8dee9; margin: 0 10px; }
+      .input-number { width: 50px; padding: 4px; border: 1px solid #d8dee9; border-radius: 6px; text-align: center; outline: none; }
 
-.bm-sidebar-header {
-    padding: 0 16px 8px;
-    font-size: 12px;
-    color: var(--text-tertiary);
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.bm-tree {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    overflow-y: auto;
-}
-
-.bm-tree-item {
-    position: relative;
-    cursor: pointer;
-}
-
-.bm-tree-content {
-    display: flex;
-    align-items: center;
-    height: 36px;
-    padding: 0 12px;
-    margin: 2px 8px;
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    transition: background 0.2s, color 0.2s;
-}
-
-.bm-tree-content:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-.bm-tree-item.active > .bm-tree-content {
-    background: var(--bg-active);
-    color: var(--color-primary);
-    font-weight: 500;
-}
-
-/* 箭头动画 */
-.bm-arrow {
-    width: 16px;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 4px;
-    font-size: 10px;
-    opacity: 0.6;
-    /* 箭头旋转动画 */
-    transition: transform var(--duration-normal) var(--ease-smooth);
-}
-
-.bm-tree-item.expanded > .bm-tree-content > .bm-arrow {
-    transform: rotate(90deg);
-}
-
-.bm-icon { margin-right: 8px; font-size: 16px; }
-
-/* =================================================================
-   核心动画逻辑: Grid Height Transition
-   ================================================================= */
-
-/* 1. 动画容器：控制高度 */
-.bm-collapse-wrapper {
-    display: grid;
-    grid-template-rows: 0fr; /* 默认闭合 */
-    transition: grid-template-rows var(--duration-normal) var(--ease-smooth);
-}
-
-/* 2. 展开状态 */
-.bm-tree-item.expanded > .bm-collapse-wrapper {
-    grid-template-rows: 1fr; /* 展开为自适应高度 */
-}
-
-/* 3. 内容容器：控制位移与透明度 */
-.bm-sub-tree {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    padding-left: 20px; /* 缩进 */
-    overflow: hidden; /* 必须：隐藏溢出内容 */
-    min-height: 0;    /* 必须：Grid 子项约束 */
-    
-    /* 初始状态：向上偏移且透明 */
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity var(--duration-normal) var(--ease-smooth),
-                transform var(--duration-normal) var(--ease-smooth);
-}
-
-/* 4. 展开时的内容状态 */
-.bm-tree-item.expanded > .bm-collapse-wrapper > .bm-sub-tree {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* --- 右侧内容 (保持不变) --- */
-.bm-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-.bm-main-header {
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    border-bottom: var(--border-divider);
-}
-.bm-folder-title {
-    font-weight: 600;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.bm-list-container {
-    flex: 1;
-    padding: 16px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-    align-content: start;
-}
-.bm-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    background: var(--bg-hover);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    color: var(--text-primary);
-    font-size: 13px;
-    transition: transform 0.2s, background 0.2s;
-}
-.bm-card:hover {
-    background: var(--bg-active);
-    transform: translateY(-2px);
-}
-.bm-card-icon { width: 32px; height: 32px; margin-bottom: 8px; border-radius: 6px; }
-.bm-card-url { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
-
-</style>
-</head>
-<body>
-
-<div class="bm-panel">
-    <!-- 侧边栏 -->
-    <aside class="bm-sidebar">
-        <div class="bm-sidebar-header">Library</div>
-        <ul class="bm-tree">
-            
-            <!-- 文件夹 1 (默认展开) -->
-            <!-- 注意结构变化：增加了 bm-collapse-wrapper -->
-            <li class="bm-tree-item expanded active" onclick="toggleFolder(event, this)">
-                <div class="bm-tree-content">
-                    <span class="bm-arrow">▶</span>
-                    <span class="bm-icon">💻</span>
-                    <span>Development</span>
-                </div>
-                
-                <!-- 动画包裹层 -->
-                <div class="bm-collapse-wrapper">
-                    <ul class="bm-sub-tree">
-                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
-                            <div class="bm-tree-content">
-                                <span class="bm-arrow"></span>
-                                <span class="bm-icon">🛠</span>
-                                <span>Tools</span>
-                            </div>
-                        </li>
-                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
-                            <div class="bm-tree-content">
-                                <span class="bm-arrow"></span>
-                                <span class="bm-icon">📚</span>
-                                <span>Docs</span>
-                            </div>
-                        </li>
-                        <li class="bm-tree-item" onclick="toggleFolder(event, this)">
-                            <div class="bm-tree-content">
-                                <span class="bm-arrow"></span>
-                                <span class="bm-icon">⚙️</span>
-                                <span>APIs</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- 文件夹 2 (默认折叠) -->
-            <li class="bm-tree-item" onclick="toggleFolder(event, this)">
-                <div class="bm-tree-content">
-                    <span class="bm-arrow">▶</span>
-                    <span class="bm-icon">🎨</span>
-                    <span>Design</span>
-                </div>
-                
-                <div class="bm-collapse-wrapper">
-                    <ul class="bm-sub-tree">
-                        <li class="bm-tree-item">
-                            <div class="bm-tree-content">
-                                <span class="bm-arrow"></span>
-                                <span>Inspiration</span>
-                            </div>
-                        </li>
-                        <li class="bm-tree-item">
-                            <div class="bm-tree-content">
-                                <span class="bm-arrow"></span>
-                                <span>Figma Resources</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <!-- 文件夹 3 (无子级) -->
-            <li class="bm-tree-item" onclick="toggleFolder(event, this)">
-                <div class="bm-tree-content">
-                    <span class="bm-arrow"></span>
-                    <span class="bm-icon">🎮</span>
-                    <span>Entertainment</span>
-                </div>
-            </li>
-
-        </ul>
-    </aside>
-
-    <!-- 右侧内容 -->
-    <main class="bm-main">
-        <header class="bm-main-header">
-            <div class="bm-folder-title">
-                <span style="color: var(--nord8)">💻</span> Development
-            </div>
-        </header>
-
-        <div class="bm-list-container">
-            <a href="#" class="bm-card">
-                <img src="https://github.githubassets.com/favicons/favicon.png" class="bm-card-icon" alt="icon">
-                <div class="bm-card-title">GitHub</div>
-                <div class="bm-card-url">github.com</div>
-            </a>
-            <a href="#" class="bm-card">
-                <div class="bm-card-icon" style="background:var(--nord11); display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;">S</div>
-                <div class="bm-card-title">Stack Overflow</div>
-                <div class="bm-card-url">stackoverflow.com</div>
-            </a>
-            <a href="#" class="bm-card">
-                <div class="bm-card-icon" style="background:var(--nord9); display:flex;align-items:center;justify-content:center;color:white;">R</div>
-                <div class="bm-card-title">React</div>
-                <div class="bm-card-url">react.dev</div>
-            </a>
-        </div>
-    </main>
-</div>
-
-<script>
-    function toggleFolder(e, element) {
-        e.stopPropagation();
-
-        // 1. 激活状态处理 (高亮)
-        document.querySelectorAll('.bm-tree-item.active').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
+      /* --- 容器 Wrapper --- */
+      .capsule-tabs-wrapper {
+        width: 100%;
+        transition: max-width 0.3s, max-height 0.3s;
         
-        // 更新标题
-        const folderName = element.querySelector('.bm-tree-content span:last-child').innerText;
-        const iconEl = element.querySelector('.bm-icon');
-        const folderIcon = iconEl ? iconEl.innerText : '📁';
-        document.querySelector('.bm-folder-title').innerHTML = `<span style="color: var(--nord8)">${folderIcon}</span> ${folderName}`;
+        background: var(--bg-panel);
+        border-radius: var(--radius-box);
+        border: 1px solid rgba(0,0,0,0.05);
+        
+        /* 给滚动条留一点内边距，防止贴得太死 */
+        padding: 6px; 
+        padding-right: 2px; 
+        
+        display: flex; 
+        flex-direction: column; 
+        
+        /* Firefox 适配 */
+        scrollbar-width: thin; 
+        scrollbar-color: rgba(0,0,0,0.1) transparent; 
+        
+        overflow: hidden; 
+      }
 
-        // 2. 展开/折叠动画逻辑
-        // 检查是否有子级 wrapper
-        const wrapper = element.querySelector('.bm-collapse-wrapper');
-        if (wrapper) {
-            // 只需切换 expanded 类，CSS grid-template-rows 会自动处理高度动画
-            element.classList.toggle('expanded');
+      /* --- [核心修改] 滚动条样式 --- */
+      
+      .capsule-tabs-wrapper::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      .capsule-tabs-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 6px 0; /* 留出边距 */
+      }
+
+      .capsule-tabs-wrapper::-webkit-scrollbar-thumb {
+        background-color: transparent; 
+        border-radius: 10px;
+        border: 1px solid transparent; 
+        background-clip: content-box;
+      }
+
+      /* 鼠标悬停显示 */
+      .capsule-tabs-wrapper:hover::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.15); 
+      }
+      .capsule-tabs-wrapper::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.3);
+      }
+
+      /* --- Tabs 内容区 --- */
+      .capsule-tabs {
+        position: relative;
+        display: inline-flex;
+        background: transparent;
+        border: none;
+        padding: 0;
+        transition: gap 0.3s; 
+        box-sizing: border-box;
+      }
+
+      .capsule-tabs.layout-grid {
+        display: grid;
+        gap: var(--grid-gap);
+        width: fit-content; 
+        min-width: 100%; 
+        padding-right: 4px; /* 视觉补偿 */
+      }
+
+      /* --- 指示器 --- */
+      .capsule-indicator {
+        position: absolute;
+        top: 0; left: 0;
+        background: var(--bg-active);
+        border-radius: var(--radius-item);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 0;
+        transition: transform 0.35s var(--ease-elastic), 
+                    width 0.35s var(--ease-elastic), 
+                    height 0.35s var(--ease-elastic);
+      }
+      .capsule-indicator.initialized { opacity: 1; }
+      .capsule-indicator.no-transition { transition: none !important; }
+
+      /* --- Tab --- */
+      .capsule-tab {
+        position: relative;
+        z-index: 1;
+        padding: 10px 12px;
+        min-width: 80px; 
+        cursor: pointer;
+        user-select: none;
+        color: #4c566a;
+        font-size: 14px;
+        border-radius: var(--radius-item);
+        transition: color 0.2s, width 0.3s var(--ease-elastic);
+        display: inline-grid;
+        grid-template-areas: "stack";
+        place-items: center;
+      }
+
+      .capsule-tabs.layout-grid .capsule-tab {
+        width: 100% !important; 
+        padding: 12px 0;
+      }
+      
+      .capsule-tab:focus-visible { outline: none; } 
+
+      .tab-content {
+        grid-area: stack;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        white-space: nowrap;
+        transition: opacity 0.2s;
+      }
+
+      .tab-ghost {
+        grid-area: stack;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        visibility: hidden;
+        pointer-events: none;
+        font-weight: 600; 
+        white-space: nowrap;
+      }
+
+      .capsule-tab.active .tab-content {
+        color: var(--color-primary);
+        font-weight: 600;
+      }
+
+      /* Switch */
+      .switch { position: relative; display: inline-block; width: 36px; height: 20px;}
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d8dee9; transition: .4s; border-radius: 34px; }
+      .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+      input:checked + .slider { background-color: var(--color-primary); }
+      input:checked + .slider:before { transform: translateX(16px); }
+    </style>
+  </head>
+  <body>
+
+    <div class="controls-group">
+      <div class="control-item">
+        <span>网格模式</span>
+        <label class="switch">
+          <input type="checkbox" id="layoutToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="control-item" id="widthControl">
+        <span>所有 Tab 等宽</span>
+        <label class="switch">
+          <input type="checkbox" id="widthToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="control-item disabled" id="colLimitControl">
+        <span>列数</span>
+        <input type="number" id="colLimitInput" class="input-number" value="6" min="1" max="10">
+      </div>
+
+      <div class="control-item disabled" id="rowLimitControl">
+        <span>可见行</span>
+        <input type="number" id="rowLimitInput" class="input-number" value="3" min="1" max="10">
+      </div>
+    </div>
+
+    <!-- Wrapper -->
+    <div class="capsule-tabs-wrapper">
+      <!-- Tabs -->
+      <div class="capsule-tabs" id="tabs" role="tablist">
+        <div class="capsule-indicator"></div>
+        <div class="capsule-tab active"><div class="tab-content">首页概览</div></div>
+        <div class="capsule-tab"><div class="tab-content">API 接口</div></div>
+        <div class="capsule-tab"><div class="tab-content">配置中心</div></div>
+        <div class="capsule-tab"><div class="tab-content">账户安全</div></div>
+        <div class="capsule-tab"><div class="tab-content">审计日志</div></div>
+        <div class="capsule-tab"><div class="tab-content">数据分析</div></div>
+        <div class="capsule-tab"><div class="tab-content">偏好设置</div></div>
+        <div class="capsule-tab"><div class="tab-content">团队管理</div></div>
+        <div class="capsule-tab"><div class="tab-content">账单支付</div></div>
+        <div class="capsule-tab"><div class="tab-content">通知中心</div></div>
+        <div class="capsule-tab"><div class="tab-content">外部集成</div></div>
+        <div class="capsule-tab"><div class="tab-content">帮助文档</div></div>
+        <div class="capsule-tab"><div class="tab-content">关于我们</div></div>
+        <div class="capsule-tab"><div class="tab-content">版本更新</div></div>
+        <div class="capsule-tab"><div class="tab-content">退出登录</div></div>
+      </div>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".capsule-tab");
+      const indicator = document.querySelector(".capsule-indicator");
+      const container = document.querySelector(".capsule-tabs");
+      const wrapper = document.querySelector(".capsule-tabs-wrapper");
+      
+      const layoutToggle = document.getElementById("layoutToggle");
+      const widthToggle = document.getElementById("widthToggle");
+      const widthControl = document.getElementById("widthControl");
+      const rowLimitInput = document.getElementById("rowLimitInput");
+      const colLimitInput = document.getElementById("colLimitInput");
+      const rowLimitControl = document.getElementById("rowLimitControl");
+      const colLimitControl = document.getElementById("colLimitControl");
+
+      let maxTabWidth = 0;
+      let isWindowResizing = false;
+      let resizeTimer = null;
+
+      function initGhostElements() {
+        tabs.forEach(tab => {
+          const content = tab.querySelector('.tab-content');
+          if (content && !tab.querySelector('.tab-ghost')) {
+            const ghost = content.cloneNode(true);
+            ghost.className = 'tab-ghost';
+            tab.appendChild(ghost);
+          }
+        });
+      }
+
+      function calculateMaxTabWidth() {
+        tabs.forEach(tab => tab.style.width = '');
+        maxTabWidth = 0;
+        tabs.forEach(tab => {
+          const w = tab.getBoundingClientRect().width;
+          if (w > maxTabWidth) maxTabWidth = w;
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        isWindowResizing = true;
+        updateIndicator(false);
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => isWindowResizing = false, 200);
+      });
+
+      const resizeObserver = new ResizeObserver(entries => {
+        updateIndicator(!isWindowResizing);
+      });
+
+      function scrollActiveIntoView(tab) {
+        const isGrid = layoutToggle.checked;
+        const tabLeft = tab.offsetLeft;
+        const tabTop = tab.offsetTop;
+        const tabWidth = tab.offsetWidth;
+        const tabHeight = tab.offsetHeight;
+        const wrapperWidth = wrapper.offsetWidth;
+        const wrapperHeight = wrapper.clientHeight;
+
+        if (!isGrid) {
+          const scrollTo = tabLeft - wrapperWidth / 2 + tabWidth / 2;
+          wrapper.scrollTo({ left: scrollTo, behavior: "smooth" });
+        } else {
+          const scrollTop = tabTop - wrapperHeight / 2 + tabHeight / 2;
+          const scrollLeft = tabLeft - wrapperWidth / 2 + tabWidth / 2;
+          wrapper.scrollTo({ top: scrollTop, left: scrollLeft, behavior: "smooth" });
         }
-    }
-</script>
+      }
 
-</body>
+      function updateIndicator(enableTransition = true) {
+        const activeTab = document.querySelector(".capsule-tab.active");
+        if (!activeTab) return;
+
+        if (!enableTransition) {
+            indicator.classList.add('no-transition');
+        } else {
+            indicator.classList.remove('no-transition');
+        }
+
+        const left = activeTab.offsetLeft;
+        const top = activeTab.offsetTop;
+        const width = activeTab.offsetWidth;
+        const height = activeTab.offsetHeight;
+
+        indicator.style.width = `${width}px`;
+        indicator.style.height = `${height}px`;
+        indicator.style.transform = `translate(${left}px, ${top}px)`;
+
+        if(!enableTransition) {
+             indicator.offsetHeight; 
+             requestAnimationFrame(() => indicator.classList.remove('no-transition'));
+        }
+
+        scrollActiveIntoView(activeTab);
+      }
+
+      function updateLayout() {
+        const isGrid = layoutToggle.checked;
+        const isEqualWidth = widthToggle.checked;
+
+        if (!isGrid) {
+          container.classList.remove("layout-grid");
+          container.style.gridTemplateColumns = '';
+          wrapper.style.maxHeight = '';
+          wrapper.style.overflowY = 'hidden';
+          wrapper.style.overflowX = 'auto';
+          wrapper.style.maxWidth = "100%";
+          container.style.width = ''; 
+          container.style.minWidth = '';
+
+          widthControl.classList.remove("disabled");
+          colLimitControl.classList.add("disabled");
+          rowLimitControl.classList.add("disabled");
+
+          tabs.forEach(tab => {
+             if (isEqualWidth) {
+                 tab.style.width = `${maxTabWidth}px`;
+             } else {
+                 tab.style.width = ''; 
+             }
+          });
+
+        } else {
+          container.classList.add("layout-grid");
+          wrapper.style.maxWidth = "400px"; 
+
+          widthControl.classList.add("disabled");
+          colLimitControl.classList.remove("disabled");
+          rowLimitControl.classList.remove("disabled");
+
+          const cols = parseInt(colLimitInput.value) || 2;
+          container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+          
+          tabs.forEach(tab => tab.style.width = '');
+
+          const rows = parseInt(rowLimitInput.value) || 3;
+          const sampleTab = tabs[0];
+          const tabHeight = sampleTab.offsetHeight || 44;
+          const gap = 8;
+          // 注意：Wrapper padding 6px * 2 = 12px
+          const wrapperPadding = 12; 
+          const totalGap = Math.max(0, rows - 1) * gap;
+          const visibleHeight = (tabHeight * rows) + totalGap + wrapperPadding;
+          
+          wrapper.style.maxHeight = `${visibleHeight}px`;
+          wrapper.style.overflowY = 'auto'; 
+          wrapper.style.overflowX = 'auto'; 
+        }
+      }
+
+      function setActiveTab(tab) {
+        const oldActive = document.querySelector(".capsule-tab.active");
+        if (oldActive) resizeObserver.unobserve(oldActive);
+
+        tabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        
+        resizeObserver.observe(tab);
+        updateIndicator(true);
+      }
+
+      function handleControlsChange() {
+        indicator.classList.add('no-transition');
+        updateLayout();
+        requestAnimationFrame(() => {
+            updateIndicator(false);
+        });
+      }
+
+      function initKeyboardNav() {
+        container.addEventListener("keydown", (e) => {
+          const isGrid = layoutToggle.checked;
+          const activeTab = document.querySelector(".capsule-tab.active");
+          const tabList = Array.from(tabs);
+          const index = tabList.indexOf(activeTab);
+          const cols = parseInt(colLimitInput.value) || 2;
+
+          let nextIndex = null;
+          if (e.key === "ArrowRight") nextIndex = index + 1;
+          if (e.key === "ArrowLeft") nextIndex = index - 1;
+          
+          if (isGrid) {
+            if (e.key === "ArrowDown") nextIndex = index + cols;
+            if (e.key === "ArrowUp") nextIndex = index - cols;
+          }
+
+          if (nextIndex !== null) {
+            e.preventDefault();
+            if (nextIndex >= 0 && nextIndex < tabList.length) {
+                setActiveTab(tabList[nextIndex]);
+            }
+          }
+        });
+      }
+
+      window.addEventListener("load", () => {
+        initGhostElements();    
+        calculateMaxTabWidth(); 
+
+        tabs.forEach(tab => tab.addEventListener("click", () => setActiveTab(tab)));
+        
+        layoutToggle.addEventListener("change", handleControlsChange);
+        widthToggle.addEventListener("change", handleControlsChange); 
+        
+        [rowLimitInput, colLimitInput].forEach(input => {
+          input.addEventListener("input", updateLayout);
+        });
+
+        const firstTab = document.querySelector('.capsule-tab.active');
+        if(firstTab) resizeObserver.observe(firstTab);
+
+        initKeyboardNav();
+        handleControlsChange(); 
+        
+        setTimeout(() => indicator.classList.add("initialized"), 100);
+      });
+    </script>
+  </body>
 </html>

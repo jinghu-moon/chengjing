@@ -221,7 +221,8 @@
 .folder-box {
   width: 100%;
   height: 100%;
-  border-radius: calc(var(--item-radius) * 0.5);
+  /* [核心修改] 使用动态计算的 --f-radius 确保圆角在任何长宽比下都是圆形 */
+  border-radius: var(--f-radius, 24px);
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -335,12 +336,13 @@
   aspect-ratio: 1 / 1;
   max-width: 100%;
   max-height: 100%;
-  border-radius: calc(var(--f-icon-size, 40px) * 0.2);
+  /* [核心修改] 使用动态计算的内部图标圆角，确保与 iOS icon 一致的 22% 比例 */
+  border-radius: var(--f-icon-radius, 12px);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: rgba(255, 255, 255, var(--bg-opacity, 0.5));
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -482,7 +484,7 @@
 
 .context-menu {
   position: fixed;
-  z-index: 200;
+  z-index: 10000;
   background: rgba(40, 40, 40, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);

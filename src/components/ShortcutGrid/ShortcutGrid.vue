@@ -1,28 +1,23 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, computed, watch, nextTick, provide } from 'vue'
 import {
-  IconPlus,
-  IconTrash,
-  IconEdit,
   IconFolderPlus,
   IconRefresh,
   IconChevronLeft,
   IconChevronRight,
 } from '@tabler/icons-vue'
-import { VueDraggable } from 'vue-draggable-plus'
+import { useVirtualizer } from '@tanstack/vue-virtual'
 import { useSettings } from '../../composables/useSettings'
 import { useShortcutDrag } from './composables/useShortcutDrag'
 import { useShortcutData } from './composables/useShortcutData'
 import { useShortcutLayout } from './composables/useShortcutLayout'
 import { useFolderIconSize } from './composables/useFolderIconSize'
-import ShortcutItem from './components/ShortcutItem.vue'
-import EditForm from './components/EditForm.vue'
+import { useGridActions } from './composables/useGridActions'
+import GridPage from './components/GridPage.vue'
 import FolderModal from './components/FolderModal.vue'
 import ContextMenu from '../SelectMenu/components/ContextMenu.vue'
-import type { OptionItem } from '../SelectMenu/types'
-import { useDialog } from '../Dialog'
-import { getRandomColor } from './config'
 import type { Shortcut } from '../../types'
+import { GridStateKey } from './keys'
 
 const { settings, iconConfig } = useSettings()
 const { shortcuts, loadData, saveData, resetToDemo, createFolder } = useShortcutData()
@@ -32,25 +27,50 @@ const { pagedShortcuts, reflowShortcuts, syncFromPages } = useShortcutLayout(
   saveData
 )
 const { folderSizeVars } = useFolderIconSize(settings, iconConfig)
-const dialog = useDialog()
+
+// 🌟 使用新的 Action Composable
+const { openAddModal, showContextMenu, contextMenuRef } = useGridActions(shortcuts, saveData, reflowShortcuts)
+// 显式引用 contextMenuRef 防止 eslint/ts 报错
+void contextMenuRef
 
 const currentPage = ref(0)
 const pagesContainerRef = ref<HTMLElement | null>(null)
 
-const handleScroll = (e: Event) => {
-  const target = e.target as HTMLElement
-  const width = target.clientWidth
-  const newPage = Math.round(target.scrollLeft / width)
-  if (newPage !== currentPage.value) currentPage.value = newPage
+// ==========================================
+// 🌟 核心改动：初始化虚拟滚动
+// ==========================================
+const virtualizer = useVirtualizer<HTMLElement, Element>(
+  computed(() => ({
+    count: pagedShortcuts.value.length,
+    getScrollElement: () => pagesContainerRef.value,
+    // 修改点 1: 给定准确的估算宽度（容器宽度），防止测量循环
+    estimateSize: () => pagesContainerRef.value?.clientWidth || window.innerWidth,
+    horizontal: true,
+    overscan: 1,
+    onChange: (instance) => {
+      // @ts-ignore
+      if (!instance.isScrolling) {
+        const width = pagesContainerRef.value?.clientWidth || 1
+        const offset = instance.scrollOffset ?? 0
+        const index = Math.round(offset / width)
+        if (currentPage.value !== index) {
+          currentPage.value = index
+        }
+      }
+    },
+  }))
+)
+
+const virtualItems = computed(() => virtualizer.value.getVirtualItems())
+const totalSize = computed(() => virtualizer.value.getTotalSize())
+
+const handleScroll = (_e: Event) => {
+  // 虚拟器接管了大部分逻辑
 }
 
 const scrollToPage = (index: number) => {
-  if (pagesContainerRef.value) {
-    pagesContainerRef.value.scrollTo({
-      left: index * pagesContainerRef.value.clientWidth,
-      behavior: 'smooth',
-    })
-  }
+  virtualizer.value.scrollToIndex(index, { align: 'start', behavior: 'smooth' })
+  currentPage.value = index
 }
 
 const prevPage = () => {
@@ -115,8 +135,6 @@ watch(
   { immediate: true }
 )
 
-
-
 const handlePageDragEnd = () => {
   syncFromPages()
   nextTick(() => onDragEnd())
@@ -157,8 +175,6 @@ const openFolder = (item: Shortcut) => {
   }
 }
 
-// folderCapacity 和 folderGridClass 已移至 ShortcutItem 组件内部计算
-
 const gridStyle = computed(() => ({
   '--item-size': `${iconConfig.boxSize}px`,
   '--item-radius': `${iconConfig.radius}%`,
@@ -174,12 +190,24 @@ const gridStyle = computed(() => ({
 }))
 
 const containerWidthStyle = computed(() => {
+  // 虚拟滚动不需要手动计算总宽度，由 totalSize 决定
+  // 但为了保留原有的 --dynamic-container-width 变量给 CSS 使用 (如居中)，我们仍保留它用于单页宽度参考
   const cols = settings.gridCols
   const boxSize = iconConfig.boxSize
   const gapX = settings.gridGapX
   const contentPadding = 40
   const totalWidth = cols * boxSize + (cols - 1) * gapX + contentPadding
   return { '--dynamic-container-width': `${totalWidth}px` }
+})
+
+const containerHeightStyle = computed(() => {
+  const rows = settings.gridRows
+  const boxSize = iconConfig.boxSize
+  const gapY = settings.gridGapY
+  // 加上一些缓冲空间防止边缘被裁剪
+  const paddingY = 20 
+  const totalHeight = rows * boxSize + (rows - 1) * gapY + paddingY
+  return { height: `${totalHeight}px` }
 })
 
 const containerClasses = computed(() => ({
@@ -194,128 +222,18 @@ const openShortcut = (url?: string) => {
   else window.location.href = url
 }
 
-// 模态框相关
-const openAddModal = async () => {
-  const editingItem: Shortcut = {
-    id: 0,
-    type: 'app',
-    name: '',
-    url: '',
-    iconBase64: '',
-    filled: false,
-    inverted: false,
-  }
-
-  let savedData: Shortcut | null = null
-
-  await dialog.open({
-    title: '添加应用',
-    component: EditForm,
-    componentProps: {
-      isFolderMode: false,
-      editingItem,
-      onSave: (data: Shortcut) => {
-        savedData = data
-      },
-    },
-    width: 420,
-    showCancelBtn: true,
-    onOk: async () => {
-      if (savedData) {
-        const name = savedData.name.trim()
-        let url = savedData.url?.trim() || ''
-        if (!name || !url) return
-        if (!url.startsWith('http')) url = 'https://' + url
-
-        const itemData: Shortcut = {
-          ...savedData,
-          id: Date.now(),
-          type: 'app',
-          name,
-          url,
-          color: savedData.iconBase64 ? '#fff' : getRandomColor(),
-        }
-
-        shortcuts.value.push(itemData)
-        saveData()
-        reflowShortcuts()
-      }
-    },
-  })
-}
-
-const openEditModal = async (item: Shortcut) => {
-  const isFolderMode = item.type === 'folder'
-  const editingItem = JSON.parse(JSON.stringify(item))
-  let savedData: Shortcut | null = null
-
-  await dialog.open({
-    title: isFolderMode ? '编辑文件夹' : '编辑应用',
-    component: EditForm,
-    componentProps: {
-      isFolderMode,
-      editingItem,
-      onSave: (data: Shortcut) => {
-        savedData = data
-      },
-    },
-    width: 420,
-    showCancelBtn: true,
-    onOk: async () => {
-      if (savedData) {
-        if (isFolderMode) {
-          const target = shortcuts.value.find(i => i.id === item.id)
-          if (target) target.name = savedData.name
-          saveData()
-          return
-        }
-
-        const name = savedData.name.trim()
-        let url = savedData.url?.trim() || ''
-        if (!name || !url) return
-        if (!url.startsWith('http')) url = 'https://' + url
-
-        const itemData: Shortcut = {
-          ...savedData,
-          id: item.id,
-          type: 'app',
-          name,
-          url,
-          color: item.color || (savedData.iconBase64 ? '#fff' : getRandomColor()),
-        }
-
-        const idx = shortcuts.value.findIndex(i => i.id === item.id)
-        if (idx > -1) shortcuts.value[idx] = itemData
-
-        saveData()
-        reflowShortcuts()
-      }
-    },
-  })
-}
-
-// 右键菜单
-const contextMenuRef = ref<InstanceType<typeof ContextMenu> | null>(null)
-
-const showContextMenu = async (e: MouseEvent, item: Shortcut) => {
-  const menuOptions: OptionItem[] = [
-    { value: 'edit', label: '编辑/重命名', prefixIcon: IconEdit },
-    { value: 'delete', label: '删除', danger: true, prefixIcon: IconTrash },
-  ]
-
-  const result = await contextMenuRef.value?.open(e, menuOptions)
-
-  if (result === 'edit') {
-    openEditModal(item)
-  } else if (result === 'delete') {
-    if (confirm('删除?')) {
-      const idx = shortcuts.value.findIndex(i => i.id === item.id)
-      if (idx > -1) shortcuts.value.splice(idx, 1)
-      saveData()
-      reflowShortcuts()
-    }
-  }
-}
+// 🌟 Provide 注入状态
+provide(GridStateKey, {
+  settings,
+  iconConfig,
+  dragTargetFolderId,
+  mergeTargetId,
+  previewFolderId,
+  previewChildren,
+  openShortcut,
+  openFolder,
+  showContextMenu
+})
 
 const handleResetToDemo = () => {
   if (resetToDemo()) {
@@ -328,6 +246,7 @@ const handleCreateFolder = () => {
   reflowShortcuts()
 }
 
+// 监听尺寸变化重建虚拟器
 watch(
   [
     () => settings.gridRows,
@@ -338,7 +257,24 @@ watch(
   () => {
     currentPage.value = 0
     if (pagesContainerRef.value) pagesContainerRef.value.scrollTo({ left: 0 })
+    nextTick(() => {
+      virtualizer.value?.measure()
+    })
+  },
+  {
+    flush: 'post'
   }
+)
+
+// 监听分页数量变化
+watch(
+  () => pagedShortcuts.value, 
+  () => {
+    nextTick(() => {
+      virtualizer.value.measure()
+    })
+  },
+  { deep: true, flush: 'post' }
 )
 
 onMounted(() => {
@@ -359,46 +295,40 @@ onMounted(() => {
       v-if="settings.showShortcuts"
       ref="pagesContainerRef"
       class="pages-container"
+      :style="containerHeightStyle"
       @scroll="handleScroll"
     >
-      <div v-for="(pageData, pageIndex) in pagedShortcuts" :key="pageIndex" class="grid-page">
-        <VueDraggable
-          v-model="pagedShortcuts[pageIndex]"
-          :group="draggableGroup"
-          :animation="300"
-          :force-fallback="true"
-          :fallback-tolerance="3"
-          ghost-class="shortcut-ghost"
-          chosen-class="shortcut-chosen"
-          drag-class="shortcut-drag"
-          :move="onMoveCallback"
-          class="page-inner-grid"
-          item-key="id"
-          @start="onStart"
-          @end="handlePageDragEnd"
-        >
-          <ShortcutItem
-            v-for="item in pageData"
-            :key="item.id"
-            :item="item"
-            :is-drag-target="String(dragTargetFolderId) === String(item.id)"
-            :is-merge-target="String(mergeTargetId) === String(item.id)"
-            :preview-children="String(previewFolderId) === String(item.id) ? previewChildren : null"
-            @click="item.type === 'app' ? openShortcut(item.url) : openFolder(item)"
-            @contextmenu="showContextMenu($event, item)"
-            @open-shortcut="openShortcut"
-          />
-          <div
-            v-if="pageIndex === pagedShortcuts.length - 1"
-            class="shortcut-item add-btn-group"
-            @click="openAddModal"
-          >
-            <div class="icon-box dashed">
-              <IconPlus :size="28" stroke-width="1.5" />
-            </div>
-            <span class="shortcut-name">添加</span>
-          </div>
-        </VueDraggable>
+      <div
+        :style="{
+          width: `${totalSize}px`,
+          height: '100%',
+          position: 'relative',
+        }"
+      >
+        <GridPage
+          v-for="virtualItem in virtualItems"
+          :key="String(virtualItem.key)"
+          :data-index="virtualItem.index"
+
+          v-model="pagedShortcuts[virtualItem.index]"
+          :page-index="virtualItem.index"
+          :is-last-page="virtualItem.index === pagedShortcuts.length - 1"
+          
+          :style="{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%', 
+            height: '100%',
+            transform: `translateX(${virtualItem.start}px)`, 
+          }"
+
+          :draggable-group="draggableGroup"
+          :on-move-callback="onMoveCallback"
+          :on-start="onStart"
+          :on-end="handlePageDragEnd"
+          :on-add-click="openAddModal"
+        />
       </div>
     </div>
 
@@ -430,6 +360,7 @@ onMounted(() => {
       @folder-move="onFolderMove"
       @folder-update="handleFolderUpdate"
       @preview-update="handlePreviewUpdate"
+      @contextmenu="showContextMenu"
     />
 
     <ContextMenu ref="contextMenuRef" />

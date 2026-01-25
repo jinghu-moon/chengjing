@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import type { Shortcut } from '../../../types'
+import { useSettings } from '../../../composables/useSettings'
 
 interface Props {
   folder: Shortcut | null
@@ -19,12 +20,25 @@ const emit = defineEmits<{
   folderMove: []
   folderUpdate: [] // 通知父组件内部顺序已变化
   previewUpdate: [children: Shortcut[] | null] // 🔑 新增：拖动过程中的实时预览
+  contextmenu: [evt: MouseEvent, item: Shortcut] // 🔑 新增：右键菜单
 }>()
 
 const showDialog = ref(false)
 const folderContentRef = ref<HTMLElement | null>(null)
 // 本地数据引用（与 props.folder 是同一对象引用）
 const folderData = ref<Shortcut | null>(null)
+
+const { iconConfig } = useSettings()
+
+// 注入图标样式变量
+const containerStyle = computed(() => ({
+  '--item-size': `${iconConfig.boxSize}px`,
+  '--item-radius': `${iconConfig.radius}%`,
+  '--icon-scale': `${iconConfig.iconScale}%`,
+  '--bg-opacity': iconConfig.opacity / 100,
+  '--shadow-display': iconConfig.showShadow ? 'block' : 'none',
+  '--brand-color': '#888', // 默认兜底
+}))
 
 defineExpose({
   folderContentRef,
@@ -130,6 +144,7 @@ onUnmounted(() => {
           class="folder-container"
           ref="folderContentRef"
           :class="{ 'dragging-out': isDraggingOut }"
+          :style="containerStyle"
         >
           <div class="folder-header-wrapper" v-if="folderData">
             <input
@@ -162,11 +177,14 @@ onUnmounted(() => {
                 v-for="subItem in folderData.children"
                 :key="subItem.id"
                 class="shortcut-item inner-item"
+                :style="containerStyle"
                 @click.stop="handleOpenShortcut(subItem.url)"
+                @contextmenu.prevent.stop="emit('contextmenu', $event, subItem)"
               >
                 <div
                   class="icon-box"
                   :class="{ filled: subItem.filled, inverted: subItem.inverted }"
+                  :style="subItem.color ? { backgroundColor: subItem.color } : {}"
                 >
                   <img
                     :src="getIconSrc(subItem)"
@@ -196,6 +214,15 @@ onUnmounted(() => {
 <style scoped src="../styles/index.css"></style>
 
 <style scoped>
+.folder-inner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--item-size));
+  gap: 24px;
+  justify-content: center;
+  padding: 16px;
+  min-height: 120px;
+}
+
 .folder-overlay {
   position: fixed;
   top: 0;

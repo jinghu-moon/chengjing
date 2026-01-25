@@ -18,6 +18,7 @@ const emit = defineEmits<{
   click: []
   contextmenu: [e: MouseEvent]
   openShortcut: [url?: string]
+  'sub-contextmenu': [e: MouseEvent, item: Shortcut]
 }>()
 
 const { settings, iconConfig } = useSettings()
@@ -64,13 +65,15 @@ const needsNesting = computed(() => {
   return effectiveChildren.value.length > capacity.value
 })
 
-// 显示的普通图标（前 capacity-1 个，如果需要嵌套）
+// 显示的普通图标
 const visibleChildren = computed(() => {
   const children = effectiveChildren.value
   if (children.length === 0) return []
   if (needsNesting.value) {
+    // 需要嵌套时：显示前 capacity-1 个，最后一个槽位留给嵌套预览
     return children.slice(0, capacity.value - 1)
   }
+  // 不需要嵌套时：直接显示所有（最多 capacity 个）
   return children.slice(0, capacity.value)
 })
 
@@ -80,9 +83,12 @@ const nestedChildren = computed(() => {
   return effectiveChildren.value.slice(capacity.value - 1, capacity.value + 3)
 })
 
-// 最后一个普通图标（当不需要嵌套时）
+// 最后一个槽位的单独图标（仅当需要嵌套但嵌套图标不足时使用，通常不需要）
+// 修复：当不需要嵌套时返回 null，因为 visibleChildren 已包含所有图标
 const lastChild = computed(() => {
-  if (needsNesting.value || effectiveChildren.value.length === 0) return null
+  // 不需要嵌套时，不单独渲染最后一个（visibleChildren 已包含）
+  if (!needsNesting.value) return null
+  if (effectiveChildren.value.length === 0) return null
   return effectiveChildren.value[capacity.value - 1] || null
 })
 
@@ -163,8 +169,9 @@ const handleSubItemClick = (e: Event, url?: string) => {
           :key="subItem.id"
           class="mini-app"
           @click="handleSubItemClick($event, subItem.url)"
+          @contextmenu.prevent.stop="emit('sub-contextmenu', $event, subItem)"
         >
-          <div class="mini-icon-wrapper" :style="{ backgroundColor: subItem.color || '#ddd' }">
+          <div class="mini-icon-wrapper" :style="subItem.color ? { backgroundColor: subItem.color } : {}">
             <img
               :src="getIconSrc(subItem)"
               class="mini-icon-img"
@@ -180,7 +187,6 @@ const handleSubItemClick = (e: Event, url?: string) => {
               v-for="n in nestedChildren"
               :key="n.id"
               class="nested-dot"
-              :style="{ backgroundColor: n.color || '#fff' }"
             >
               <img :src="getIconSrc(n)" class="nested-icon-img" />
             </div>
@@ -190,8 +196,9 @@ const handleSubItemClick = (e: Event, url?: string) => {
           v-else-if="lastChild"
           class="mini-app"
           @click="handleSubItemClick($event, lastChild.url)"
+          @contextmenu.prevent.stop="emit('sub-contextmenu', $event, lastChild)"
         >
-          <div class="mini-icon-wrapper" :style="{ backgroundColor: lastChild.color || '#ddd' }">
+          <div class="mini-icon-wrapper" :style="lastChild.color ? { backgroundColor: lastChild.color } : {}">
             <img
               :src="getIconSrc(lastChild)"
               class="mini-icon-img"

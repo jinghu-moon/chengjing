@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>字幕大师实验室 Pro - 双语版</title>
+    <style>
+      :root {
+        --panel-bg: #ffffff;
+        --sidebar-bg: #111111;
+        --accent: #3b82f6;
+        --border: #e2e8f0;
+        --bg-gray: #f1f5f9;
+      }
+
+      body {
+        background: var(--bg-gray);
+        font-family: -apple-system, system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        color: #1e293b;
+      }
+
+      /* 主容器 */
+      .picker-card {
+        display: flex;
+        width: 1200px;
+        height: 900px;
+        background: var(--panel-bg);
+        border-radius: 24px;
+        box-shadow: 0 50px 100px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
+
+      /* --- 左侧栏 --- */
+      .left-col {
+        width: 420px;
+        background: var(--sidebar-bg);
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #222;
+      }
+
+      .subtitle-preview {
+        height: 320px;
+        background: url("https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop")
+          center;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-tag {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: #22c55e;
+        color: #fff;
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-weight: 900;
+        z-index: 10;
+      }
+
+      /* 双行字幕容器 */
+      .subtitle-box {
+        display: flex;
+        flex-direction: column;
+        max-width: 90%;
+        transition: all 0.1s ease;
+        box-sizing: border-box;
+        gap: 4px; /* 中英文行间距 */
+      }
+
+      .subtitle-text {
+        width: 100%;
+        font-weight: bold;
+        line-height: 1.2;
+        transition: all 0.05s ease;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      /* 英文行稍微调小一点，符合专业审美 */
+      #subLineEn {
+        opacity: 0.95;
+        filter: scale(0.9);
+        transform-origin: center;
+      }
+
+      .sv-panel {
+        flex: 1;
+        width: 100%;
+        position: relative;
+        cursor: crosshair;
+      }
+      .sv-white {
+        background: linear-gradient(to right, #fff, rgba(255, 255, 255, 0));
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+      .sv-black {
+        background: linear-gradient(to top, #000, rgba(0, 0, 0, 0));
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+      .sv-cursor {
+        width: 18px;
+        height: 18px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+      }
+
+      /* --- 右侧控制区 --- */
+      .right-col {
+        flex: 1;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+        background: #fff;
+      }
+
+      .section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .section-header {
+        font-size: 11px;
+        font-weight: 800;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-header::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #f1f5f9;
+      }
+
+      .layout-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      .align-btn {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        transition: all 0.2s;
+        text-align: center;
+      }
+      .align-btn.active {
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      .shadow-presets-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      .shadow-btn {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 10px 5px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .shadow-btn:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+      }
+      .shadow-btn.active {
+        border-color: var(--accent);
+        background: #eff6ff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      }
+      .shadow-btn .demo-icon {
+        font-size: 16px;
+        font-weight: 900;
+        color: #333;
+      }
+      .shadow-btn span {
+        font-size: 10px;
+        font-weight: 800;
+        color: #64748b;
+      }
+
+      .params-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+      .control-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .label-row label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+      }
+      .label-row span {
+        font-size: 11px;
+        font-family: monospace;
+        color: var(--accent);
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: #e2e8f0;
+        outline: none;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+      }
+      .hue-bar {
+        background: linear-gradient(
+          to right,
+          #f00 0%,
+          #ff0 17%,
+          #0f0 33%,
+          #0ff 50%,
+          #00f 67%,
+          #f0f 83%,
+          #f00 100%
+        ) !important;
+      }
+
+      .palette-tabs {
+        display: flex;
+        gap: 12px;
+        margin-top: 5px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .palette-tab {
+        font-size: 11px;
+        font-weight: bold;
+        color: #94a3b8;
+        padding-bottom: 5px;
+        cursor: pointer;
+      }
+      .palette-tab.active {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+      }
+      .dots-grid {
+        display: grid;
+        grid-template-columns: repeat(11, 1fr);
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .color-dot {
+        aspect-ratio: 1;
+        border-radius: 4px;
+        cursor: pointer;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+      }
+
+      .color-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .in-field {
+        flex: 1;
+      }
+      .in-field input {
+        width: 100%;
+        padding: 8px 0;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 12px;
+        text-align: center;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="picker-card">
+      <!-- 左侧栏 -->
+      <div class="left-col">
+        <div class="subtitle-preview">
+          <span class="preview-tag">DUAL SUBTITLE</span>
+          <div class="subtitle-box" id="subBox">
+            <div class="subtitle-text" id="subLineZh">这是一段测试字幕</div>
+            <div class="subtitle-text" id="subLineEn">
+              This is a test subtitle.
+            </div>
+          </div>
+        </div>
+        <div class="sv-panel" id="svPanel">
+          <div class="sv-white"></div>
+          <div class="sv-black"></div>
+          <div class="sv-cursor" id="svCursor"></div>
+        </div>
+      </div>
+
+      <!-- 右侧控制区 -->
+      <div class="right-col">
+        <div class="section">
+          <div class="section-header">背景</div>
+          <div class="params-grid">
+            <div class="control-item">
+              <div class="label-row">
+                <label>背景透明度</label><span id="valBoxA">0.00</span>
+              </div>
+              <input type="range" id="boxAlpha" min="0" max="100" value="0" />
+            </div>
+            <div class="control-item">
+              <div class="label-row">
+                <label>内边距</label><span id="valPad">10px</span>
+              </div>
+              <input type="range" id="boxPadding" min="0" max="50" value="10" />
+            </div>
+            <div class="control-item">
+              <div class="label-row">
+                <label>背景圆角</label><span id="valRadius">0px</span>
+              </div>
+              <input type="range" id="boxRadius" min="0" max="40" value="0" />
+            </div>
+            <div class="control-item">
+              <div class="label-row">
+                <label>毛玻璃模糊</label><span id="valBackBlur">0px</span>
+              </div>
+              <input
+                type="range"
+                id="backdropBlur"
+                min="0"
+                max="20"
+                value="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">排版布局控制</div>
+          <div class="params-grid">
+            <div class="control-item">
+              <div class="label-row">
+                <label>文本大小</label><span id="valSize">30px</span>
+              </div>
+              <input type="range" id="fontSize" min="12" max="80" value="30" />
+            </div>
+            <div class="control-item">
+              <div class="label-row">
+                <label>垂直偏移 (Y)</label><span id="valYOff">15px</span>
+              </div>
+              <input type="range" id="yOffset" min="-50" max="150" value="15" />
+            </div>
+            <div class="control-item">
+              <div class="label-row"><label>对齐方式</label></div>
+              <div class="layout-grid" id="alignGroup">
+                <div class="align-btn" data-align="left">左对齐</div>
+                <div class="align-btn active" data-align="center">居中</div>
+                <div class="align-btn" data-align="right">右对齐</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">色彩管理 & 推荐方案</div>
+          <div class="params-grid">
+            <div class="control-item">
+              <div class="label-row">
+                <label>色相 Hue</label><span id="valH">48°</span>
+              </div>
+              <input
+                type="range"
+                class="hue-bar"
+                id="hueSlider"
+                min="0"
+                max="360"
+                value="48"
+              />
+            </div>
+            <div class="control-item">
+              <div class="label-row">
+                <label>文本透明度</label><span id="valA">1.00</span>
+              </div>
+              <input
+                type="range"
+                id="alphaSlider"
+                min="0"
+                max="100"
+                value="100"
+              />
+            </div>
+          </div>
+          <div class="palette-tabs">
+            <div class="palette-tab active" data-lib="sub">字幕安全色</div>
+            <div class="palette-tab" data-lib="material">Material</div>
+            <div class="palette-tab" data-lib="nord">Nord</div>
+            <div class="palette-tab" data-lib="apple">Apple</div>
+          </div>
+          <div class="dots-grid" id="paletteGrid"></div>
+          <div class="color-row">
+            <div class="in-field">
+              <input type="text" id="inHex" placeholder="#FFFFFF" />
+            </div>
+            <div class="in-field">
+              <input type="number" id="inR" placeholder="R" />
+            </div>
+            <div class="in-field">
+              <input type="number" id="inG" placeholder="G" />
+            </div>
+            <div class="in-field">
+              <input type="number" id="inB" placeholder="B" />
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-header">样式预设 (Shadow & Box Presets)</div>
+          <div class="shadow-presets-grid" id="shadowPresets">
+            <div class="shadow-btn" data-type="none">
+              <div class="demo-icon">Aa</div>
+              <span>无</span>
+            </div>
+            <div class="shadow-btn active" data-type="outline">
+              <div
+                class="demo-icon"
+                style="
+                  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000,
+                    -1px 1px 0 #000;
+                "
+              >
+                Aa
+              </div>
+              <span>标准描边</span>
+            </div>
+            <div class="shadow-btn" data-type="ass">
+              <div
+                class="demo-icon"
+                style="
+                  text-shadow: 1px 1px 0 #000, 2px 2px 4px rgba(0, 0, 0, 0.8);
+                "
+              >
+                Aa
+              </div>
+              <span>ASS复合</span>
+            </div>
+            <div class="shadow-btn" data-type="neon">
+              <div class="demo-icon" style="text-shadow: 0 0 10px #3b82f6">
+                Aa
+              </div>
+              <span>霓虹发光</span>
+            </div>
+            <div class="shadow-btn" data-type="drop">
+              <div
+                class="demo-icon"
+                style="text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.6)"
+              >
+                Aa
+              </div>
+              <span>经典投影</span>
+            </div>
+            <div class="shadow-btn" data-type="youtube">
+              <div
+                class="demo-icon"
+                style="
+                  background: #000;
+                  color: #fff;
+                  padding: 0 3px;
+                  border-radius: 3px;
+                  font-size: 14px;
+                "
+              >
+                Aa
+              </div>
+              <span>YouTube</span>
+            </div>
+            <div class="shadow-btn" data-type="soft">
+              <div
+                class="demo-icon"
+                style="text-shadow: 0 0 10px rgba(0, 0, 0, 0.7)"
+              >
+                Aa
+              </div>
+              <span>柔和电影</span>
+            </div>
+            <div class="shadow-btn" data-type="elevated">
+              <div
+                class="demo-icon"
+                style="text-shadow: 0 5px 8px rgba(0, 0, 0, 0.4)"
+              >
+                Aa
+              </div>
+              <span>悬浮深度</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const colorLibraries = {
+        sub: [
+          "#F1F1F1",
+          "#FAFAFA",
+          "#F5E6A1",
+          "#F2D675",
+          "#EAD98B",
+          "#E8EEF3",
+          "#C7EDE6",
+          "#E6D6F3",
+          "#D6E3B5",
+          "#F2C6C6",
+          "#D1D5DB",
+          "#1F2933",
+          "#FFCC00",
+          "#B45309",
+          "#7C2D12",
+          "#FFFFFF",
+          "#000000",
+        ],
+        material: [
+          "#F44336",
+          "#E91E63",
+          "#9C27B0",
+          "#673AB7",
+          "#3F51B5",
+          "#2196F3",
+          "#03A9F4",
+          "#00BCD4",
+          "#4CAF50",
+          "#8BC34A",
+          "#FFEB3B",
+          "#FFC107",
+          "#FF9800",
+          "#FF5722",
+        ],
+        nord: [
+          "#2E3440",
+          "#3B4252",
+          "#434C5E",
+          "#4C566A",
+          "#D8DEE9",
+          "#E5E9F0",
+          "#ECEFF4",
+          "#8FBCBB",
+          "#88C0D0",
+          "#81A1C1",
+          "#5E81AC",
+          "#BF616A",
+          "#D08770",
+          "#EBCB8B",
+          "#A3BE8C",
+        ],
+        apple: [
+          "#FF3B30",
+          "#FF9500",
+          "#FFCC00",
+          "#34C759",
+          "#007AFF",
+          "#5AC8FA",
+          "#AF52DE",
+          "#FF2D55",
+          "#8E8E93",
+          "#E5E5EA",
+          "#2C2C2E",
+        ],
+      };
+
+      const shadowModes = {
+        none: { thick: 0, dist: 0, blur: 0, shA: 0, boxAlpha: 0 },
+        outline: { thick: 1.5, dist: 0, blur: 0, shA: 0.9, boxAlpha: 0 },
+        ass: { thick: 1.5, dist: 3, blur: 4, shA: 0.85, boxAlpha: 0 },
+        neon: { thick: 0, dist: 0, blur: 15, shA: 0.95, boxAlpha: 0 },
+        drop: { thick: 0, dist: 5, blur: 5, shA: 0.7, boxAlpha: 0 },
+        youtube: {
+          thick: 0,
+          dist: 0,
+          blur: 0,
+          shA: 0,
+          boxAlpha: 70,
+          boxRadius: 4,
+          boxPadding: 10,
+        },
+        soft: { thick: 0, dist: 0, blur: 10, shA: 0.8, boxAlpha: 0 },
+        elevated: { thick: 1, dist: 8, blur: 6, shA: 0.5, boxAlpha: 0 },
+      };
+
+      const state = {
+        h: 48,
+        s: 12,
+        v: 95,
+        a: 1,
+        thick: 1.5,
+        dist: 0,
+        angle: 135,
+        blur: 0,
+        shA: 0.9,
+        fontSize: 30,
+        yOffset: 15,
+        alignment: "center",
+        boxAlpha: 0,
+        boxRadius: 0,
+        boxPadding: 10,
+        backdropBlur: 0,
+        mode: "outline",
+      };
+
+      const els = {};
+      const ids = [
+        "svPanel",
+        "svCursor",
+        "subBox",
+        "hueSlider",
+        "alphaSlider",
+        "boxAlpha",
+        "fontSize",
+        "yOffset",
+        "boxRadius",
+        "boxPadding",
+        "backdropBlur",
+        "inHex",
+        "inR",
+        "inG",
+        "inB",
+        "shadowPresets",
+        "paletteGrid",
+      ];
+      ids.forEach((id) => (els[id] = document.getElementById(id)));
+
+      // 特殊处理：双行字幕需要同时更新
+      const subLines = document.querySelectorAll(".subtitle-text");
+
+      function hsvToRgb(h, s, v) {
+        s /= 100;
+        v /= 100;
+        let f = (n, k = (n + h / 60) % 6) =>
+          v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+        return [
+          Math.round(f(5) * 255),
+          Math.round(f(3) * 255),
+          Math.round(f(1) * 255),
+        ];
+      }
+
+      function rgbToHsv(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const v = Math.max(r, g, b),
+          n = v - Math.min(r, g, b);
+        const h =
+          n &&
+          (v == r ? (g - b) / n : v == g ? 2 + (b - r) / n : 4 + (r - g) / n);
+        return [
+          Math.round(60 * (h < 0 ? h + 6 : h)),
+          Math.round(v && (n / v) * 100),
+          Math.round(v * 100),
+        ];
+      }
+
+      function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+          ? [
+              parseInt(result[1], 16),
+              parseInt(result[2], 16),
+              parseInt(result[3], 16),
+            ]
+          : [255, 255, 255];
+      }
+
+      function update() {
+        const [r, g, b] = hsvToRgb(state.h, state.s, state.v);
+        const textCol = `rgba(${r}, ${g}, ${b}, ${state.a})`;
+
+        // SV Panel
+        const [pureR, pureG, pureB] = hsvToRgb(state.h, 100, 100);
+        els.svPanel.style.backgroundColor = `rgb(${pureR},${pureG},${pureB})`;
+        els.svCursor.style.left = state.s + "%";
+        els.svCursor.style.top = 100 - state.v + "%";
+
+        // 衬板控制
+        els.subBox.style.backgroundColor = `rgba(0,0,0,${
+          state.boxAlpha / 100
+        })`;
+        els.subBox.style.borderRadius = state.boxRadius + "px";
+        els.subBox.style.padding = state.boxPadding + "px";
+        els.subBox.style.transform = `translateY(${-state.yOffset}px)`;
+        const blurVal = `blur(${state.backdropBlur}px)`;
+        els.subBox.style.backdropFilter = blurVal;
+        els.subBox.style.webkitBackdropFilter = blurVal;
+
+        // --- 遍历更新两行字幕 ---
+        const t = state.thick;
+        const blur = state.blur;
+        const sCol =
+          state.mode === "neon" ? textCol : `rgba(0,0,0,${state.shA})`;
+
+        let shadowStr = "";
+        if (t > 0) {
+          shadowStr = `${t}px 0 0 ${sCol}, -${t}px 0 0 ${sCol}, 0 ${t}px 0 ${sCol}, 0 -${t}px 0 ${sCol}, ${t}px ${t}px 0 ${sCol}, -${t}px -${t}px 0 ${sCol}, ${t}px -${t}px 0 ${sCol}, -${t}px ${t}px 0 ${sCol}`;
+        }
+        if (state.dist > 0 || blur > 0) {
+          const rad = (state.angle * Math.PI) / 180;
+          const offX = Math.round(Math.cos(rad) * state.dist);
+          const offY = Math.round(Math.sin(rad) * state.dist);
+          const extra = `${offX}px ${offY}px ${blur}px ${sCol}`;
+          shadowStr = shadowStr ? shadowStr + ", " + extra : extra;
+        }
+
+        subLines.forEach((line) => {
+          line.style.color = textCol;
+          line.style.textAlign = state.alignment;
+          line.style.textShadow = shadowStr || "none";
+          // 英文行设为中文的 85% 大小，视觉比例更协调
+          if (line.id === "subLineEn") {
+            line.style.fontSize = state.fontSize * 0.85 + "px";
+          } else {
+            line.style.fontSize = state.fontSize + "px";
+          }
+        });
+
+        // 数据面板
+        els.inHex.value =
+          "#" +
+          [r, g, b]
+            .map((x) => x.toString(16).padStart(2, "0"))
+            .join("")
+            .toUpperCase();
+        els.inR.value = r;
+        els.inG.value = g;
+        els.inB.value = b;
+        document.getElementById("valH").innerText = state.h + "°";
+        document.getElementById("valA").innerText = state.a.toFixed(2);
+        document.getElementById("valRadius").innerText = state.boxRadius + "px";
+        document.getElementById("valPad").innerText = state.boxPadding + "px";
+        document.getElementById("valBackBlur").innerText =
+          state.backdropBlur + "px";
+        document.getElementById("valBoxA").innerText = (
+          state.boxAlpha / 100
+        ).toFixed(2);
+        document.getElementById("valSize").innerText = state.fontSize + "px";
+        document.getElementById("valYOff").innerText = state.yOffset + "px";
+
+        // 同步滑块位置
+        els.boxAlpha.value = state.boxAlpha;
+        els.boxRadius.value = state.boxRadius;
+        els.boxPadding.value = state.boxPadding;
+      }
+
+      els.shadowPresets.onclick = (e) => {
+        const btn = e.target.closest(".shadow-btn");
+        if (!btn) return;
+        document
+          .querySelectorAll(".shadow-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.mode = btn.dataset.type;
+        Object.assign(state, shadowModes[state.mode]);
+        update();
+      };
+
+      document.getElementById("alignGroup").onclick = (e) => {
+        const btn = e.target.closest(".align-btn");
+        if (!btn) return;
+        document
+          .querySelectorAll(".align-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.alignment = btn.dataset.align;
+        update();
+      };
+
+      function renderPalette(libName) {
+        els.paletteGrid.innerHTML = "";
+        colorLibraries[libName].forEach((hex) => {
+          const dot = document.createElement("div");
+          dot.className = "color-dot";
+          dot.style.backgroundColor = hex;
+          dot.onclick = () => {
+            const [r, g, b] = hexToRgb(hex);
+            const [h, s, v] = rgbToHsv(r, g, b);
+            state.h = h;
+            state.s = s;
+            state.v = v;
+            els.hueSlider.value = h;
+            update();
+          };
+          els.paletteGrid.appendChild(dot);
+        });
+      }
+
+      const bind = (id, key, factor = 1) => {
+        els[id].addEventListener("input", (e) => {
+          state[key] = parseFloat(e.target.value) / factor;
+          update();
+        });
+      };
+
+      bind("hueSlider", "h");
+      bind("alphaSlider", "a", 100);
+      bind("boxAlpha", "boxAlpha");
+      bind("fontSize", "fontSize");
+      bind("yOffset", "yOffset");
+      bind("boxRadius", "boxRadius");
+      bind("boxPadding", "boxPadding");
+      bind("backdropBlur", "backdropBlur");
+
+      document.querySelectorAll(".palette-tab").forEach((tab) => {
+        tab.onclick = () => {
+          document
+            .querySelector(".palette-tab.active")
+            .classList.remove("active");
+          tab.classList.add("active");
+          renderPalette(tab.dataset.lib);
+        };
+      });
+
+      els.svPanel.onmousedown = (e) => {
+        const move = (ee) => {
+          const rect = els.svPanel.getBoundingClientRect();
+          state.s = Math.max(
+            0,
+            Math.min(((ee.clientX - rect.left) / rect.width) * 100, 100)
+          );
+          state.v = Math.max(
+            0,
+            Math.min(100 - ((ee.clientY - rect.top) / rect.height) * 100, 100)
+          );
+          update();
+        };
+        move(e);
+        document.onmousemove = move;
+        document.onmouseup = () => (document.onmousemove = null);
+      };
+
+      renderPalette("sub");
+      update();
+    </script>
+  </body>
+</html>

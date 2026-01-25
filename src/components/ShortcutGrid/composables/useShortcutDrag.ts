@@ -1,9 +1,10 @@
 import { ref, onUnmounted, type Ref, nextTick } from 'vue'
-import type { Shortcut } from '@/types'
+import type { Shortcut, Settings } from '@/types'
+import { throttle } from '../../../utils/throttle'
 
 export function useShortcutDrag(
   shortcuts: Ref<Shortcut[]>,
-  settings: any, // 接收 store 中的 settings 对象
+  settings: Settings, // 接收 store 中的 settings 对象
   saveData: () => void,
   callbacks: {
     closeFolder: () => void
@@ -48,7 +49,8 @@ export function useShortcutDrag(
   // ==========================================
   // 逻辑 A: 桌面图标拖入文件夹 / 合并创建文件夹
   // ==========================================
-  const handleGlobalMouseMove = (e: MouseEvent) => {
+  // ==========================================
+  const handleGlobalMouseMove = throttle((e: MouseEvent) => {
     if (!currentDraggedId.value) return
 
     // 获取鼠标下的元素
@@ -81,7 +83,7 @@ export function useShortcutDrag(
 
     if (dragTargetFolderId.value) dragTargetFolderId.value = null
     if (mergeTargetId.value) mergeTargetId.value = null
-  }
+  }, 16)
 
   const onStart = (evt: any) => {
     const item = shortcuts.value[evt.oldIndex]
@@ -159,7 +161,7 @@ export function useShortcutDrag(
   // ==========================================
   
   // 监听鼠标位置，判断是否出界 (Update DragState)
-  const detectFolderExit = (e: MouseEvent | TouchEvent) => {
+  const detectFolderExit = throttle((e: MouseEvent | TouchEvent) => {
     // 只有在 inside 或 outside 状态下才检测，idle 不检测
     if (dragState.value === 'idle') return
 
@@ -216,7 +218,7 @@ export function useShortcutDrag(
              hoverDropIndex.value = null
         }
     }
-  }
+  }, 16)
 
   // 核心：利用 Sortable Move 事件阻止内部排序
   const onFolderMove = () => {

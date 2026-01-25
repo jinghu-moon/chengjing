@@ -18,7 +18,7 @@ const toasts = ref<ToastInstance[]>([])
 const config = reactive<ToastConfig>({
   position: 'top-right', // 默认位置
   maxCount: 5, // 最大存在数（内存中）
-  defaultDuration: 300000,
+  defaultDuration: 3000,
   defaultClosable: true,
 })
 
