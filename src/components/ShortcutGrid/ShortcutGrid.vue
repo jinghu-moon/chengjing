@@ -643,9 +643,7 @@ onMounted(() => {
 .shortcuts-wrapper.is-preview :deep(.add-btn-group) {
   display: none !important;
 }
-</style>
-
-<style>
+ 
 /* 全局样式覆盖 */
 .snapshot-dialog-reset {
   background: transparent !important;

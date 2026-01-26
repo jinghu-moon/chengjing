@@ -72,12 +72,15 @@ const handleBlur = () => {
       <button class="icon-btn" title="日历" @click="isCalendarOpen = true">
         <DynamicCalendarIcon />
       </button>
+      
       <button class="icon-btn" title="书签管理器" @click="isBookmarkOpen = true">
         <IconBookmarks size="20" />
       </button>
+ 
       <button class="icon-btn" title="设置" @click="isSettingsOpen = true">
         <IconSettings size="20" />
       </button>
+            
     </div>
 
     <div
@@ -115,7 +118,7 @@ const handleBlur = () => {
   padding: 0 20px 0; /* padding-top replaced by inline style */
 }
 
-/* ...原有的 .top-actions 等样式保持不变... */
+
 .top-actions {
   position: absolute;
   top: 24px;

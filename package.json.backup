@@ -5,8 +5,8 @@
   "type": "module",
   "geckoId": "chengjing@seeyue.com",
   "scripts": {
-    "dev": "cross-env WATCH=true NODE_ENV=development vite build --watch --mode development",
-    "build": "vite build --mode production",
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -40,7 +40,6 @@
     "vue-draggable-plus": "^0.6.1"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.3.0",
     "@eslint/js": "^9.39.2",
     "@types/chrome": "^0.1.33",
     "@types/node": "^25.0.10",

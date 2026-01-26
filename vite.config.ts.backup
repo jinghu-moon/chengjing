@@ -102,7 +102,7 @@ export default defineConfig({
     // ===== 开发环境优化 =====
     minify: isDev ? false : 'esbuild', // 开发时不压缩，加快构建速度
     sourcemap: isDev ? true : false, // 开发时生成独立 map 文件（比 inline 更快）
-    target: isDev ? 'esnext' : 'es2020', // 开发时使用现代语法，生产环境兼容 ES2020 (Chrome 80+)
+    target: isDev ? 'esnext' : 'modules', // 开发时使用现代语法，减少转译
 
     rollupOptions: {
       output: {
