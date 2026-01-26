@@ -69,4 +69,9 @@ export interface Shortcut {
   filled?: boolean
   inverted?: boolean
   folderMode?: FolderLayoutMode // 每个文件夹独立布局声明
+  position?: {
+    page: number
+    row: number
+    col: number
+  }
 }

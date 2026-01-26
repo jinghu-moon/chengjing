@@ -60,6 +60,8 @@ declare module 'vue' {
     SettingSwitch: typeof import('./components/SettingsPanel/components/SettingSwitch.vue')['default']
     ShortcutGrid: typeof import('./components/ShortcutGrid/ShortcutGrid.vue')['default']
     ShortcutItem: typeof import('./components/ShortcutGrid/components/ShortcutItem.vue')['default']
+    SnapshotManager: typeof import('./components/ShortcutGrid/components/SnapshotManager/SnapshotManager.vue')['default']
+    SnapshotPreview: typeof import('./components/ShortcutGrid/components/SnapshotManager/SnapshotPreview.vue')['default']
     SubmenuPanel: typeof import('./components/SelectMenu/components/SubmenuPanel.vue')['default']
     SvgIcon: typeof import('./components/SvgIcon.vue')['default']
     TimeCapsule: typeof import('./components/CalendarPanel/components/TimeCapsule.vue')['default']

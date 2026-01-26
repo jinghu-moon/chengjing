@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch, nextTick, provide } from 'vue'
+import { ref, onMounted, computed, watch, nextTick, provide, defineAsyncComponent } from 'vue'
 import {
   IconFolderPlus,
   IconRefresh,
@@ -18,32 +18,68 @@ import FolderModal from './components/FolderModal.vue'
 import ContextMenu from '../SelectMenu/components/ContextMenu.vue'
 import type { Shortcut } from '../../types'
 import { GridStateKey } from './keys'
+import type { LayoutSnapshot } from './composables/useSnapshot'
 
-const { settings, iconConfig } = useSettings()
-const { shortcuts, loadData, saveData, resetToDemo, createFolder } = useShortcutData()
+const props = defineProps<{
+  previewSnapshot?: LayoutSnapshot | null
+}>()
+
+// 判断是否为预览模式
+const isPreview = computed(() => !!props.previewSnapshot)
+
+// 数据源选择
+const { settings: globalSettings, iconConfig: globalIconConfig } = isPreview.value ? { settings: {} as any, iconConfig: {} as any } : useSettings()
+const { shortcuts: globalShortcuts, loadData, saveData, resetToDemo, createFolder } = isPreview.value 
+  ? { shortcuts: ref([]), loadData: () => {}, saveData: () => {}, resetToDemo: () => false, createFolder: () => {} }
+  : useShortcutData()
+
+// 构造最终使用的响应式数据
+// 统一封装为 ComputedRef，确保后续使用方式一致 (.value 访问)
+const settings = computed(() => isPreview.value 
+  ? props.previewSnapshot!.data.settings
+  : globalSettings
+)
+
+const iconConfig = computed(() => isPreview.value
+  ? props.previewSnapshot!.data.settings.iconConfig
+  : globalIconConfig
+)
+
+const shortcuts = isPreview.value
+  ? computed({
+    get: () => props.previewSnapshot!.data.shortcuts,
+    set: () => {} // 预览模式不可修改
+  })
+  : globalShortcuts
+
+// 布局计算
+// 注意：传入 .value 以获取响应式对象 (Main) 或 普通对象 (Preview)
 const { pagedShortcuts, reflowShortcuts, syncFromPages } = useShortcutLayout(
   shortcuts,
-  settings,
-  saveData
+  settings.value, 
+  isPreview.value ? () => {} : saveData
 )
-const { folderSizeVars } = useFolderIconSize(settings, iconConfig)
 
-// 🌟 使用新的 Action Composable
-const { openAddModal, showContextMenu, contextMenuRef } = useGridActions(shortcuts, saveData, reflowShortcuts)
-// 显式引用 contextMenuRef 防止 eslint/ts 报错
+const { folderSizeVars } = useFolderIconSize(settings.value, iconConfig.value)
+
+
+// 动作 & 拖拽 (预览模式下禁用或 Mock)
+const gridActions = isPreview.value
+  ? { openAddModal: () => {}, showContextMenu: () => {}, contextMenuRef: ref(null) }
+  : useGridActions(shortcuts, saveData, reflowShortcuts)
+const { openAddModal, showContextMenu, contextMenuRef } = gridActions
+
+// 显式引用
 void contextMenuRef
 
 const currentPage = ref(0)
 const pagesContainerRef = ref<HTMLElement | null>(null)
 
-// ==========================================
-// 🌟 核心改动：初始化虚拟滚动
-// ==========================================
+// 虚拟滚动 (通用)
 const virtualizer = useVirtualizer<HTMLElement, Element>(
   computed(() => ({
     count: pagedShortcuts.value.length,
     getScrollElement: () => pagesContainerRef.value,
-    // 修改点 1: 给定准确的估算宽度（容器宽度），防止测量循环
     estimateSize: () => pagesContainerRef.value?.clientWidth || window.innerWidth,
     horizontal: true,
     overscan: 1,
@@ -64,9 +100,7 @@ const virtualizer = useVirtualizer<HTMLElement, Element>(
 const virtualItems = computed(() => virtualizer.value.getVirtualItems())
 const totalSize = computed(() => virtualizer.value.getTotalSize())
 
-const handleScroll = (_e: Event) => {
-  // 虚拟器接管了大部分逻辑
-}
+const handleScroll = (_e: Event) => {}
 
 const scrollToPage = (index: number) => {
   virtualizer.value.scrollToIndex(index, { align: 'start', behavior: 'smooth' })
@@ -93,9 +127,37 @@ const currentOpenedFolder = computed(() =>
 )
 const folderModalRef = ref<InstanceType<typeof FolderModal> | null>(null)
 
-// 🔑 新增：拖动过程中的实时预览数据
+// 预览模式相关 Mock
 const previewFolderId = ref<string | number | null>(null)
 const previewChildren = ref<Shortcut[] | null>(null)
+
+// 拖拽逻辑 (预览模式使用空实现)
+const dragResult = isPreview.value
+  ? {
+      dragTargetFolderId: ref(null),
+      mergeTargetId: ref(null),
+      isDraggingOut: ref(false),
+      draggableGroup: 'preview-group',
+      onStart: () => {},
+      onMoveCallback: () => false,
+      onDragEnd: () => {},
+      onFolderDragStart: () => {},
+      onFolderDragEnd: () => {},
+      onFolderMove: () => {},
+      folderContainerRef: ref(null)
+    }
+  : useShortcutDrag(
+      shortcuts,
+      settings.value,
+      () => {
+        saveData()
+        reflowShortcuts()
+      },
+      {
+        closeFolder: () => { openedFolderId.value = null },
+        openedFolderId,
+      }
+    )
 
 const {
   dragTargetFolderId,
@@ -107,57 +169,46 @@ const {
   onDragEnd,
   onFolderDragStart,
   onFolderDragEnd,
-  onFolderMove, // [新增]
+  onFolderMove,
   folderContainerRef,
-} = useShortcutDrag(
-  shortcuts,
-  settings,
-  () => {
-    saveData()
-    reflowShortcuts()
-  },
-  {
-    closeFolder: () => {
-      openedFolderId.value = null
-    },
-    openedFolderId,
-  }
-)
+} = dragResult
 
-// 当文件夹打开时，设置 folderContainerRef
-watch(
-  () => folderModalRef.value?.folderContentRef,
-  (containerElement) => {
-    if (containerElement) {
-      folderContainerRef.value = containerElement as HTMLElement
-    }
-  },
-  { immediate: true }
-)
+// Watcher needed only for real mode
+if (!isPreview.value) {
+  watch(
+    () => folderModalRef.value?.folderContentRef,
+    (containerElement) => {
+      if (containerElement && folderContainerRef) {
+        folderContainerRef.value = containerElement as HTMLElement
+      }
+    },
+    { immediate: true }
+  )
+}
 
 const handlePageDragEnd = () => {
+  if (isPreview.value) return
   syncFromPages()
   nextTick(() => onDragEnd())
 }
 
-// 🔑 文件夹内部拖拽排序变化时，强制刷新 shortcuts 数组以触发桌面预览更新
 const handleFolderUpdate = () => {
-  // 清除预览数据
+  if (isPreview.value) return
   previewChildren.value = null
   previewFolderId.value = null
   
   const folderIndex = shortcuts.value.findIndex(s => String(s.id) === String(openedFolderId.value))
   if (folderIndex > -1) {
     const folder = shortcuts.value[folderIndex]
-    // 创建 folder 对象的浅拷贝，强制让 Vue 认为这是一个新对象
+    // @ts-ignore: read-only error in preview mode handled by isPreview check
     shortcuts.value[folderIndex] = { ...folder }
-    // 强制替换数组引用
+    // @ts-ignore
     shortcuts.value = [...shortcuts.value]
   }
 }
 
-// 拖动过程中的实时预览更新
 const handlePreviewUpdate = (children: Shortcut[] | null) => {
+  if (isPreview.value) return
   if (children) {
     previewFolderId.value = openedFolderId.value
     previewChildren.value = children
@@ -168,7 +219,7 @@ const handlePreviewUpdate = (children: Shortcut[] | null) => {
 }
 
 const openFolder = (item: Shortcut) => {
-  // 只在打开不同的文件夹时才重置 isDraggingOut
+  if (isPreview.value) return
   if (openedFolderId.value !== item.id) {
     openedFolderId.value = item.id
     isDraggingOut.value = false
@@ -176,35 +227,32 @@ const openFolder = (item: Shortcut) => {
 }
 
 const gridStyle = computed(() => ({
-  '--item-size': `${iconConfig.boxSize}px`,
-  '--item-radius': `${iconConfig.radius}%`,
-  '--icon-scale': `${iconConfig.iconScale}%`,
-  '--bg-opacity': iconConfig.opacity / 100,
-  '--shadow-display': iconConfig.showShadow ? 'block' : 'none',
-  '--label-display': iconConfig.hideLabel ? 'none' : 'block',
-  '--grid-cols': settings.gridCols,
-  '--grid-rows': settings.gridRows,
-  '--grid-gap-x': `${settings.gridGapX}px`,
-  '--grid-gap-y': `${settings.gridGapY}px`,
+  '--item-size': `${iconConfig.value.boxSize}px`,
+  '--item-radius': `${iconConfig.value.radius}%`,
+  '--icon-scale': `${iconConfig.value.iconScale}%`,
+  '--bg-opacity': iconConfig.value.opacity / 100,
+  '--shadow-display': iconConfig.value.showShadow ? 'block' : 'none',
+  '--label-display': iconConfig.value.hideLabel ? 'none' : 'block',
+  '--grid-cols': settings.value.gridCols,
+  '--grid-rows': settings.value.gridRows,
+  '--grid-gap-x': `${settings.value.gridGapX}px`,
+  '--grid-gap-y': `${settings.value.gridGapY}px`,
   ...folderSizeVars.value,
 }))
 
 const containerWidthStyle = computed(() => {
-  // 虚拟滚动不需要手动计算总宽度，由 totalSize 决定
-  // 但为了保留原有的 --dynamic-container-width 变量给 CSS 使用 (如居中)，我们仍保留它用于单页宽度参考
-  const cols = settings.gridCols
-  const boxSize = iconConfig.boxSize
-  const gapX = settings.gridGapX
+  const cols = settings.value.gridCols
+  const boxSize = iconConfig.value.boxSize
+  const gapX = settings.value.gridGapX
   const contentPadding = 40
   const totalWidth = cols * boxSize + (cols - 1) * gapX + contentPadding
   return { '--dynamic-container-width': `${totalWidth}px` }
 })
 
 const containerHeightStyle = computed(() => {
-  const rows = settings.gridRows
-  const boxSize = iconConfig.boxSize
-  const gapY = settings.gridGapY
-  // 加上一些缓冲空间防止边缘被裁剪
+  const rows = settings.value.gridRows
+  const boxSize = iconConfig.value.boxSize
+  const gapY = settings.value.gridGapY
   const paddingY = 20 
   const totalHeight = rows * boxSize + (rows - 1) * gapY + paddingY
   return { height: `${totalHeight}px` }
@@ -212,20 +260,21 @@ const containerHeightStyle = computed(() => {
 
 const containerClasses = computed(() => ({
   'shortcuts-wrapper': true,
-  'compress-mode': settings.compressLargeFolders,
-  'overflow-mode': !settings.compressLargeFolders,
+  'compress-mode': settings.value.compressLargeFolders,
+  'overflow-mode': !settings.value.compressLargeFolders,
+  'is-preview': isPreview.value
 }))
 
 const openShortcut = (url?: string) => {
-  if (!url) return
-  if (settings.openNewTab) window.open(url, '_blank')
+  if (isPreview.value || !url) return
+  if (settings.value.openNewTab) window.open(url, '_blank')
   else window.location.href = url
 }
 
 // 🌟 Provide 注入状态
 provide(GridStateKey, {
-  settings,
-  iconConfig,
+  settings: settings.value,
+  iconConfig: iconConfig.value,
   dragTargetFolderId,
   mergeTargetId,
   previewFolderId,
@@ -246,13 +295,125 @@ const handleCreateFolder = () => {
   reflowShortcuts()
 }
 
-// 监听尺寸变化重建虚拟器
+// 🌟 Phase 4: 快照系统集成
+import { useSnapshot } from './composables/useSnapshot'
+import { useDialog } from '@/components/Dialog'
+import { useToast } from '@/components/Toast/composables/useToast'
+import { IconHistory, IconDeviceFloppy } from '@tabler/icons-vue'
+
+// 异步导入 SnapshotManager 避免循环依赖
+const SnapshotManager = defineAsyncComponent(() => 
+  import('./components/SnapshotManager/SnapshotManager.vue')
+)
+
+const { 
+  snapshots, 
+  createSnapshot, 
+  restoreSnapshot, 
+  removeSnapshot, 
+  renameSnapshot, 
+  exportSnapshot,
+  importSnapshot,
+  getStorageSize
+} = useSnapshot()
+
+const dialog = useDialog()
+const toast = useToast()
+
+const handleOpenSnapshotManager = () => {
+  if (isPreview.value) return 
+
+  dialog.open({
+    title: '', 
+    dialogClass: 'snapshot-dialog-reset',
+    component: SnapshotManager,
+    width: 'auto', 
+    showConfirmBtn: false,
+    showCancelBtn: false,
+    componentProps: {
+      snapshots: snapshots,
+      maxSnapshots: 20,
+      storageSize: getStorageSize(),
+      onRestore: (id: string) => {
+        dialog.open({
+          title: '确认恢复',
+          content: '当前布局将被覆盖，确定要恢复此快照吗？',
+          type: 'warning',
+          showCancelBtn: true,
+          onOk: () => {
+             const { shortcuts: newShortcuts, settings: newSettings } = restoreSnapshot(id)
+             shortcuts.value = newShortcuts
+             Object.assign(settings.value, newSettings) // 注意：settings在非预览模式下是Proxy，可以直接assign
+             reflowShortcuts()
+             toast.success('布局已恢复')
+             dialog.close(currentDialogId) 
+          }
+        })
+      },
+      onDelete: (id: string) => {
+          removeSnapshot(id)
+          toast.success('快照已删除')
+      },
+      onRename: (id: string, newName: string) => {
+          try {
+            renameSnapshot(id, newName)
+            toast.success('重命名成功')
+          } catch(e: any) {
+            toast.error(e.message)
+          }
+      },
+      onExport: (id: string) => {
+          exportSnapshot(id)
+          toast.success('导出开始')
+      },
+      onImport: async (file: File) => {
+          try {
+              await importSnapshot(file)
+              toast.success('导入成功')
+          } catch (e: any) {
+              toast.error(e.message || '导入失败')
+          }
+      },
+      onClose: () => {
+          dialog.close(currentDialogId)
+      }
+    }
+  })
+
+  const dialogsRef = dialog.dialogs
+  const currentDialogId = dialogsRef.value[dialogsRef.value.length - 1]?.id || ''
+}
+
+const handleSaveLayout = () => {
+    if (isPreview.value) return
+    const defaultName = `布局 ${new Date().toLocaleDateString()}`
+    /* eslint-disable-next-line no-alert */
+    const name = window.prompt('请输入快照名称', defaultName)
+    
+    if (name) {
+        try {
+            const snapshotSettings = {
+                gridRows: settings.value.gridRows,
+                gridCols: settings.value.gridCols,
+                gridGapX: settings.value.gridGapX,
+                gridGapY: settings.value.gridGapY,
+                folderPreviewMode: settings.value.folderPreviewMode,
+                iconConfig: { ...iconConfig.value }
+            }
+            createSnapshot(name, shortcuts.value, snapshotSettings)
+            toast.success('布局已保存')
+        } catch(e: any) {
+            toast.error(e.message)
+        }
+    }
+}
+
 watch(
   [
-    () => settings.gridRows,
-    () => settings.gridCols,
-    () => settings.folderPreviewMode,
-    () => settings.compressLargeFolders,
+    () => settings.value.gridRows,
+    () => settings.value.gridCols,
+    () => settings.value.folderPreviewMode,
+    () => settings.value.compressLargeFolders,
   ],
   () => {
     currentPage.value = 0
@@ -261,12 +422,9 @@ watch(
       virtualizer.value?.measure()
     })
   },
-  {
-    flush: 'post'
-  }
+  { flush: 'post' }
 )
 
-// 监听分页数量变化
 watch(
   () => pagedShortcuts.value, 
   () => {
@@ -278,23 +436,27 @@ watch(
 )
 
 onMounted(() => {
-  loadData()
+  if (!isPreview.value) {
+    loadData()
+  }
   reflowShortcuts()
 })
 </script>
 
 <template>
   <div :class="containerClasses" :style="[gridStyle, containerWidthStyle]">
+    <!-- 导航按钮：预览模式隐藏 -->
     <transition name="fade">
-      <div v-if="pagedShortcuts.length > 1" class="nav-btn prev" @click="prevPage">
+      <div v-if="!isPreview && pagedShortcuts.length > 1" class="nav-btn prev" @click="prevPage">
         <IconChevronLeft :size="32" />
       </div>
     </transition>
 
     <div
-      v-if="settings.showShortcuts"
+      v-if="isPreview || settings.showShortcuts"
       ref="pagesContainerRef"
       class="pages-container"
+      :class="{ 'preview-container': isPreview }"
       :style="containerHeightStyle"
       @scroll="handleScroll"
     >
@@ -333,12 +495,12 @@ onMounted(() => {
     </div>
 
     <transition name="fade">
-      <div v-if="pagedShortcuts.length > 1" class="nav-btn next" @click="nextPage">
+      <div v-if="!isPreview && pagedShortcuts.length > 1" class="nav-btn next" @click="nextPage">
         <IconChevronRight :size="32" />
       </div>
     </transition>
 
-    <div v-if="pagedShortcuts.length > 1" class="pagination-dots">
+    <div v-if="pagedShortcuts.length > 1" class="pagination-dots" :class="{ 'preview-dots': isPreview }">
       <span
         v-for="(_p, i) in pagedShortcuts"
         :key="i"
@@ -348,31 +510,40 @@ onMounted(() => {
       ></span>
     </div>
 
-    <FolderModal
-      ref="folderModalRef"
-      :folder="currentOpenedFolder || null"
-      :is-dragging-out="isDraggingOut"
-      :draggable-group="draggableGroup"
-      @close="openedFolderId = null"
-      @open-shortcut="openShortcut"
-      @folder-drag-start="onFolderDragStart"
-      @folder-drag-end="onFolderDragEnd"
-      @folder-move="onFolderMove"
-      @folder-update="handleFolderUpdate"
-      @preview-update="handlePreviewUpdate"
-      @contextmenu="showContextMenu"
-    />
+    <!-- 弹窗组件：预览模式不渲染 -->
+    <template v-if="!isPreview">
+      <FolderModal
+        ref="folderModalRef"
+        :folder="currentOpenedFolder || null"
+        :is-dragging-out="isDraggingOut"
+        :draggable-group="draggableGroup"
+        @close="openedFolderId = null"
+        @open-shortcut="openShortcut"
+        @folder-drag-start="onFolderDragStart"
+        @folder-drag-end="onFolderDragEnd"
+        @folder-move="onFolderMove"
+        @folder-update="handleFolderUpdate"
+        @preview-update="handlePreviewUpdate"
+        @contextmenu="showContextMenu"
+      />
 
-    <ContextMenu ref="contextMenuRef" />
+      <ContextMenu ref="contextMenuRef" />
 
-    <div class="debug-actions">
-      <div class="debug-btn" title="新建文件夹" @click="handleCreateFolder">
-        <IconFolderPlus :size="20" />
+      <div class="debug-actions">
+        <div class="debug-btn" title="保存布局" @click="handleSaveLayout">
+          <IconDeviceFloppy :size="20" />
+        </div>
+        <div class="debug-btn" title="布局历史" @click="handleOpenSnapshotManager">
+          <IconHistory :size="20" />
+        </div>
+        <div class="debug-btn" title="新建文件夹" @click="handleCreateFolder">
+          <IconFolderPlus :size="20" />
+        </div>
+        <div class="debug-btn" title="重置布局" @click="handleResetToDemo">
+          <IconRefresh :size="20" />
+        </div>
       </div>
-      <div class="debug-btn" title="重置布局" @click="handleResetToDemo">
-        <IconRefresh :size="20" />
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -434,10 +605,66 @@ onMounted(() => {
   }
 }
 
+
 :deep(.pages-container) {
   max-width: min(var(--dynamic-container-width), calc(100vw - 160px));
   margin: 0 auto;
   position: relative;
   z-index: 10;
+}
+
+/* 预览模式适配 */
+.shortcuts-wrapper.is-preview {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  background: transparent;
+  display: flex;
+  align-items: flex-start; /* 保持顶部对齐，缩放由父容器控制 */
+  justify-content: center;
+  pointer-events: none; /* 禁用所有交互 */
+  user-select: none;
+}
+
+.shortcuts-wrapper.is-preview :deep(.pages-container) {
+  overflow: visible; /* 允许超出以供缩放 */
+  margin: 0;
+  max-width: none;
+  /* 强制重置样式以适应预览容器 */
+  width: var(--dynamic-container-width) !important;
+}
+
+.shortcuts-wrapper.is-preview .pagination-dots {
+  display: none; /* 预览模式隐藏圆点 */
+}
+
+/* 预览模式隐藏添加按钮 */
+.shortcuts-wrapper.is-preview :deep(.add-btn-group) {
+  display: none !important;
+}
+</style>
+
+<style>
+/* 全局样式覆盖 */
+.snapshot-dialog-reset {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  width: auto !important;
+  max-width: none !important;
+}
+
+.snapshot-dialog-reset .dialog-header {
+  display: none !important;
+}
+
+.snapshot-dialog-reset .dialog-body {
+  padding: 0 !important;
+}
+
+.snapshot-dialog-reset .dialog-footer {
+  display: none !important;
 }
 </style>
