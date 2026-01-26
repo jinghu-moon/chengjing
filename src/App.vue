@@ -80,7 +80,7 @@ const handleBlur = () => {
       <button class="icon-btn" title="设置" @click="isSettingsOpen = true">
         <IconSettings size="20" />
       </button>
-            
+      
     </div>
 
     <div

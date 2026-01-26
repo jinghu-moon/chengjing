@@ -4,37 +4,18 @@ import vue from '@vitejs/plugin-vue'
 import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-import extensionReloader from './scripts/reloader'
+import { crx } from '@crxjs/vite-plugin'
+// @ts-ignore
+import manifest from './src/manifest.json'
 
 // ===== 环境变量 =====
-const isDev = process.env.WATCH === 'true'
-const reloaderPort = process.env.RELOADER_PORT ? parseInt(process.env.RELOADER_PORT) : 8888
+const isDev = process.env.NODE_ENV === 'development'
 
-// 🔍 调试：验证优化是否生效
-console.log('[Vite Config] isDev:', isDev)
-console.log('[Vite Config] minify:', isDev ? false : 'esbuild')
-console.log('[Vite Config] sourcemap:', isDev ? true : false)
-console.log('[Vite Config] target:', isDev ? 'esnext' : 'modules')
+console.log('[Vite Config] Mode:', process.env.NODE_ENV)
+console.log('[Vite Config] using @crxjs/vite-plugin')
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // ✅ 减少开发模式下的冗余日志
-  logLevel: isDev ? 'warn' : 'info',
-
-  // 🚀 依赖预构建优化（强制缓存重依赖）
-  optimizeDeps: {
-    include: [
-      'vue',
-      '@tiptap/vue-3',
-      '@tiptap/starter-kit',
-      'dayjs',
-      'lowlight',
-    ],
-    // 开发时保持依赖预构建结果，除非依赖变更
-    force: false,
-  },
-
   plugins: [
     vue(),
     svgLoader({
@@ -54,92 +35,66 @@ export default defineConfig({
         ],
       },
     }),
+    // 🚀 CRXJS: 核心扩展插件
+    crx({ manifest }),
+    
     // 自动导入 Vue API (ref, reactive, computed 等) 和项目内函数
     AutoImport({
       imports: ['vue'],
       dts: 'src/auto-imports.d.ts',
-      // ✅ 自动扫描目录，导入导出的函数
       dirs: [
-        'src/composables', // 自动导入所有 hooks (useSettings, useCalendar 等)
-        'src/utils', // 自动导入工具函数 (throttle, positioning 等)
+        'src/composables',
+        'src/utils',
       ],
-      vueTemplate: true, // 支持在 Vue 模板中使用自动导入的函数
+      vueTemplate: true,
     }),
     // 自动导入组件
     Components({
       dirs: ['src/components'],
       dts: 'src/components.d.ts',
     }),
-    // 复制 manifest.json 到 dist（Chrome 扩展必需）
-    viteStaticCopy({
-      targets: [{ src: 'src/manifest.json', dest: '.' }],
-    }),
-    // ✅ 条件启用自动重载插件
-    ...(isDev ? [extensionReloader({
-      port: reloaderPort,
-      smartReload: true,
-      hotReloadCSS: true,
-      showNotification: true,
-      logLevel: 'info'
-    })] : []),
   ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // 🚀 CRXJS 开发服务器配置
+  server: {
+    port: 5173,
+    strictPort: true,
+    hmr: {
+      clientPort: 5173,
+    },
+    cors: true, // 允许扩展跨域访问
+  },
   build: {
-    // ✅ 根据环境变量决定是否启用 watch
-    watch: isDev ? {} : null,
-
     outDir: 'dist',
     emptyOutDir: true,
-    // 开发时关闭 CSS 代码分割，减少文件生成数量
-    cssCodeSplit: isDev ? false : true,
-    // 显示压缩后的大小（开发模式关闭以提升速度）
-    reportCompressedSize: !isDev,
-
-    // ===== 开发环境优化 =====
-    minify: isDev ? false : 'esbuild', // 开发时不压缩，加快构建速度
-    sourcemap: isDev ? true : false, // 开发时生成独立 map 文件（比 inline 更快）
-    target: isDev ? 'esnext' : 'es2020', // 开发时使用现代语法，生产环境兼容 ES2020 (Chrome 80+)
-
+    // 开发时生成 sourcemap，生产环境可关闭
+    sourcemap: isDev,
     rollupOptions: {
       output: {
-        // 确保打包后的文件名不带 hash，方便 manifest 引用（可选，但在插件开发中推荐）
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]',
-        // 开发时关闭手动分包，加快构建速度
-        manualChunks: isDev ? undefined : (id) => {
+        // 生产环境分包优化
+        manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            if (
-              id.includes('@tiptap') ||
-              id.includes('prosemirror') ||
-              id.includes('tiptap-markdown')
-            ) {
-              return 'vendor-editor'
-            }
-            // lowlight 代码高亮单独分包
-            if (id.includes('lowlight')) {
-              return 'vendor-highlight'
-            }
-            if (id.includes('dayjs') || id.includes('chinese-days')) {
-              return 'vendor-date'
-            }
-            if (id.includes('vue') || id.includes('@vue')) {
-              return 'vendor-core'
-            }
-            if (id.includes('@tabler/icons-vue')) {
-              return 'vendor-icons'
-            }
-            // 虚拟滚动单独分包
-            if (id.includes('@tanstack/vue-virtual')) {
-              return 'vendor-virtual'
-            }
+             if (id.includes('@tiptap') || id.includes('prosemirror') || id.includes('tiptap-markdown')) {
+               return 'vendor-editor'
+             }
+             if (id.includes('lowlight')) {
+               return 'vendor-highlight'
+             }
+             if (id.includes('dayjs') || id.includes('chinese-days')) {
+               return 'vendor-date'
+             }
+             if (id.includes('vue') || id.includes('@vue')) {
+               return 'vendor-core'
+             }
           }
         },
       },
     },
+    // 兼容 Chrome 扩展的目标环境
+    target: 'esnext',
   },
 })
