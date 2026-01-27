@@ -1,142 +1,94 @@
 <div align="center">
   <h1>澄镜 Chengjing</h1>
-  <p>极简、高效、毛玻璃风格的浏览器新标签页扩展</p>
+  <p>极简、高效、毛玻璃风格的 Chrome 新标签页扩展</p>
+  <p>
+    <b>🚀 真·HMR 热重载</b> | 
+    <b>🎨 动态毛玻璃</b> | 
+    <b>⚡ 极速构建</b>
+  </p>
 </div>
 
-## ✨ 功能特性
+## ✨ 核心特性
 
-- 📚 **书签管理** - 虚拟滚动 + 拼音搜索 + 文件夹树导航
-- 📝 **富文本笔记** - Markdown 支持 + 图片压缩 + 代码高亮
-- ✅ **待办事项** - 拖拽排序 + 优先级标记 + 日期关联
-- 📅 **日历面板** - 月/周/年视图 + 农历显示 + 节日节气
-- 🍅 **番茄钟** - 专注计时工具
-- 🔍 **搜索栏** - 多搜索引擎支持
-- 🎨 **动态壁纸** - 每日壁纸 + 毛玻璃效果
-- ⚙️ **可视化设置** - 自定义布局和样式
+- **📚 沉浸式书签** - 虚拟滚动 + 拼音搜索 + 文件夹树，万级书签秒开。
+- **📝 富文本笔记** - 基于 TipTap，支持 Markdown、图片压缩、代码高亮。
+- **✅ 智能待办** - 拖拽排序，支持优先级与日期关联。
+- **📅 万年历** - 农历、节气、节日、加班调休一目了然。
+- **⚙️ 极致性能** - Web Worker 后台索引，CRXJS 极速热更。
 
 ## 🛠️ 技术栈
 
-- **框架**: Vue 3 (Composition API)
-- **语言**: TypeScript
-- **构建工具**: Vite
-- **富文本编辑器**: TipTap
-- **图标库**: Tabler Icons
-- **日期处理**: dayjs + chinese-days
-- **拖拽功能**: vue-draggable-plus
-- **虚拟滚动**: @tanstack/vue-virtual
+- **Core**: Vue 3 (Composition API) + TypeScript
+- **Build**: Vite + @crxjs/vite-plugin (HMR Support)
+- **UI**: Tailwind CSS? (Vanilla + Scoped), Tabler Icons
+- **Perf**: 
+  - 虚拟滚动 (@tanstack/vue-virtual)
+  - 离屏渲染 (OffscreenCanvas)
+  - 增量构建 (Target: es2020)
 
-## 📦 安装
+## 🚀 快速开始
 
-### 克隆项目
-
-```bash
-git clone https://github.com/yourusername/chengjing.git
-cd chengjing
-```
-
-### 安装依赖
+### 1. 安装依赖
 
 ```bash
 npm install
 ```
 
-### 开发模式
+### 2. 开发模式 (支持 HMR)
 
 ```bash
 npm run dev
 ```
 
-### 构建扩展
+该命令会启动 Vite 开发服务器 (Port 5173)。
+- 打开 Chrome 扩展管理页 `chrome://extensions/`
+-开启「开发者模式」
+- 点击「加载已解压的扩展程序」，选择 `dist` 目录
+
+👉 **修改代码后，扩展会自动热更新 (HMR)，无需手动刷新页面！**
+
+### 3. 生产构建
 
 ```bash
 npm run build
 ```
 
-构建产物将输出到 `dist` 目录。
-
-## 🚀 加载到 Chrome
-
-1. 运行 `npm run build` 构建项目
-2. 打开 Chrome 浏览器，访问 `chrome://extensions/`
-3. 启用右上角的"开发者模式"
-4. 点击"加载已解压的扩展程序"
-5. 选择项目的 `dist` 目录
+- 输出目录: `dist`
+- 优化策略: 
+  - 关闭 Sourcemap (减小体积)
+  - Esbuild 压缩
+  - 代码分包 (Vendor Splitting)
 
 ## 📂 项目结构
 
 ```
 src/
-├── components/        # UI 组件
-│   ├── BookmarkPanel/ # 书签面板
-│   ├── CalendarPanel/ # 日历面板
-│   ├── NotePad/       # 便签
+├── components/        # 业务组件 (自动导入)
+│   ├── BookmarkPanel/ # 书签核心 (含 Worker)
+│   ├── NotePad/       # 笔记编辑器
 │   └── ...
-├── composables/       # 组合式函数
-├── utils/             # 工具函数
-├── types/             # 类型定义
-├── constants/         # 常量
-├── styles/            # 全局样式
-└── assets/            # 静态资源
+├── composables/       # 逻辑复用 (Hooks)
+├── utils/             # 工具库
+├── assets/            # 静态资源
+└── manifest.json      # 扩展配置 (V3)
 ```
 
-## 🔧 开发指南
+## 🔧 最佳实践
+
+### 性能优化
+*   **Web Worker**: 书签搜索和数据处理在 Worker 中运行，主线程 0 阻塞。
+*   **Virtual Scroll**: 仅渲染可视区域 DOM，内存占用极低。
+*   **Persistence**: 利用 SessionStorage + CRXJS 保持页面状态，热更后不丢失滚动位置。
 
 ### 代码规范
-
-项目使用 ESLint + Prettier 进行代码规范管理。
-
-```bash
-# 检查代码规范
-npm run lint
-
-# 自动修复代码规范问题
-npm run lint:fix
-
-# 格式化代码
-npm run format
-
-# 检查代码格式
-npm run format:check
-```
-
-### 运行测试
-
-```bash
-# 运行测试
-npm run test
-
-# 使用 UI 界面运行测试
-npm run test:ui
-```
-
-### 自动导入
-
-项目配置了自动导入功能：
-- Vue API（ref, reactive, computed 等）自动导入
-- `src/composables` 下的 hooks 自动导入
-- `src/utils` 下的工具函数自动导入
-- `src/components` 下的组件自动导入
-
-无需手动 import，直接使用即可。
-
-## 🎨 性能优化
-
-- **代码分割** - 按依赖分包，优化加载性能
-- **虚拟滚动** - 处理大量书签数据
-- **Web Worker** - 后台搜索，不阻塞 UI
-- **图片压缩** - 自动压缩上传的图片
-- **缓存策略** - 多级缓存优化性能
+*   **TypeScript**: 全类型覆盖
+*   **ESLint + Prettier**: 统一代码风格
+*   **Auto Import**: 自动按需引入 Vue API 和组件
 
 ## 📄 许可证
 
 MIT License
 
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
----
-
 <div align="center">
-  Made with ❤️
+  Made with ❤️ by Seeyue
 </div>
