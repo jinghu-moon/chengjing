@@ -14,18 +14,21 @@ import {
   IconSettings,
   IconSearch,
   IconFocus2,
-  IconListCheck, // [新增]
-  IconNotes, // [新增]
+  IconListCheck,
+  IconNotes,
   IconFileText,
   IconMarkdown,
+  IconSparkles,
 } from '@tabler/icons-vue'
 import { saveImage, removeImage } from '@/utils/db'
+import { useDailyPoem } from '@/components/DailyPoem/composables/useDailyPoem'
 // [自动导入] useSettings 无需显式导入
 
 import SettingSlider from './components/SettingSlider.vue'
 import SettingSwitch from './components/SettingSwitch.vue'
 import LayoutSettingsModal from './components/LayoutSettingsModal.vue'
 import CapsuleTabs from './components/CapsuleTabs.vue'
+import SelectMenu from '@/components/SelectMenu/index.vue'
 // Select 组件由 unplugin-vue-components 自动导入
 
 const props = defineProps<{ isOpen: boolean }>()
@@ -35,6 +38,58 @@ const close = () => {
 }
 
 const { settings, iconConfig, forceWallpaperUpdate, resetSettings } = useSettings()
+
+const {
+  settings: poemSettings,
+  updateSettings: updatePoemSettings,
+  isOnlineMode: isPoemOnline,
+  setOnlineMode: setPoemOnlineMode
+} = useDailyPoem()
+
+// Hitokoto 基础选项
+const hitokotoBaseOptions = [
+  { label: '诗词', value: 'i' },
+  { label: '哲学 (文言文)', value: 'k' },
+  { label: '文学', value: 'd' },
+  { label: '动画', value: 'a' },
+  { label: '影视', value: 'h' },
+  { label: '其他', value: 'c' },
+]
+
+// API 来源选项
+const sourceOptions = [
+  { label: '今日诗词 (智能推荐)', value: 'jinrishici' },
+  { label: '一言 (Hitokoto)', value: 'hitokoto' },
+]
+
+// 动态计算分类选项（Checkbox 状态）
+const hitokotoCategoryOptions = computed(() => {
+  return hitokotoBaseOptions.map(opt => ({
+    ...opt,
+    type: 'checkbox' as const,
+    checked: poemSettings.value.hitokotoCategories.includes(opt.value as any)
+  }))
+})
+
+// 处理分类 Checkbox 变化
+const handleCategoryCheck = (value: string, checked: boolean) => {
+  const currentCats = poemSettings.value.hitokotoCategories
+  const val = value as any
+  
+  let newCats
+  if (checked) {
+    if (!currentCats.includes(val)) {
+      newCats = [...currentCats, val]
+    } else {
+      newCats = currentCats
+    }
+  } else {
+    newCats = currentCats.filter(c => c !== val)
+  }
+  
+  updatePoemSettings({ hitokotoCategories: newCats })
+}
+
 
 // --- JS 折叠动画逻辑 ---
 const onEnter = (el: Element) => {
@@ -91,8 +146,9 @@ const sectionState = reactive({
   features: true,
   data: true,
   pomodoro: true,
-  todo: true, // [新增]
-  notepad: true, // [新增]
+  todo: true,
+  notepad: true,
+  dailyPoem: true,
 })
 
 const toggleSection = (key: keyof typeof sectionState) => {
@@ -360,6 +416,92 @@ const resetNotePadPos = () => {
           </transition>
         </div>
 
+        <div class="section-card" :class="{ collapsed: !sectionState.dailyPoem }">
+          <div class="card-header" @click="toggleSection('dailyPoem')">
+            <div class="header-label">
+              <IconSparkles :size="16" stroke-width="2" />
+              <span>每日诗词设置</span>
+            </div>
+            <IconChevronDown :size="18" class="toggle-icon" />
+          </div>
+          <transition
+            name="accordion"
+            @enter="onEnter"
+            @after-enter="onAfterEnter"
+            @leave="onLeave"
+          >
+            <div v-show="sectionState.dailyPoem" class="card-content-wrapper">
+              <div class="card-content-inner">
+                <SettingSwitch v-model="settings.showDailyPoem" label="开启每日诗词" />
+                
+                <transition name="slide-fade">
+                  <div v-if="settings.showDailyPoem" class="sub-settings">
+                    <SettingSwitch
+                      :model-value="isPoemOnline"
+                      label="使用在线 API"
+                      @update:model-value="setPoemOnlineMode"
+                    />
+
+                    <!-- 扩展配置 -->
+                    <transition name="expand">
+                      <div v-if="isPoemOnline" class="api-config">
+                        <div class="divider"></div>
+                        <div class="config-row">
+                          <label>API 来源</label>
+                          <div class="config-control">
+                            <SelectMenu
+                              :model-value="poemSettings.source"
+                              :options="sourceOptions"
+                              trigger-width="100%"
+                              :show-arrow="true"
+                              @update:model-value="updatePoemSettings({ source: $event as any })"
+                            />
+                          </div>
+                        </div>
+
+                        <!-- 一言分类选择 -->
+                        <transition name="expand">
+                          <div v-if="poemSettings.source === 'hitokoto'" class="config-row" style="margin-top: 12px">
+                            <label>分类筛选</label>
+                            <div class="config-control">
+                              <SelectMenu
+                                model-value=""
+                                placeholder="选择分类 (可多选)"
+                                :options="hitokotoCategoryOptions"
+                                trigger-width="100%"
+                                :multiple="true" 
+                                :clearable="false"
+                                @check="handleCategoryCheck"
+                              />
+                            </div>
+                          </div>
+                        </transition>
+
+                        <!-- API 信息 -->
+                        <div class="api-info">
+                          <div class="api-provider">
+                            <span class="label">当前来源：</span>
+                            <span class="value">
+                              {{ poemSettings.source === 'hitokoto' ? 'Hitokoto 一言' : '今日诗词' }}
+                            </span>
+                          </div>
+                          <div class="api-description">
+                            {{ 
+                              poemSettings.source === 'hitokoto' 
+                                ? '可以获取诗词、哲学、文学等各类名句。' 
+                                : '根据时间、地点、天气智能推荐古诗词名句。' 
+                            }}
+                          </div>
+                        </div>
+                      </div>
+                    </transition>
+                  </div>
+                </transition>
+              </div>
+            </div>
+          </transition>
+        </div>
+
         <div class="section-card" :class="{ collapsed: !sectionState.style }">
           <div class="card-header" @click="toggleSection('style')">
             <div class="header-label">
@@ -602,6 +744,8 @@ const resetNotePadPos = () => {
               <div class="card-content-inner">
                 <SettingSwitch v-model="settings.showClock" label="时钟与日期" />
                 <SettingSwitch v-model="settings.showShortcuts" label="快捷方式网格" />
+                <SettingSwitch v-model="settings.showCalculator" label="计算器" />
+
                 <div class="divider"></div>
                 <SettingSwitch v-model="settings.openNewTab" label="新标签页打开链接" />
                 <SettingSwitch v-model="settings.deleteEmptyFolder" label="清空后删除文件夹" />
@@ -660,3 +804,75 @@ const resetNotePadPos = () => {
 </template>
 
 <style scoped src="./styles.css"></style>
+
+<style scoped>
+/* API 配置样式扩展 */
+.api-config {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.config-row label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.config-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.api-info {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.api-provider {
+  display: flex;
+  gap: 6px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.api-description {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+/* 展开动画 */
+.expand-enter-active,
+.expand-leave-active {
+  transition: 
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  max-height: 400px;
+  opacity: 1;
+  will-change: max-height, opacity, margin;
+  transform: translateZ(0);
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+</style>

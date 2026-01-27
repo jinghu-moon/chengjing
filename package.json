@@ -6,6 +6,7 @@
   "geckoId": "chengjing@seeyue.com",
   "scripts": {
     "dev": "vite",
+    "open": "vite --open",
     "build": "vite build --mode production",
     "preview": "vite preview",
     "test": "vitest",

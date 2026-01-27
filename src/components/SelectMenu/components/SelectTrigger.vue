@@ -281,7 +281,8 @@ defineExpose({
   border: var(--border-glass);
   border-radius: var(--radius-md);
   padding: 0 8px 0 12px;
-  height: var(--trigger-height);
+  min-height: var(--trigger-height);
+  height: auto;
   transition: all 0.2s var(--ease-smooth);
   cursor: pointer;
   outline: none;

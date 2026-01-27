@@ -17,6 +17,8 @@ const SettingsPanel = defineAsyncComponent(() => import('./components/SettingsPa
 const CalendarPanel = defineAsyncComponent(() => import('./components/CalendarPanel/index.vue'))
 const BookmarkPanel = defineAsyncComponent(() => import('./components/BookmarkPanel/index.vue'))
 const NotePad = defineAsyncComponent(() => import('./components/NotePad/index.vue'))
+const Calculator = defineAsyncComponent(() => import('./components/Calculator.vue'))
+const DailyPoem = defineAsyncComponent(() => import('./components/DailyPoem/index.vue'))
 
 import { useImageGC } from './composables/useImageGC'
 import { useSettings } from './composables/useSettings'
@@ -52,6 +54,7 @@ const handleBlur = () => {
 
     <NotePad />
     <TodoList />
+    <DailyPoem v-if="settings.showDailyPoem" />
 
     <SettingsPanel
       :is-open="isSettingsOpen"
@@ -93,6 +96,8 @@ const handleBlur = () => {
       <ClockWeather class="app-component" :class="{ dimmed: isFocusMode }" />
 
       <Pomodoro class="app-component" :class="{ dimmed: isFocusMode }" />
+
+      <Calculator v-if="settings.showCalculator" class="app-component" :class="{ dimmed: isFocusMode }" />
 
       <SearchBar @focus="handleFocus" @blur="handleBlur" />
 

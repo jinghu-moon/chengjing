@@ -65,6 +65,9 @@ const defaultSettings: Settings = {
   pomodoroAutoBreak: false,
   pomodoroAutoWork: false,
   pomodoroIntent: '',
+  showCalculator: true,
+  showDailyPoem: true,
+  dailyPoemOnline: false,
 }
 
 const defaultIconConfig: IconConfig = {

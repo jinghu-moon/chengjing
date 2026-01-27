@@ -14,6 +14,7 @@ declare global {
   const calculateCoords: typeof import('./utils/positioning').calculateCoords
   const checkFit: typeof import('./utils/positioning').checkFit
   const computed: typeof import('vue').computed
+  const converterCategories: typeof import('./composables/useConverter').converterCategories
   const createApp: typeof import('vue').createApp
   const customRef: typeof import('vue').customRef
   const debounce: typeof import('./utils/debounce').debounce
@@ -85,10 +86,13 @@ declare global {
   const unref: typeof import('vue').unref
   const useAsyncWordCount: typeof import('./composables/useAsyncWordCount').useAsyncWordCount
   const useAttrs: typeof import('vue').useAttrs
+  const useCalculator: typeof import('./composables/useCalculator').useCalculator
   const useCalendarData: typeof import('./composables/useCalendarData').useCalendarData
   const useContextMenu: typeof import('./composables/useContextMenu').useContextMenu
+  const useConverter: typeof import('./composables/useConverter').useConverter
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
+  const useDailyPoem: typeof import('./composables/useDailyPoem').useDailyPoem
   const useDraggableCard: typeof import('./composables/useDraggableCard').useDraggableCard
   const useId: typeof import('vue').useId
   const useImageGC: typeof import('./composables/useImageGC').useImageGC
@@ -113,11 +117,17 @@ declare global {
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
   // @ts-ignore
+  export type { HistoryItem } from './composables/useCalculator'
+  import('./composables/useCalculator')
+  // @ts-ignore
   export type { DayMetadata } from './composables/useCalendarData'
   import('./composables/useCalendarData')
   // @ts-ignore
   export type { OptionItem } from './composables/useContextMenu'
   import('./composables/useContextMenu')
+  // @ts-ignore
+  export type { ConverterType, ConverterCategory } from './composables/useConverter'
+  import('./composables/useConverter')
   // @ts-ignore
   export type { Note, SortMode } from './composables/useNotes'
   import('./composables/useNotes')
@@ -151,6 +161,7 @@ declare module 'vue' {
     readonly calculateCoords: UnwrapRef<typeof import('./utils/positioning')['calculateCoords']>
     readonly checkFit: UnwrapRef<typeof import('./utils/positioning')['checkFit']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
+    readonly converterCategories: UnwrapRef<typeof import('./composables/useConverter')['converterCategories']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debounce: UnwrapRef<typeof import('./utils/debounce')['debounce']>
@@ -222,8 +233,10 @@ declare module 'vue' {
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly useAsyncWordCount: UnwrapRef<typeof import('./composables/useAsyncWordCount')['useAsyncWordCount']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
+    readonly useCalculator: UnwrapRef<typeof import('./composables/useCalculator')['useCalculator']>
     readonly useCalendarData: UnwrapRef<typeof import('./composables/useCalendarData')['useCalendarData']>
     readonly useContextMenu: UnwrapRef<typeof import('./composables/useContextMenu')['useContextMenu']>
+    readonly useConverter: UnwrapRef<typeof import('./composables/useConverter')['useConverter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
     readonly useDraggableCard: UnwrapRef<typeof import('./composables/useDraggableCard')['useDraggableCard']>

@@ -47,6 +47,9 @@ export interface Settings {
   pomodoroAutoBreak: boolean
   pomodoroAutoWork: boolean
   pomodoroIntent: string
+  showCalculator: boolean
+  showDailyPoem: boolean
+  dailyPoemOnline: boolean
 }
 
 export interface IconConfig {

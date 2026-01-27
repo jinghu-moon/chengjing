@@ -238,5 +238,8 @@ export function useToast() {
 
     // Promise 状态跟踪
     promise,
+
+    // 兼容旧代码
+    showToast: add,
   }
 }
