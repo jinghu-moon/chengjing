@@ -28,6 +28,12 @@ export interface DailyPoemSettings {
   online: boolean
   source: ApiSource
   hitokotoCategories: HitokotoCategory[]
+  showAuthor: boolean
+  showTitle: boolean
+  showCollect: boolean
+  showRefresh: boolean
+  showCard: boolean
+  showManager: boolean
 }
 
 // ===== 组件 Props 类型 =====

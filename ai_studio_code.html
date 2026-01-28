@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Bar Filter State</title>
+    <style>
+        /* ---------------- 全局复位 ---------------- */
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; height: 100vh; display: flex;
+            justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* ---------------- 组件容器 ---------------- */
+        .search-container { width: 100%; max-width: 680px; padding: 0 20px; }
+
+        /* ---------------- 核心外壳 ---------------- */
+        .search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            height: 52px;
+            padding: 0 4px;
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .search-wrapper:focus-within {
+            border-color: rgba(56, 189, 248, 0.6);
+            background-color: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        }
+
+        /* ---------------- 通用 SVG 样式 ---------------- */
+        .icon-svg {
+            width: 20px; height: 20px;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ---------------- 左侧：范围选择器 ---------------- */
+        .scope-selector {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 8px 8px 12px;
+            border-radius: 10px;
+            color: #94a3b8;
+            transition: all 0.2s;
+            height: 40px;
+            user-select: none;
+        }
+
+        .scope-selector:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #f1f5f9;
+        }
+
+        .scope-arrow {
+            width: 14px; height: 14px;
+            margin-left: 4px; opacity: 0.7;
+        }
+
+        /* ---------------- 分割线 ---------------- */
+        .divider {
+            width: 1px; height: 24px;
+            background-color: rgba(148, 163, 184, 0.2);
+            margin: 0 8px;
+        }
+
+        /* ---------------- 中间：输入框 ---------------- */
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none; outline: none;
+            color: #f1f5f9;
+            font-size: 16px;
+            margin: 0 4px;
+        }
+        .search-input::placeholder { color: #64748b; }
+
+        /* ---------------- 右侧：功能按钮组 ---------------- */
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* 基础图标按钮样式 */
+        .icon-btn {
+            display: flex; align-items: center; justify-content: center;
+            background: transparent; border: none; cursor: pointer;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+
+        /* 普通 hover 状态 */
+        .icon-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        /* ------ 筛选按钮：选中状态 (Active) ------ */
+        /* 这里的逻辑：选中时背景变成亮蓝色，图标变成深色（形成高对比度） */
+        .icon-btn.filter-active {
+            background-color: #38bdf8; /* 亮蓝色底色 */
+            color: #0f172a; /* 深蓝色/黑色图标 */
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); /* 可选：微弱的外发光 */
+        }
+
+        /* 选中状态下的 hover */
+        .icon-btn.filter-active:hover {
+            background-color: #7dd3fc; /* 稍微再亮一点 */
+        }
+
+        /* 清除按钮显隐 */
+        .clear-btn { display: none; }
+        .clear-btn.show { display: flex; }
+
+        /* ---------------- 右侧：快捷键 ---------------- */
+        .kbd-shortcut {
+            display: flex; align-items: center;
+            height: 24px; padding: 0 8px; margin-left: 4px; margin-right: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #64748b;
+            font-size: 12px; font-weight: 600;
+            user-select: none; white-space: nowrap;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <div class="search-wrapper" id="searchWrapper">
+        
+        <!-- 左侧：范围选择 -->
+        <div class="scope-selector" id="scopeBtn" title="切换搜索范围">
+            <svg class="icon-svg" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <svg class="icon-svg scope-arrow" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+
+        <!-- 分割线 -->
+        <div class="divider"></div>
+
+        <!-- 中间：输入框 -->
+        <input type="text" class="search-input" id="searchInput" placeholder="搜索书签..." autocomplete="off">
+
+        <!-- 右侧：功能按钮组 -->
+        <div class="action-group">
+            
+            <!-- 清除按钮 -->
+            <button class="icon-btn clear-btn" id="clearBtn" title="清除">
+                <svg class="icon-svg" style="width:16px; height:16px;" viewBox="0 0 24 24">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- 筛选按钮 -->
+            <button class="icon-btn" id="filterBtn" title="筛选条件">
+                <svg class="icon-svg" style="width:18px; height:18px;" viewBox="0 0 24 24">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 分割线 -->
+        <div class="divider" style="height: 16px; margin: 0 4px 0 8px;"></div>
+
+        <!-- 快捷键 -->
+        <div class="kbd-shortcut">
+            <span id="modKey">⌘</span> K
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+    const filterBtn = document.getElementById('filterBtn');
+    const modKey = document.getElementById('modKey');
+
+    // 平台适配
+    modKey.textContent = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? '⌘' : 'Ctrl';
+
+    // 1. 输入监听
+    searchInput.addEventListener('input', (e) => {
+        if (e.target.value.length > 0) {
+            clearBtn.classList.add('show');
+        } else {
+            clearBtn.classList.remove('show');
+        }
+    });
+
+    // 2. 清除功能
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.classList.remove('show');
+        searchInput.focus();
+    });
+
+    // 3. 筛选按钮逻辑
+    let isFilterActive = false;
+
+    filterBtn.addEventListener('click', () => {
+        isFilterActive = !isFilterActive;
+        if (isFilterActive) {
+            filterBtn.classList.add('filter-active');
+            filterBtn.title = "关闭筛选";
+        } else {
+            filterBtn.classList.remove('filter-active');
+            filterBtn.title = "开启筛选";
+        }
+    });
+
+    // 4. 快捷键
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -11,10 +11,12 @@ const props = withDefaults(defineProps<{
   modelValue: string | number
   items: CapsuleTabItem[]
   equalWidth?: boolean
+  stretch?: boolean  // 新增：让 tabs 均分容器宽度
   layout?: 'flex' | 'grid'
   gridCols?: number
 }>(), {
   equalWidth: false,
+  stretch: false,
   layout: 'flex',
   gridCols: 2
 })
@@ -203,7 +205,7 @@ onUnmounted(() => {
       ref="tabsRef" 
       role="tablist" 
       tabindex="0"
-      :class="{ 'layout-grid': layout === 'grid' }"
+      :class="{ 'layout-grid': layout === 'grid', 'layout-stretch': stretch }"
       :style="gridStyle"
       @keydown="handleKeyDown"
     >
@@ -321,6 +323,17 @@ onUnmounted(() => {
   gap: 8px; /* Default gap */
   width: 100%;
   padding-right: 4px; /* Visual compensation */
+}
+
+/* Stretch 模式：均分容器宽度 */
+.capsule-tabs.layout-stretch {
+  display: flex;
+  width: 100%;
+}
+
+.capsule-tabs.layout-stretch .capsule-tab {
+  flex: 1;
+  justify-content: center;
 }
 
 .capsule-indicator {

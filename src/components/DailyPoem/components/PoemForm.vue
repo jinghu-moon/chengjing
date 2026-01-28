@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import { IconArrowLeft, IconSparkles } from '@tabler/icons-vue'
 import { Button } from '../../Button'
+import { Dialog } from '../../Dialog'
 import type { PoemFormData } from '../types'
 
 const props = defineProps<{
@@ -26,6 +27,10 @@ const formData = ref<PoemFormData>({
   dynasty: '',
 })
 
+const resetForm = () => {
+  formData.value = { content: '', author: '', title: '', dynasty: '' }
+}
+
 // 初始化/监听 initialData
 watch(
   () => props.initialData,
@@ -39,11 +44,26 @@ watch(
   { immediate: true, deep: true }
 )
 
-const resetForm = () => {
-  formData.value = { content: '', author: '', title: '', dynasty: '' }
+
+
+const hasContent = () => {
+  return formData.value.content || formData.value.author || formData.value.title
 }
 
+const showConfirmDialog = ref(false)
 
+const handleFetchApi = () => {
+  if (hasContent()) {
+    showConfirmDialog.value = true
+    return
+  }
+  emit('fetch-api')
+}
+
+const confirmFetch = () => {
+  showConfirmDialog.value = false
+  emit('fetch-api')
+}
 
 const onSubmitClick = () => {
   emit('submit', formData.value)
@@ -89,7 +109,7 @@ const onSubmitClick = () => {
         size="small"
         :loading="apiLoading"
         class="fetch-btn"
-        @click="emit('fetch-api')"
+        @click="handleFetchApi"
       >
         <IconSparkles :size="16" />
         从 API 获取
@@ -102,6 +122,18 @@ const onSubmitClick = () => {
         </Button>
       </div>
     </div>
+
+    <!-- 确认对话框 -->
+    <Dialog
+      v-model="showConfirmDialog"
+      type="warning"
+      title="覆盖确认"
+      content="当前表单已有内容，获取新数据将覆盖现有内容，确定继续吗？"
+      ok-text="确认覆盖"
+      cancel-text="再想想"
+      :show-cancel-btn="true"
+      @positive-click="confirmFetch"
+    />
   </div>
 </template>
 

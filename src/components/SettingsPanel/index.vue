@@ -442,6 +442,41 @@ const resetNotePadPos = () => {
                       @update:model-value="setPoemOnlineMode"
                     />
 
+                    <div class="divider"></div>
+                    <SettingSwitch
+                      :model-value="poemSettings.showAuthor"
+                      label="显示作者"
+                      @update:model-value="updatePoemSettings({ showAuthor: $event })"
+                    />
+                    <SettingSwitch
+                      :model-value="poemSettings.showTitle"
+                      label="显示标题"
+                      @update:model-value="updatePoemSettings({ showTitle: $event })"
+                    />
+                    
+                    <div class="divider"></div>
+                    <div class="control-row secondary-label">操作按钮</div>
+                    <SettingSwitch
+                      :model-value="poemSettings.showCollect"
+                      label="收藏按钮"
+                      @update:model-value="updatePoemSettings({ showCollect: $event })"
+                    />
+                    <SettingSwitch
+                      :model-value="poemSettings.showRefresh"
+                      label="刷新按钮"
+                      @update:model-value="updatePoemSettings({ showRefresh: $event })"
+                    />
+                    <SettingSwitch
+                      :model-value="poemSettings.showCard"
+                      label="卡片生成"
+                      @update:model-value="updatePoemSettings({ showCard: $event })"
+                    />
+                    <SettingSwitch
+                      :model-value="poemSettings.showManager"
+                      label="管理面板"
+                      @update:model-value="updatePoemSettings({ showManager: $event })"
+                    />
+
                     <!-- 扩展配置 -->
                     <transition name="expand">
                       <div v-if="isPoemOnline" class="api-config">
@@ -872,7 +907,14 @@ const resetNotePadPos = () => {
 .expand-leave-to {
   max-height: 0;
   opacity: 0;
-  margin-top: 0 !important;
   margin-bottom: 0 !important;
+}
+
+.secondary-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 8px;
+  margin-bottom: 4px;
+  padding-left: 4px;
 }
 </style>

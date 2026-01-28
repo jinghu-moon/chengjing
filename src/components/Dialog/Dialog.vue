@@ -283,8 +283,43 @@ const onAfterLeave = () => {
 }
 
 // 暴露 dialogRef 供父组件使用
+// 暴露 dialogRef 供父组件使用
 defineExpose({
   dialogRef
+})
+
+// ===== 高度自适应动画 =====
+const dialogContentRef = ref<HTMLElement | null>(null)
+const panelHeight = ref<string | number>('auto')
+let resizeObserver: ResizeObserver | null = null
+
+const startObserve = () => {
+  if (!dialogContentRef.value) return
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.borderBoxSize?.[0]) {
+        panelHeight.value = `${entry.borderBoxSize[0].blockSize}px`
+      } else {
+        // Fallback for older browsers
+        panelHeight.value = `${entry.contentRect.height}px`
+      }
+    }
+  })
+  resizeObserver.observe(dialogContentRef.value)
+}
+
+watch(dialogContentRef, (val) => {
+  if (val) {
+    // 首次挂载时使用 nextTick 确保测量准确
+    nextTick(() => startObserve())
+  } else {
+    resizeObserver?.disconnect()
+    panelHeight.value = 'auto'
+  }
+})
+
+onUnmounted(() => {
+  resizeObserver?.disconnect()
 })
 </script>
 
@@ -320,52 +355,54 @@ defineExpose({
             ref="dialogRef"
             class="dialog-panel"
             :class="[type, arrowPlacementClass, props.dialogClass]"
-            :style="containerStyle"
+            :style="[containerStyle, { height: panelHeight }]"
             role="dialog"
             aria-modal="true"
           >
-            <!-- 头部 -->
-            <div class="dialog-header" :class="props.headerClass">
-              <div class="header-content">
-                <div v-if="showIcon" class="status-icon" :class="type">
-                  <component :is="currentIcon" size="22" stroke-width="2" />
+            <div ref="dialogContentRef" class="dialog-panel-inner">
+              <!-- 头部 -->
+              <div class="dialog-header" :class="props.headerClass">
+                <div class="header-content">
+                  <div v-if="showIcon" class="status-icon" :class="type">
+                    <component :is="currentIcon" size="22" stroke-width="2" />
+                  </div>
+                  <div v-if="title || $slots.header" class="title">
+                    <slot name="header">{{ title }}</slot>
+                  </div>
                 </div>
-                <div v-if="title || $slots.header" class="title">
-                  <slot name="header">{{ title }}</slot>
-                </div>
+
+                <button v-if="closable" class="close-btn" @click="handleNegativeClick">
+                  <IconX size="18" />
+                </button>
               </div>
 
-              <button v-if="closable" class="close-btn" @click="handleNegativeClick">
-                <IconX size="18" />
-              </button>
-            </div>
+              <!-- 内容 -->
+              <div class="dialog-body" :class="props.contentClass">
+                <slot>{{ content }}</slot>
+              </div>
 
-            <!-- 内容 -->
-            <div class="dialog-body" :class="props.contentClass">
-              <slot>{{ content }}</slot>
-            </div>
+              <!-- 底部 -->
+              <div v-if="$slots.footer || showConfirmBtn || showCancelBtn" class="dialog-footer" :class="props.footerClass">
+                <slot name="footer">
+                  <Button
+                    v-if="showCancelBtn"
+                    v-bind="{ theme: 'default', variant: 'base', ...props.cancelButtonProps }"
+                    @click="handleNegativeClick"
+                  >
+                    {{ cancelText }}
+                  </Button>
 
-            <!-- 底部 -->
-            <div v-if="$slots.footer || showConfirmBtn || showCancelBtn" class="dialog-footer" :class="props.footerClass">
-              <slot name="footer">
-                <Button
-                  v-if="showCancelBtn"
-                  v-bind="{ theme: 'default', variant: 'base', ...props.cancelButtonProps }"
-                  @click="handleNegativeClick"
-                >
-                  {{ cancelText }}
-                </Button>
-
-                <Button
-                  v-if="showConfirmBtn"
-                  v-bind="{ ...buttonPresets.primary, ...props.okButtonProps }"
-                  :loading="loading || internalLoading"
-                  :disabled="loading || internalLoading"
-                  @click="handlePositiveClick"
-                >
-                  {{ okText }}
-                </Button>
-              </slot>
+                  <Button
+                    v-if="showConfirmBtn"
+                    v-bind="{ ...buttonPresets.primary, ...props.okButtonProps }"
+                    :loading="loading || internalLoading"
+                    :disabled="loading || internalLoading"
+                    @click="handlePositiveClick"
+                  >
+                    {{ okText }}
+                  </Button>
+                </slot>
+              </div>
             </div>
           </div>
         </Transition>
@@ -433,6 +470,14 @@ defineExpose({
   overflow: hidden;
   max-width: 90vw;
   color: var(--text-primary);
+  /* 高度过渡动画 */
+  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: height;
+}
+
+.dialog-panel-inner {
+  display: flex;
+  flex-direction: column;
 }
 
 /* 头部 */

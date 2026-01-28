@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import {
-  IconSearch,
-  IconX,
   IconPlus,
   IconEdit,
   IconTrash,
@@ -11,6 +9,7 @@ import {
 } from '@tabler/icons-vue'
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import { Button } from '../../Button'
+import SearchInput from '../../SearchInput.vue'
 import type { LocalPoem } from '../types'
 import type { PoemListProps } from '../types'
 
@@ -72,23 +71,14 @@ const formatAuthor = (poem: LocalPoem) => {
   <div class="poem-list-view">
     <!-- 搜索栏 -->
     <div class="toolbar">
-      <div class="search-box">
-        <IconSearch :size="16" class="search-icon" />
-        <input
-          v-model="keyword"
-          type="text"
-          placeholder="搜索诗词..."
-          class="search-input"
-        />
-        <button
-          v-if="keyword"
-          class="clear-btn"
-          @click="keyword = ''"
-        >
-          <IconX :size="14" />
-        </button>
-      </div>
-      <Button size="small" @click="emit('add')">
+      <SearchInput
+        v-model="keyword"
+        placeholder="搜索诗词..."
+        size="md"
+        class="search-input-wrapper"
+        @clear="keyword = ''"
+      />
+      <Button size="medium" @click="emit('add')">
         <IconPlus :size="16" />
         新增
       </Button>
@@ -165,49 +155,8 @@ const formatAuthor = (poem: LocalPoem) => {
   align-items: center;
 }
 
-.search-box {
+.search-input-wrapper {
   flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 12px;
-  height: 36px;
-  background: var(--bg-input);
-  border: var(--border-light);
-  border-radius: var(--radius-md);
-}
-
-.search-icon {
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-}
-
-.search-input {
-  flex: 1;
-  border: none;
-  background: none;
-  outline: none;
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.search-input::placeholder {
-  color: var(--text-placeholder);
-}
-
-.clear-btn {
-  padding: 4px;
-  border: none;
-  background: none;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  display: flex;
-  border-radius: var(--radius-sm);
-}
-
-.clear-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-secondary);
 }
 
 .poem-count {
