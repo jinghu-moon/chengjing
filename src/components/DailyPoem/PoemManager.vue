@@ -6,9 +6,10 @@
  * 2. 管理 ViewMode (列表/表单)
  * 3. 编排数据流 (useDailyPoem)
  */
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Dialog } from '../Dialog'
 import { useDailyPoem } from './composables/useDailyPoem'
+import { usePoemSearch } from './composables/usePoemSearch'
 import { type LocalPoem } from './types'
 import { useToast } from '../Toast/composables/useToast'
 import PoemList from './components/PoemList.vue'
@@ -25,11 +26,11 @@ const emit = defineEmits<{
 
 const {
   poemCount,
+  localPoems, // Need access to store
   addPoem,
   updatePoem,
   deletePoem,
   fetchOneForForm,
-  searchPoems,
   exportPoems,
   importPoems,
 } = useDailyPoem()
@@ -38,7 +39,6 @@ const { showToast } = useToast()
 
 // ===== 状态管理 =====
 const viewMode = ref<ViewMode>('list')
-const searchKeyword = ref('')
 const editingId = ref<string | null>(null)
 const formData = ref<PoemFormData | undefined>(undefined)
 const formLoading = ref(false)
@@ -47,10 +47,17 @@ const apiLoading = ref(false)
 // 导入相关
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
-// 过滤列表
-const filteredPoems = computed(() => {
-  return searchPoems(searchKeyword.value)
-})
+// ===== 高性能搜索 =====
+const { 
+  query: searchKeyword, // Bind directly
+  filteredPoems, 
+  search 
+} = usePoemSearch(localPoems)
+
+// 监听搜索词变化
+const handleSearchUpdate = (val: string) => {
+  search(val)
+}
 
 // ===== 事件处理 =====
 
@@ -193,7 +200,7 @@ const handleClose = () => {
           v-if="viewMode === 'list'"
           :poems="filteredPoems"
           :total-count="poemCount"
-          @update:search-keyword="searchKeyword = $event"
+          @update:search-keyword="handleSearchUpdate"
           @add="handleAdd"
           @edit="handleEdit"
           @delete="handleDelete"

@@ -1,467 +1,816 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>滑动胶囊 Tab - 无按钮滚动条版</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗词·云笺 | 终极诗词卡片生成器</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-      :root {
-        --ease-elastic: cubic-bezier(0.34, 1.25, 0.64, 1);
-        --color-primary: #5e81ac;
-        --bg-panel: #e5e9f0;
-        --bg-active: #ffffff;
-        --radius-box: 12px;
-        --radius-item: 8px;
-        --grid-gap: 8px; 
-      }
+        /* ================= 全局变量与重置 ================= */
+        :root {
+            --primary: #8B4513;     /* 主色调：鞍褐色 */
+            --primary-light: #d6bda4;
+            --bg-body: #f0f2f5;
+            --bg-panel: #ffffff;
+            --text-main: #2c1810;
+            --text-sub: #666;
+            --border: #e4e7ed;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 12px;
+        }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-
-      body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background-color: #eceff4;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 40px;
-        min-height: 100vh;
-        color: #2e3440;
-      }
-
-      /* --- 控制面板 --- */
-      .controls-group {
-        display: flex;
-        gap: 20px;
-        background: #fff;
-        padding: 15px 25px;
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        align-items: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      .control-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4c566a; transition: opacity 0.3s; }
-      .control-item.disabled { opacity: 0.4; pointer-events: none; }
-      .divider { width: 1px; height: 20px; background: #d8dee9; margin: 0 10px; }
-      .input-number { width: 50px; padding: 4px; border: 1px solid #d8dee9; border-radius: 6px; text-align: center; outline: none; }
-
-      /* --- 容器 Wrapper --- */
-      .capsule-tabs-wrapper {
-        width: 100%;
-        transition: max-width 0.3s, max-height 0.3s;
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
         
-        background: var(--bg-panel);
-        border-radius: var(--radius-box);
-        border: 1px solid rgba(0,0,0,0.05);
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ================= 顶部导航 ================= */
+        header {
+            height: 60px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            z-index: 20;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* ================= 按钮样式 ================= */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+        }
+        .btn-primary:hover { background: #6d360f; transform: translateY(-1px); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .btn-outline {
+            background: white;
+            border-color: #dcdfe6;
+            color: #606266;
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: #fdf6f2; }
+
+        /* ================= 主布局 ================= */
+        main {
+            display: flex;
+            flex: 1;
+            overflow: hidden; /* 防止整个页面滚动 */
+        }
+
+        /* 左侧控制面板 */
+        .controls-panel {
+            width: 360px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        /* 滚动条美化 */
+        .controls-panel::-webkit-scrollbar { width: 6px; }
+        .controls-panel::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        .control-group { border-bottom: 1px solid #f0f0f0; padding-bottom: 20px; }
+        .control-group:last-child { border-bottom: none; }
         
-        /* 给滚动条留一点内边距，防止贴得太死 */
-        padding: 6px; 
-        padding-right: 2px; 
+        .group-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-title i { color: var(--primary); font-size: 14px; }
+
+        .form-item { margin-bottom: 12px; }
+        .form-label { display: block; font-size: 12px; color: #666; margin-bottom: 6px; }
         
-        display: flex; 
-        flex-direction: column; 
+        /* 输入控件 */
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+        textarea:focus, input:focus, select:focus { border-color: var(--primary); }
+        textarea { resize: vertical; min-height: 80px; }
+
+        .row { display: flex; gap: 10px; align-items: center; }
+        .col { flex: 1; }
+
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--primary); }
+        input[type="color"] { 
+            width: 100%; height: 36px; padding: 0; border: none; 
+            border-radius: 4px; cursor: pointer; background: none; 
+        }
+
+        /* 预设背景网格 */
+        .bg-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .bg-item {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .bg-item.active { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.2); }
+        .bg-item:hover { transform: translateY(-2px); }
+
+        /* ================= 右侧预览区 ================= */
+        .preview-area {
+            flex: 1;
+            background-color: #e4e7ed;
+            /* 棋盘格背景，方便看透明度 */
+            background-image: linear-gradient(45deg, #ddd 25%, transparent 25%), linear-gradient(-45deg, #ddd 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ddd 75%), linear-gradient(-45deg, transparent 75%, #ddd 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: auto;
+            position: relative;
+        }
+
+        /* 真实的卡片容器 wrapper */
+        #card-wrapper {
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: width 0.3s, height 0.3s;
+            /* 初始尺寸 */
+            width: 600px;
+            height: 900px;
+        }
+
+        /* 卡片本体 */
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* 卡片层级系统 */
+        .layer-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 1; transition: filter 0.2s; }
+        .layer-overlay { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+        .layer-texture { position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: 0.15; } /* Canvas 绘制噪点 */
+        .layer-content { 
+            position: relative; 
+            z-index: 10; 
+            width: 100%; 
+            height: 100%; 
+            padding: 50px; 
+            display: flex; 
+        }
+
+        /* 布局系统 */
+        /* 横排：flex-col, 居中 */
+        .layout-horizontal {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        /* 竖排：row-reverse (从右到左), 垂直排版 */
+        .layout-vertical {
+            flex-direction: row-reverse;
+            justify-content: center; /* 在横轴(即视觉上下)居中 */
+            align-items: center;     /* 在纵轴(即视觉左右)居中 */
+        }
+
+        /* 竖排对齐修正 */
+        .layout-vertical.align-top { justify-content: flex-start; } /* 视觉上靠右 */
+        .layout-vertical.align-bottom { justify-content: flex-end; } /* 视觉上靠左 */
         
-        /* Firefox 适配 */
-        scrollbar-width: thin; 
-        scrollbar-color: rgba(0,0,0,0.1) transparent; 
+        .layout-horizontal.align-left { align-items: flex-start; text-align: left; }
+        .layout-horizontal.align-right { align-items: flex-end; text-align: right; }
+
+        /* 文本区域 */
+        .text-group {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .poem-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .meta-text {
+            font-size: 0.5em; /* 相对正文 */
+            opacity: 0.85;
+            transition: all 0.2s;
+        }
+
+        /* 竖排时的特殊文字处理 */
+        .layout-vertical .poem-text, 
+        .layout-vertical .meta-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.1em;
+        }
         
-        overflow: hidden; 
-      }
+        .layout-vertical .poem-text {
+            margin-bottom: 0;
+            margin-left: 24px; /* 竖排时的行间距 */
+            border-left: 1px solid transparent; /* 占位防止塌陷 */
+        }
 
-      /* --- [核心修改] 滚动条样式 --- */
-      
-      .capsule-tabs-wrapper::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
+        /* 字体类 */
+        .font-song { font-family: 'Noto Serif SC', serif; font-weight: 700; }
+        .font-kai { font-family: 'LXGW WenKai Screen', cursive; font-weight: 400; }
+        .font-hei { font-family: "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif; font-weight: 300; }
+        .font-shufa { font-family: 'Ma Shan Zheng', cursive; font-weight: 400; }
 
-      .capsule-tabs-wrapper::-webkit-scrollbar-track {
-        background: transparent;
-        margin: 6px 0; /* 留出边距 */
-      }
+        /* Toast 提示 */
+        .toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
+            background: rgba(0,0,0,0.85); color: #fff; padding: 10px 20px;
+            border-radius: 50px; font-size: 14px; opacity: 0;
+            transition: all 0.3s; pointer-events: none; z-index: 100;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translate(-50%, 0); opacity: 1; }
 
-      .capsule-tabs-wrapper::-webkit-scrollbar-thumb {
-        background-color: transparent; 
-        border-radius: 10px;
-        border: 1px solid transparent; 
-        background-clip: content-box;
-      }
-
-      /* 鼠标悬停显示 */
-      .capsule-tabs-wrapper:hover::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.15); 
-      }
-      .capsule-tabs-wrapper::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(0, 0, 0, 0.3);
-      }
-
-      /* --- Tabs 内容区 --- */
-      .capsule-tabs {
-        position: relative;
-        display: inline-flex;
-        background: transparent;
-        border: none;
-        padding: 0;
-        transition: gap 0.3s; 
-        box-sizing: border-box;
-      }
-
-      .capsule-tabs.layout-grid {
-        display: grid;
-        gap: var(--grid-gap);
-        width: fit-content; 
-        min-width: 100%; 
-        padding-right: 4px; /* 视觉补偿 */
-      }
-
-      /* --- 指示器 --- */
-      .capsule-indicator {
-        position: absolute;
-        top: 0; left: 0;
-        background: var(--bg-active);
-        border-radius: var(--radius-item);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        opacity: 0;
-        pointer-events: none;
-        z-index: 0;
-        transition: transform 0.35s var(--ease-elastic), 
-                    width 0.35s var(--ease-elastic), 
-                    height 0.35s var(--ease-elastic);
-      }
-      .capsule-indicator.initialized { opacity: 1; }
-      .capsule-indicator.no-transition { transition: none !important; }
-
-      /* --- Tab --- */
-      .capsule-tab {
-        position: relative;
-        z-index: 1;
-        padding: 10px 12px;
-        min-width: 80px; 
-        cursor: pointer;
-        user-select: none;
-        color: #4c566a;
-        font-size: 14px;
-        border-radius: var(--radius-item);
-        transition: color 0.2s, width 0.3s var(--ease-elastic);
-        display: inline-grid;
-        grid-template-areas: "stack";
-        place-items: center;
-      }
-
-      .capsule-tabs.layout-grid .capsule-tab {
-        width: 100% !important; 
-        padding: 12px 0;
-      }
-      
-      .capsule-tab:focus-visible { outline: none; } 
-
-      .tab-content {
-        grid-area: stack;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        white-space: nowrap;
-        transition: opacity 0.2s;
-      }
-
-      .tab-ghost {
-        grid-area: stack;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        visibility: hidden;
-        pointer-events: none;
-        font-weight: 600; 
-        white-space: nowrap;
-      }
-
-      .capsule-tab.active .tab-content {
-        color: var(--color-primary);
-        font-weight: 600;
-      }
-
-      /* Switch */
-      .switch { position: relative; display: inline-block; width: 36px; height: 20px;}
-      .switch input { opacity: 0; width: 0; height: 0; }
-      .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #d8dee9; transition: .4s; border-radius: 34px; }
-      .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-      input:checked + .slider { background-color: var(--color-primary); }
-      input:checked + .slider:before { transform: translateX(16px); }
+        /* 响应式 */
+        @media (max-width: 900px) {
+            main { flex-direction: column-reverse; overflow: auto; height: auto; }
+            .controls-panel { width: 100%; height: auto; border-right: none; border-top: 1px solid var(--border); }
+            .preview-area { min-height: 500px; padding: 20px; }
+            #card-wrapper { transform: scale(0.6); transform-origin: center; margin: -100px 0; }
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
 
-    <div class="controls-group">
-      <div class="control-item">
-        <span>网格模式</span>
-        <label class="switch">
-          <input type="checkbox" id="layoutToggle" />
-          <span class="slider"></span>
-        </label>
-      </div>
+    <header>
+        <div class="brand">
+            <i class="fas fa-scroll"></i>
+            <span>诗词·云笺</span>
+        </div>
+        <div class="header-actions">
+            <button id="btnShare" class="btn btn-outline" title="调用系统分享（若支持）">
+                <i class="fas fa-share-alt"></i> 分享
+            </button>
+            <button id="btnDownload" class="btn btn-primary">
+                <i class="fas fa-download"></i> 导出图片
+            </button>
+        </div>
+    </header>
 
-      <div class="divider"></div>
+    <main>
+        <div class="controls-panel">
+            
+            <div class="control-group">
+                <div class="group-title"><i class="fas fa-pen-nib"></i> 内容编辑</div>
+                <div class="form-item">
+                    <label class="form-label">诗句 (支持回车换行)</label>
+                    <textarea id="inputPoem">黄沙百战穿金甲，
+不破楼兰终不还。</textarea>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">落款 (作者 / 标题)</label>
+                    <input type="text" id="inputMeta" value="〔唐〕王昌龄 《从军行》">
+                </div>
+            </div>
 
-      <div class="control-item" id="widthControl">
-        <span>所有 Tab 等宽</span>
-        <label class="switch">
-          <input type="checkbox" id="widthToggle" />
-          <span class="slider"></span>
-        </label>
-      </div>
-      
-      <div class="control-item disabled" id="colLimitControl">
-        <span>列数</span>
-        <input type="number" id="colLimitInput" class="input-number" value="6" min="1" max="10">
-      </div>
+            <div class="control-group">
+                <div class="group-title"><i class="fas fa-align-left"></i> 布局与排版</div>
+                <div class="row form-item">
+                    <div class="col">
+                        <label class="form-label">方向</label>
+                        <select id="selectLayout">
+                            <option value="horizontal">横排 (现代)</option>
+                            <option value="vertical" selected>竖排 (古韵)</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">对齐</label>
+                        <select id="selectAlign">
+                            <option value="center">居中</option>
+                            <option value="top">起首/居左</option>
+                            <option value="bottom">落脚/居右</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">预设尺寸</label>
+                    <select id="selectSize">
+                        <option value="600x900">600 × 900 (竖版海报)</option>
+                        <option value="800x1200">800 × 1200 (长图)</option>
+                        <option value="1080x1080">1080 × 1080 (方形/Ins)</option>
+                        <option value="1200x630">1200 × 630 (公众号/推特)</option>
+                    </select>
+                </div>
+            </div>
 
-      <div class="control-item disabled" id="rowLimitControl">
-        <span>可见行</span>
-        <input type="number" id="rowLimitInput" class="input-number" value="3" min="1" max="10">
-      </div>
+            <div class="control-group">
+                <div class="group-title"><i class="fas fa-font"></i> 字体外观</div>
+                <div class="row form-item">
+                    <div class="col">
+                        <label class="form-label">字体</label>
+                        <select id="selectFont">
+                            <option value="font-song" selected>思源宋体</option>
+                            <option value="font-kai">霞鹜文楷</option>
+                            <option value="font-shufa">马善政书法</option>
+                            <option value="font-hei">HarmonyOS黑体</option>
+                        </select>
+                    </div>
+                    <div class="col" style="flex: 0 0 50px;">
+                        <label class="form-label">颜色</label>
+                        <input type="color" id="inputColor" value="#2c1810">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">字号: <span id="valSize">56</span>px</label>
+                    <input type="range" id="rangeSize" min="24" max="100" value="56">
+                </div>
+                <div class="row form-item">
+                    <div class="col">
+                        <label class="form-label">描边宽度</label>
+                        <input type="range" id="rangeStroke" min="0" max="8" step="0.5" value="0">
+                    </div>
+                    <div class="col" style="flex: 0 0 50px;">
+                        <label class="form-label">描边色</label>
+                        <input type="color" id="inputStrokeColor" value="#ffffff">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">
+                        <input type="checkbox" id="checkShadow" checked> 开启文字阴影
+                    </label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <div class="group-title"><i class="fas fa-image"></i> 背景与质感</div>
+                
+                <div class="form-item">
+                    <label class="form-label">选择背景</label>
+                    <div class="bg-grid" id="bgGrid">
+                        <div class="bg-item active" data-src="https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=800&auto=format&fit=crop" style="background-image: url('https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=200&auto=format&fit=crop')"></div>
+                        <div class="bg-item" data-src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=800&auto=format&fit=crop" style="background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=200&auto=format&fit=crop')"></div>
+                        <div class="bg-item" data-src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800&auto=format&fit=crop" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=200&auto=format&fit=crop')"></div>
+                        <div class="bg-item" data-src="https://images.unsplash.com/photo-1559827291-72ee739d0d9a?q=80&w=800&auto=format&fit=crop" style="background-image: url('https://images.unsplash.com/photo-1559827291-72ee739d0d9a?q=80&w=200&auto=format&fit=crop')"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)" style="background: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)" style="background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"></div>
+                        <div class="bg-item" id="btnUploadBg" style="display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9;">
+                            <i class="fas fa-plus" style="color:#999"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+
+                <div class="form-item">
+                    <label class="form-label">背景模糊: <span id="valBlur">0</span>px</label>
+                    <input type="range" id="rangeBlur" min="0" max="20" value="0">
+                </div>
+
+                <div class="form-item">
+                    <label class="form-label">遮罩浓度 (提升文字可读性)</label>
+                    <input type="range" id="rangeOverlay" min="0" max="0.8" step="0.05" value="0.2">
+                </div>
+
+                <div class="form-item">
+                    <label class="form-label">暗角强度 (Vignette)</label>
+                    <input type="range" id="rangeVignette" min="0" max="1" step="0.05" value="0.3">
+                </div>
+
+                <div class="form-item">
+                    <label class="form-label">纸张纹理强度 (Noise)</label>
+                    <input type="range" id="rangeNoise" min="0" max="0.5" step="0.02" value="0.12">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="preview-area">
+            <div id="card-wrapper">
+                <div class="card" id="card">
+                    <div class="layer-bg" id="layerBg"></div>
+                    <div class="layer-overlay" id="layerOverlay"></div>
+                    <canvas class="layer-texture" id="canvasNoise"></canvas>
+                    
+                    <div class="layer-content layout-vertical font-song" id="contentLayer">
+                        <div class="text-group">
+                            <div class="poem-text" id="displayPoem">黄沙百战穿金甲，
+不破楼兰终不还。</div>
+                            <div class="meta-text" id="displayMeta">〔唐〕王昌龄 《从军行》</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMsg">操作成功</span>
     </div>
 
-    <!-- Wrapper -->
-    <div class="capsule-tabs-wrapper">
-      <!-- Tabs -->
-      <div class="capsule-tabs" id="tabs" role="tablist">
-        <div class="capsule-indicator"></div>
-        <div class="capsule-tab active"><div class="tab-content">首页概览</div></div>
-        <div class="capsule-tab"><div class="tab-content">API 接口</div></div>
-        <div class="capsule-tab"><div class="tab-content">配置中心</div></div>
-        <div class="capsule-tab"><div class="tab-content">账户安全</div></div>
-        <div class="capsule-tab"><div class="tab-content">审计日志</div></div>
-        <div class="capsule-tab"><div class="tab-content">数据分析</div></div>
-        <div class="capsule-tab"><div class="tab-content">偏好设置</div></div>
-        <div class="capsule-tab"><div class="tab-content">团队管理</div></div>
-        <div class="capsule-tab"><div class="tab-content">账单支付</div></div>
-        <div class="capsule-tab"><div class="tab-content">通知中心</div></div>
-        <div class="capsule-tab"><div class="tab-content">外部集成</div></div>
-        <div class="capsule-tab"><div class="tab-content">帮助文档</div></div>
-        <div class="capsule-tab"><div class="tab-content">关于我们</div></div>
-        <div class="capsule-tab"><div class="tab-content">版本更新</div></div>
-        <div class="capsule-tab"><div class="tab-content">退出登录</div></div>
-      </div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
-      const tabs = document.querySelectorAll(".capsule-tab");
-      const indicator = document.querySelector(".capsule-indicator");
-      const container = document.querySelector(".capsule-tabs");
-      const wrapper = document.querySelector(".capsule-tabs-wrapper");
-      
-      const layoutToggle = document.getElementById("layoutToggle");
-      const widthToggle = document.getElementById("widthToggle");
-      const widthControl = document.getElementById("widthControl");
-      const rowLimitInput = document.getElementById("rowLimitInput");
-      const colLimitInput = document.getElementById("colLimitInput");
-      const rowLimitControl = document.getElementById("rowLimitControl");
-      const colLimitControl = document.getElementById("colLimitControl");
+        /**
+         * 状态管理
+         */
+        const state = {
+            poem: document.getElementById('inputPoem').value,
+            meta: document.getElementById('inputMeta').value,
+            layout: 'vertical',
+            align: 'center', // top, bottom, center
+            size: '600x900',
+            font: 'font-song',
+            color: '#2c1810',
+            fontSize: 56,
+            strokeWidth: 0,
+            strokeColor: '#ffffff',
+            shadow: true,
+            bgType: 'image',
+            bgSrc: 'https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=800&auto=format&fit=crop',
+            blur: 0,
+            overlay: 0.2,
+            vignette: 0.3,
+            noise: 0.12
+        };
 
-      let maxTabWidth = 0;
-      let isWindowResizing = false;
-      let resizeTimer = null;
+        const els = {
+            inputPoem: document.getElementById('inputPoem'),
+            inputMeta: document.getElementById('inputMeta'),
+            selectLayout: document.getElementById('selectLayout'),
+            selectAlign: document.getElementById('selectAlign'),
+            selectSize: document.getElementById('selectSize'),
+            selectFont: document.getElementById('selectFont'),
+            inputColor: document.getElementById('inputColor'),
+            rangeSize: document.getElementById('rangeSize'),
+            valSize: document.getElementById('valSize'),
+            rangeStroke: document.getElementById('rangeStroke'),
+            inputStrokeColor: document.getElementById('inputStrokeColor'),
+            checkShadow: document.getElementById('checkShadow'),
+            
+            // 背景类
+            rangeBlur: document.getElementById('rangeBlur'),
+            valBlur: document.getElementById('valBlur'),
+            rangeOverlay: document.getElementById('rangeOverlay'),
+            rangeVignette: document.getElementById('rangeVignette'),
+            rangeNoise: document.getElementById('rangeNoise'),
+            fileInput: document.getElementById('fileInput'),
+            btnUploadBg: document.getElementById('btnUploadBg'),
+            bgItems: document.querySelectorAll('.bg-item:not(#btnUploadBg)'),
+            
+            // 预览元素
+            wrapper: document.getElementById('card-wrapper'),
+            card: document.getElementById('card'),
+            layerBg: document.getElementById('layerBg'),
+            layerOverlay: document.getElementById('layerOverlay'),
+            canvasNoise: document.getElementById('canvasNoise'),
+            contentLayer: document.getElementById('contentLayer'),
+            displayPoem: document.getElementById('displayPoem'),
+            displayMeta: document.getElementById('displayMeta'),
+            
+            // 按钮
+            btnDownload: document.getElementById('btnDownload'),
+            btnShare: document.getElementById('btnShare'),
+            toast: document.getElementById('toast'),
+            toastMsg: document.getElementById('toastMsg')
+        };
 
-      function initGhostElements() {
-        tabs.forEach(tab => {
-          const content = tab.querySelector('.tab-content');
-          if (content && !tab.querySelector('.tab-ghost')) {
-            const ghost = content.cloneNode(true);
-            ghost.className = 'tab-ghost';
-            tab.appendChild(ghost);
-          }
-        });
-      }
-
-      function calculateMaxTabWidth() {
-        tabs.forEach(tab => tab.style.width = '');
-        maxTabWidth = 0;
-        tabs.forEach(tab => {
-          const w = tab.getBoundingClientRect().width;
-          if (w > maxTabWidth) maxTabWidth = w;
-        });
-      }
-
-      window.addEventListener('resize', () => {
-        isWindowResizing = true;
-        updateIndicator(false);
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => isWindowResizing = false, 200);
-      });
-
-      const resizeObserver = new ResizeObserver(entries => {
-        updateIndicator(!isWindowResizing);
-      });
-
-      function scrollActiveIntoView(tab) {
-        const isGrid = layoutToggle.checked;
-        const tabLeft = tab.offsetLeft;
-        const tabTop = tab.offsetTop;
-        const tabWidth = tab.offsetWidth;
-        const tabHeight = tab.offsetHeight;
-        const wrapperWidth = wrapper.offsetWidth;
-        const wrapperHeight = wrapper.clientHeight;
-
-        if (!isGrid) {
-          const scrollTo = tabLeft - wrapperWidth / 2 + tabWidth / 2;
-          wrapper.scrollTo({ left: scrollTo, behavior: "smooth" });
-        } else {
-          const scrollTop = tabTop - wrapperHeight / 2 + tabHeight / 2;
-          const scrollLeft = tabLeft - wrapperWidth / 2 + tabWidth / 2;
-          wrapper.scrollTo({ top: scrollTop, left: scrollLeft, behavior: "smooth" });
-        }
-      }
-
-      function updateIndicator(enableTransition = true) {
-        const activeTab = document.querySelector(".capsule-tab.active");
-        if (!activeTab) return;
-
-        if (!enableTransition) {
-            indicator.classList.add('no-transition');
-        } else {
-            indicator.classList.remove('no-transition');
+        /**
+         * 初始化与事件绑定
+         */
+        function init() {
+            bindEvents();
+            renderAll();
+            drawNoise();
         }
 
-        const left = activeTab.offsetLeft;
-        const top = activeTab.offsetTop;
-        const width = activeTab.offsetWidth;
-        const height = activeTab.offsetHeight;
+        function bindEvents() {
+            // 内容输入
+            els.inputPoem.addEventListener('input', e => { state.poem = e.target.value; updateText(); });
+            els.inputMeta.addEventListener('input', e => { state.meta = e.target.value; updateText(); });
 
-        indicator.style.width = `${width}px`;
-        indicator.style.height = `${height}px`;
-        indicator.style.transform = `translate(${left}px, ${top}px)`;
+            // 布局
+            els.selectLayout.addEventListener('change', e => { state.layout = e.target.value; updateLayout(); });
+            els.selectAlign.addEventListener('change', e => { state.align = e.target.value; updateLayout(); });
+            els.selectSize.addEventListener('change', e => { state.size = e.target.value; updateSize(); });
 
-        if(!enableTransition) {
-             indicator.offsetHeight; 
-             requestAnimationFrame(() => indicator.classList.remove('no-transition'));
+            // 字体样式
+            els.selectFont.addEventListener('change', e => { state.font = e.target.value; updateStyle(); });
+            els.inputColor.addEventListener('input', e => { state.color = e.target.value; updateStyle(); });
+            els.rangeSize.addEventListener('input', e => { state.fontSize = parseInt(e.target.value); els.valSize.innerText = state.fontSize; updateStyle(); });
+            els.rangeStroke.addEventListener('input', e => { state.strokeWidth = parseFloat(e.target.value); updateStyle(); });
+            els.inputStrokeColor.addEventListener('input', e => { state.strokeColor = e.target.value; updateStyle(); });
+            els.checkShadow.addEventListener('change', e => { state.shadow = e.target.checked; updateStyle(); });
+
+            // 背景特效
+            els.rangeBlur.addEventListener('input', e => { state.blur = e.target.value; els.valBlur.innerText = state.blur; updateBgEffects(); });
+            els.rangeOverlay.addEventListener('input', e => { state.overlay = e.target.value; updateBgEffects(); });
+            els.rangeVignette.addEventListener('input', e => { state.vignette = e.target.value; updateBgEffects(); });
+            els.rangeNoise.addEventListener('input', e => { state.noise = e.target.value; drawNoise(); });
+
+            // 背景选择
+            els.bgItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelector('.bg-item.active')?.classList.remove('active');
+                    item.classList.add('active');
+                    state.bgType = item.dataset.type || 'image';
+                    state.bgSrc = item.dataset.src;
+                    updateBg();
+                });
+            });
+
+            // 上传
+            els.btnUploadBg.addEventListener('click', () => els.fileInput.click());
+            els.fileInput.addEventListener('change', handleUpload);
+
+            // 导出
+            els.btnDownload.addEventListener('click', () => exportImage(false));
+            els.btnShare.addEventListener('click', () => exportImage(true));
         }
 
-        scrollActiveIntoView(activeTab);
-      }
-
-      function updateLayout() {
-        const isGrid = layoutToggle.checked;
-        const isEqualWidth = widthToggle.checked;
-
-        if (!isGrid) {
-          container.classList.remove("layout-grid");
-          container.style.gridTemplateColumns = '';
-          wrapper.style.maxHeight = '';
-          wrapper.style.overflowY = 'hidden';
-          wrapper.style.overflowX = 'auto';
-          wrapper.style.maxWidth = "100%";
-          container.style.width = ''; 
-          container.style.minWidth = '';
-
-          widthControl.classList.remove("disabled");
-          colLimitControl.classList.add("disabled");
-          rowLimitControl.classList.add("disabled");
-
-          tabs.forEach(tab => {
-             if (isEqualWidth) {
-                 tab.style.width = `${maxTabWidth}px`;
-             } else {
-                 tab.style.width = ''; 
-             }
-          });
-
-        } else {
-          container.classList.add("layout-grid");
-          wrapper.style.maxWidth = "400px"; 
-
-          widthControl.classList.add("disabled");
-          colLimitControl.classList.remove("disabled");
-          rowLimitControl.classList.remove("disabled");
-
-          const cols = parseInt(colLimitInput.value) || 2;
-          container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-          
-          tabs.forEach(tab => tab.style.width = '');
-
-          const rows = parseInt(rowLimitInput.value) || 3;
-          const sampleTab = tabs[0];
-          const tabHeight = sampleTab.offsetHeight || 44;
-          const gap = 8;
-          // 注意：Wrapper padding 6px * 2 = 12px
-          const wrapperPadding = 12; 
-          const totalGap = Math.max(0, rows - 1) * gap;
-          const visibleHeight = (tabHeight * rows) + totalGap + wrapperPadding;
-          
-          wrapper.style.maxHeight = `${visibleHeight}px`;
-          wrapper.style.overflowY = 'auto'; 
-          wrapper.style.overflowX = 'auto'; 
+        /**
+         * 渲染逻辑
+         */
+        function renderAll() {
+            updateText();
+            updateLayout();
+            updateSize();
+            updateStyle();
+            updateBg();
+            updateBgEffects();
         }
-      }
 
-      function setActiveTab(tab) {
-        const oldActive = document.querySelector(".capsule-tab.active");
-        if (oldActive) resizeObserver.unobserve(oldActive);
+        function updateText() {
+            els.displayPoem.textContent = state.poem;
+            els.displayMeta.textContent = state.meta;
+        }
 
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        
-        resizeObserver.observe(tab);
-        updateIndicator(true);
-      }
+        function updateLayout() {
+            const cl = els.contentLayer.classList;
+            // 清除
+            cl.remove('layout-horizontal', 'layout-vertical', 'align-top', 'align-bottom', 'align-left', 'align-right');
+            
+            // 添加主布局
+            cl.add(`layout-${state.layout}`);
 
-      function handleControlsChange() {
-        indicator.classList.add('no-transition');
-        updateLayout();
-        requestAnimationFrame(() => {
-            updateIndicator(false);
-        });
-      }
-
-      function initKeyboardNav() {
-        container.addEventListener("keydown", (e) => {
-          const isGrid = layoutToggle.checked;
-          const activeTab = document.querySelector(".capsule-tab.active");
-          const tabList = Array.from(tabs);
-          const index = tabList.indexOf(activeTab);
-          const cols = parseInt(colLimitInput.value) || 2;
-
-          let nextIndex = null;
-          if (e.key === "ArrowRight") nextIndex = index + 1;
-          if (e.key === "ArrowLeft") nextIndex = index - 1;
-          
-          if (isGrid) {
-            if (e.key === "ArrowDown") nextIndex = index + cols;
-            if (e.key === "ArrowUp") nextIndex = index - cols;
-          }
-
-          if (nextIndex !== null) {
-            e.preventDefault();
-            if (nextIndex >= 0 && nextIndex < tabList.length) {
-                setActiveTab(tabList[nextIndex]);
+            // 添加对齐
+            if (state.layout === 'vertical') {
+                if (state.align === 'top') cl.add('align-top');
+                if (state.align === 'bottom') cl.add('align-bottom');
+            } else {
+                if (state.align === 'top') cl.add('align-left');
+                if (state.align === 'bottom') cl.add('align-right');
             }
-          }
-        });
-      }
+        }
 
-      window.addEventListener("load", () => {
-        initGhostElements();    
-        calculateMaxTabWidth(); 
+        function updateSize() {
+            const [w, h] = state.size.split('x').map(Number);
+            els.wrapper.style.width = w + 'px';
+            els.wrapper.style.height = h + 'px';
+            // 尺寸改变后重绘噪音，防止拉伸
+            setTimeout(drawNoise, 100); 
+        }
 
-        tabs.forEach(tab => tab.addEventListener("click", () => setActiveTab(tab)));
+        function updateStyle() {
+            const cl = els.contentLayer.classList;
+            cl.remove('font-song', 'font-kai', 'font-hei', 'font-shufa');
+            cl.add(state.font);
+
+            // 颜色
+            els.displayPoem.style.color = state.color;
+            // 落款颜色稍微淡一点，自动计算
+            els.displayMeta.style.color = adjustColor(state.color, 20);
+
+            // 字号
+            els.displayPoem.style.fontSize = state.fontSize + 'px';
+            // 竖排时，文字间距随字号微调
+            if (state.layout === 'vertical') {
+                els.displayPoem.style.marginLeft = (state.fontSize * 0.5) + 'px';
+            } else {
+                els.displayPoem.style.marginLeft = '0';
+            }
+
+            // 描边
+            if (state.strokeWidth > 0) {
+                const stroke = `${state.strokeWidth}px ${state.strokeColor}`;
+                els.displayPoem.style.webkitTextStroke = stroke;
+                els.displayMeta.style.webkitTextStroke = `${state.strokeWidth/2}px ${state.strokeColor}`;
+            } else {
+                els.displayPoem.style.webkitTextStroke = 'unset';
+                els.displayMeta.style.webkitTextStroke = 'unset';
+            }
+
+            // 阴影
+            if (state.shadow) {
+                const sVal = `0 2px 4px rgba(0,0,0,0.3)`;
+                els.displayPoem.style.textShadow = sVal;
+                els.displayMeta.style.textShadow = sVal;
+            } else {
+                els.displayPoem.style.textShadow = 'none';
+                els.displayMeta.style.textShadow = 'none';
+            }
+        }
+
+        function updateBg() {
+            if (state.bgType === 'css') {
+                els.layerBg.style.backgroundImage = state.bgSrc;
+            } else {
+                els.layerBg.style.backgroundImage = `url('${state.bgSrc}')`;
+            }
+        }
+
+        function updateBgEffects() {
+            // 模糊
+            els.layerBg.style.filter = `blur(${state.blur}px)`;
+            
+            // 遮罩 + 暗角
+            // 使用 linear-gradient 实现遮罩，使用 radial-gradient 实现暗角
+            const overlayColor = `rgba(0,0,0,${state.overlay})`;
+            const vignetteColor = `rgba(0,0,0,${state.vignette})`;
+            
+            let bgString = `linear-gradient(${overlayColor}, ${overlayColor})`; // 基础遮罩
+            
+            if (state.vignette > 0) {
+                // 叠加暗角：中心透明，边缘黑
+                bgString += `, radial-gradient(circle at center, transparent 40%, ${vignetteColor} 100%)`;
+            }
+            
+            els.layerOverlay.style.background = bgString;
+        }
+
+        /**
+         * Canvas 绘制噪点 (纸张质感)
+         */
+        function drawNoise() {
+            const canvas = els.canvasNoise;
+            const ctx = canvas.getContext('2d');
+            const w = els.wrapper.offsetWidth;
+            const h = els.wrapper.offsetHeight;
+            
+            canvas.width = w;
+            canvas.height = h;
+            ctx.clearRect(0, 0, w, h);
+
+            if (state.noise <= 0) return;
+
+            const alpha = state.noise;
+            const idata = ctx.createImageData(w, h);
+            const buffer32 = new Uint32Array(idata.data.buffer);
+            const len = buffer32.length;
+
+            for (let i = 0; i < len; i++) {
+                if (Math.random() < 0.5) {
+                    // 黑色噪点
+                    buffer32[i] = (255 * alpha) << 24; 
+                }
+            }
+            ctx.putImageData(idata, 0, 0);
+        }
+
+        function handleUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                state.bgType = 'image';
+                state.bgSrc = evt.target.result;
+                updateBg();
+                showToast("背景已上传");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        /**
+         * 导出与分享
+         */
+        async function exportImage(isShare) {
+            const btn = isShare ? els.btnShare : els.btnDownload;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 处理中...`;
+            btn.disabled = true;
+
+            try {
+                // 确保尺寸正确，canvas 重绘
+                drawNoise();
+
+                const canvas = await html2canvas(els.wrapper, {
+                    scale: 2, // 2倍高清
+                    useCORS: true, // 允许跨域图片
+                    backgroundColor: null,
+                    logging: false
+                });
+
+                if (isShare && navigator.share) {
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], "poem_card.png", { type: "image/png" });
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: '分享诗词卡片',
+                                text: state.poem
+                            });
+                            showToast("分享成功");
+                        } catch (err) {
+                            console.log("分享取消或不支持");
+                        }
+                    });
+                } else {
+                    const link = document.createElement('a');
+                    link.download = `诗词云笺_${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    showToast("图片已开始下载");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast("生成失败，请重试");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // 工具：颜色亮度调整
+        function adjustColor(hex, amount) {
+            return hex; // 简化版，直接返回原色，实际项目可用更复杂的hex变淡算法
+        }
         
-        layoutToggle.addEventListener("change", handleControlsChange);
-        widthToggle.addEventListener("change", handleControlsChange); 
-        
-        [rowLimitInput, colLimitInput].forEach(input => {
-          input.addEventListener("input", updateLayout);
-        });
+        function showToast(msg) {
+            els.toastMsg.innerText = msg;
+            els.toast.classList.add('show');
+            setTimeout(() => els.toast.classList.remove('show'), 2000);
+        }
 
-        const firstTab = document.querySelector('.capsule-tab.active');
-        if(firstTab) resizeObserver.observe(firstTab);
+        // 启动
+        init();
 
-        initKeyboardNav();
-        handleControlsChange(); 
-        
-        setTimeout(() => indicator.classList.add("initialized"), 100);
-      });
     </script>
-  </body>
+</body>
 </html>

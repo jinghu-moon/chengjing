@@ -1,4 +1,5 @@
-import { shallowRef } from 'vue'
+import { shallowRef, toRaw } from 'vue'
+import { get, set } from 'idb-keyval'
 import { type LocalPoem } from '../types'
 import defaultPoemsData from '@/data/poems.json'
 
@@ -7,6 +8,7 @@ const LOCAL_POEMS_KEY = 'daily-poem-local-poems'
 // 单例状态
 const localPoems = shallowRef<LocalPoem[]>([])
 let initialized = false
+let initPromise: Promise<void> | null = null
 
 /** 生成唯一 ID */
 export const generateId = (): string => {
@@ -17,40 +19,66 @@ export const generateId = (): string => {
 }
 
 export function usePoemData() {
-  /** 保存本地诗词到 localStorage */
-  const saveLocalPoems = () => {
+  /** 保存本地诗词到 IndexedDB (异步) */
+  const saveLocalPoems = async () => {
     try {
-      localStorage.setItem(LOCAL_POEMS_KEY, JSON.stringify(localPoems.value))
+      // 使用 toRaw 获取原始对象，避免 Proxy 问题 (尽管 idb-keyval 通常能处理)
+      await set(LOCAL_POEMS_KEY, toRaw(localPoems.value))
     } catch (e) {
       console.warn('[DailyPoem] 本地诗词保存失败', e)
     }
   }
 
-  /** 初始化本地诗词 */
-  const initLocalPoems = () => {
+  /** 初始化本地诗词 (支持从 localStorage 迁移) */
+  const initLocalPoems = async () => {
     if (initialized) return
-    initialized = true
-    
-    try {
-      const stored = localStorage.getItem(LOCAL_POEMS_KEY)
-      if (stored) {
-        localPoems.value = JSON.parse(stored)
-      } else {
-        // 首次使用，从默认数据初始化
-        // FIXME: 类型断言可能需要调整，这里假设 defaultPoemsData 结构正确
-        // @ts-ignore
-        const defaultPoems = (defaultPoemsData.poems).map((p: any) => ({
-          id: generateId(),
-          ...p,
-          createdAt: Date.now()
-        }))
-        localPoems.value = defaultPoems
-        saveLocalPoems()
+    if (initPromise) return initPromise
+
+    initPromise = (async () => {
+      try {
+        // 1. 尝试从 IDB 读取
+        let data = await get<LocalPoem[]>(LOCAL_POEMS_KEY)
+
+        // 2. 迁移逻辑：如果 IDB 为空，检查 localStorage
+        if (!data) {
+          const localStr = localStorage.getItem(LOCAL_POEMS_KEY)
+          if (localStr) {
+            try {
+              data = JSON.parse(localStr)
+              // 迁移到 IDB
+              await set(LOCAL_POEMS_KEY, data)
+              // 清理旧数据
+              localStorage.removeItem(LOCAL_POEMS_KEY)
+              console.log('[DailyPoem] 已将诗词数据迁移至 IndexedDB')
+            } catch (e) {
+              console.warn('[DailyPoem] 迁移失败，将使用默认数据', e)
+            }
+          }
+        }
+
+        // 3. 默认数据初始化
+        if (!data) {
+          // @ts-ignore
+          const defaultPoems = (defaultPoemsData.poems).map((p: any) => ({
+            id: generateId(),
+            ...p,
+            createdAt: Date.now()
+          }))
+          data = defaultPoems
+          await set(LOCAL_POEMS_KEY, data)
+        }
+
+        localPoems.value = data || []
+        initialized = true
+      } catch (e) {
+        console.warn('[DailyPoem] 初始化失败', e)
+        localPoems.value = []
+      } finally {
+        initPromise = null
       }
-    } catch (e) {
-      console.warn('[DailyPoem] 本地诗词加载失败', e)
-      localPoems.value = []
-    }
+    })()
+
+    return initPromise
   }
 
   /** 新增诗词 */
@@ -61,7 +89,7 @@ export function usePoemData() {
       createdAt: Date.now()
     }
     localPoems.value = [newPoem, ...localPoems.value]
-    saveLocalPoems()
+    saveLocalPoems() // 触发异步保存
     return newPoem
   }
 

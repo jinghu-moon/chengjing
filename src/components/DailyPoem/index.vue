@@ -53,43 +53,59 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="poem" class="daily-poem">
-    <div class="poem-content">
-      <span class="quote-mark">「</span>
-      <span class="poem-text">{{ poem.content }}</span>
-      <span class="quote-mark">」</span>
-    </div>
-    <div class="poem-footer">
-      <span class="author-info">─ {{ authorInfo }}</span>
-      <div class="action-btns">
-        <!-- 收藏按钮（在线模式显示） -->
-        <button
-          v-if="isOnlineMode"
-          class="icon-btn"
-          title="收藏到本地"
-          @click="handleSave"
-        >
-          <IconStar :size="14" />
-        </button>
-        <!-- 刷新按钮 -->
-        <button
-          class="icon-btn"
-          :class="{ spinning: loading }"
-          title="换一首"
-          @click="handleRefresh"
-        >
-          <IconRefresh :size="14" />
-        </button>
-        <!-- 管理按钮 -->
-        <button
-          class="icon-btn"
-          title="诗词管理"
-          @click="isManagerOpen = true"
-        >
-          <IconSettings :size="14" />
-        </button>
+  <div class="daily-poem">
+    <!-- 内容区域 -->
+    <Transition name="fade-blur" mode="out-in">
+      <!-- 有数据状态 -->
+      <div v-if="poem" :key="poem.content" class="content-wrapper">
+        <div class="poem-content">
+          <span class="quote-mark">「</span>
+          <span class="poem-text">{{ poem.content }}</span>
+          <span class="quote-mark">」</span>
+        </div>
+        <div class="poem-footer">
+          <span class="author-info">─ {{ authorInfo }}</span>
+          <div class="action-btns">
+            <!-- 收藏按钮 -->
+            <button
+              v-if="isOnlineMode"
+              class="icon-btn"
+              title="收藏到本地"
+              @click="handleSave"
+            >
+              <IconStar :size="14" />
+            </button>
+            <!-- 刷新按钮 -->
+            <button
+              class="icon-btn"
+              :class="{ spinning: loading }"
+              title="换一首"
+              @click="handleRefresh"
+            >
+              <IconRefresh :size="14" />
+            </button>
+            <!-- 管理按钮 -->
+            <button
+              class="icon-btn"
+              title="诗词管理"
+              @click="isManagerOpen = true"
+            >
+              <IconSettings :size="14" />
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- 加载/空状态 -->
+      <div v-else class="content-wrapper skeleton" key="skeleton">
+        <div class="poem-content">
+          <span class="text-placeholder">正在寻觅佳句...</span>
+        </div>
+        <div class="poem-footer">
+          <div class="author-placeholder"></div>
+        </div>
+      </div>
+    </Transition>
   </div>
 
   <!-- 管理面板 -->
@@ -104,9 +120,16 @@ onMounted(() => {
   transform: translateX(-50%);
   width: auto;
   max-width: 600px;
+  min-width: 320px; /* 防止内容切换时宽度跳变过大 */
   padding: 12px 24px;
   text-align: center;
   z-index: var(--z-panel);
+}
+
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .poem-content {
@@ -114,17 +137,20 @@ onMounted(() => {
   line-height: 1.8;
   color: var(--text-primary);
   margin-bottom: 12px;
+  position: relative;
 }
 
 .quote-mark {
   color: var(--text-tertiary);
   font-size: 20px;
   vertical-align: middle;
+  opacity: 0.6;
 }
 
 .poem-text {
   font-weight: 500;
   letter-spacing: 0.5px;
+  margin: 0 4px;
 }
 
 .poem-footer {
@@ -132,6 +158,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  height: 24px; /* 固定高度 */
 }
 
 .author-info {
@@ -165,14 +192,45 @@ onMounted(() => {
 
 .icon-btn.spinning {
   animation: spin 1s linear infinite;
+  color: var(--color-primary); /* 加载时高亮 */
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 过渡动画 */
+.fade-blur-enter-active,
+.fade-blur-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-blur-enter-from,
+.fade-blur-leave-to {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(4px) scale(0.98);
+}
+
+/* 骨架屏样式 */
+.skeleton .text-placeholder {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  animation: pulse 2s infinite;
+}
+
+.skeleton .author-placeholder {
+  width: 60px;
+  height: 14px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
 }
 </style>

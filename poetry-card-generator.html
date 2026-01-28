@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗词·云笺 | Poetry Card Generator</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ========== Import Design System ========== */
+        /* Inline variables.css for self-contained demo */
+        :root {
+            /* Nord Primitives */
+            --nord: #1f232a;
+            --nord0: #2e3440;
+            --nord1: #3b4252;
+            --nord2: #434c5e;
+            --nord3: #4c566a;
+            --nord4: #d8dee9;
+            --nord5: #e5e9f0;
+            --nord6: #eceff4;
+            --nord7: #8fbcbb;
+            --nord8: #88c0d0;
+            --nord9: #81a1c1;
+            --nord10: #5e81ac;
+            --nord11: #bf616a;
+            --nord12: #d08770;
+            --nord13: #ebcb8b;
+            --nord14: #a3be8c;
+            --nord15: #b48ead;
+
+            /* Colors */
+            --color-primary: var(--nord10);
+            --color-primary-hover: var(--nord9);
+            --color-primary-active: #4a6a94;
+            --color-success: var(--nord14);
+            --color-warning: var(--nord13);
+            --color-danger: var(--nord11);
+            --color-relax: var(--nord8);
+
+            --text-primary: rgba(236, 239, 244, 0.95);
+            --text-secondary: rgba(216, 222, 233, 0.75);
+            --text-tertiary: rgba(216, 222, 233, 0.45);
+            --text-placeholder: rgba(216, 222, 233, 0.3);
+
+            /* Backgrounds */
+            --bg-toast: rgba(46, 52, 64, 1);
+            --bg-panel: rgba(46, 52, 64, 0.75);
+            --bg-panel-card: rgba(46, 52, 64, 0.3);
+            --bg-hover: rgba(31, 35, 42, 0.08);
+            --bg-active: rgba(236, 239, 244, 0.12);
+            --bg-input: rgba(236, 239, 244, 0.05);
+
+            /* Borders */
+            --color-border-glass: rgba(255, 255, 255, 0.08);
+            --color-divider: rgba(236, 239, 244, 0.15);
+            --border-glass: 1px solid var(--color-border-glass);
+            --border-divider: 1px solid var(--color-divider);
+
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-ml: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+
+            /* Glass Effects */
+            --glass-saturate: 150%;
+            --glass-brightness: 110%;
+            --blur-sm: 8px;
+            --blur-md: 16px;
+            --blur-lg: 32px;
+            --glass-sm: blur(var(--blur-sm)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+            --glass-md: blur(var(--blur-md)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+            --glass-lg: blur(var(--blur-lg)) saturate(var(--glass-saturate)) brightness(var(--glass-brightness));
+
+            /* Shadows */
+            --shadow-color: var(--nord0);
+            --shadow-sm: 0 2px 4px rgba(46, 52, 64, 0.2);
+            --shadow-md: 0 8px 16px rgba(46, 52, 64, 0.3);
+            --shadow-lg: 0 16px 48px rgba(46, 52, 64, 0.5);
+            --text-shadow: 0 2px 10px rgba(46, 52, 64, 0.3);
+
+            /* Z-Index */
+            --z-base: 1;
+            --z-widget: 100;
+            --z-panel: 200;
+            --z-modal: 500;
+            --z-tooltip: 800;
+            --z-max: 9999;
+
+            /* Animation */
+            --duration-fast: 0.2s;
+            --duration-normal: 0.3s;
+            --duration-slow: 0.5s;
+            --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+            /* Spacing */
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+
+            /* Typography */
+            --font-family-base: 'HarmonyOS Sans SC', 'PingFang SC', -apple-system, sans-serif;
+            --font-family-serif: 'Noto Serif SC', serif;
+            --font-family-kai: 'LXGW WenKai Screen', cursive;
+            --font-family-shufa: 'Ma Shan Zheng', cursive;
+            
+            --text-xs: 0.75rem;
+            --text-sm: 0.8125rem;
+            --text-base: 0.875rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+        }
+
+        /* ========== Global Reset ========== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: linear-gradient(135deg, var(--nord0) 0%, var(--nord1) 100%);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(129, 161, 193, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(163, 190, 140, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 90%, rgba(180, 142, 173, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========== Header ========== */
+        .header {
+            height: 64px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass-md);
+            -webkit-backdrop-filter: var(--glass-md);
+            border-bottom: var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-6);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            z-index: var(--z-widget);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: var(--font-family-serif);
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--nord10) 0%, var(--nord8) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* ========== Button System ========== */
+        .btn {
+            padding: 0 var(--space-4);
+            height: 36px;
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            cursor: pointer;
+            border: var(--border-glass);
+            transition: all var(--duration-fast) var(--ease-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity var(--duration-fast);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-outline {
+            background: var(--bg-panel-card);
+            backdrop-filter: var(--glass-sm);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn i {
+            font-size: var(--text-base);
+        }
+
+        /* ========== Main Layout ========== */
+        .main {
+            display: flex;
+            height: calc(100vh - 64px);
+            position: relative;
+            z-index: var(--z-base);
+        }
+
+        /* ========== Control Panel ========== */
+        .controls-panel {
+            width: 380px;
+            background: var(--bg-panel);
+            backdrop-filter: var(--glass-md);
+            -webkit-backdrop-filter: var(--glass-md);
+            border-right: var(--border-glass);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+            flex-shrink: 0;
+        }
+
+        .controls-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .controls-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .controls-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .controls-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Control Group */
+        .control-group {
+            border-bottom: var(--border-divider);
+            padding-bottom: var(--space-6);
+        }
+
+        .control-group:last-child {
+            border-bottom: none;
+        }
+
+        .group-title {
+            font-size: var(--text-base);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .group-title i {
+            color: var(--color-primary);
+            font-size: var(--text-sm);
+        }
+
+        /* Form Elements */
+        .form-item {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-label {
+            display: block;
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            background: var(--bg-input);
+            border: var(--border-glass);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: var(--text-sm);
+            font-family: inherit;
+            transition: all var(--duration-fast);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: rgba(94, 129, 172, 0.05);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.6;
+        }
+
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23d8dee9' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        /* Range Input */
+        .form-range {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--bg-input);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            transition: all var(--duration-fast);
+        }
+
+        .form-range::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 0 4px rgba(94, 129, 172, 0.2);
+        }
+
+        .form-range::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Color Input */
+        .form-color {
+            width: 48px;
+            height: 36px;
+            border: var(--border-glass);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+
+        .form-color::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .form-color::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        /* Checkbox */
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .form-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: var(--radius-sm);
+            border: var(--border-glass);
+            background: var(--bg-input);
+            cursor: pointer;
+            appearance: none;
+            position: relative;
+            transition: all var(--duration-fast);
+        }
+
+        .form-checkbox input[type="checkbox"]:checked {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        .form-checkbox input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .form-checkbox label {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        /* ========== Templates Grid ========== */
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-3);
+            margin-top: var(--space-3);
+        }
+
+        .template-card {
+            aspect-ratio: 3/4;
+            border-radius: var(--radius-md);
+            border: var(--border-glass);
+            background: var(--bg-panel-card);
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-elastic);
+            position: relative;
+            overflow: hidden;
+            padding: var(--space-3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .template-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity var(--duration-fast);
+        }
+
+        .template-card:hover::before {
+            opacity: 1;
+        }
+
+        .template-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .template-card.active {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(94, 129, 172, 0.3);
+        }
+
+        .template-title {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .template-preview {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            text-align: center;
+            line-height: 1.6;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            margin: auto;
+        }
+
+        /* ========== Background Grid ========== */
+        .bg-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+
+        .bg-item {
+            aspect-ratio: 1;
+            border-radius: var(--radius-md);
+            border: 2px solid transparent;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: all var(--duration-normal) var(--ease-elastic);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bg-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity var(--duration-fast);
+        }
+
+        .bg-item:hover::after {
+            opacity: 1;
+        }
+
+        .bg-item:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .bg-item.active {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(94, 129, 172, 0.3);
+        }
+
+        .bg-upload {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            background: var(--bg-panel-card);
+        }
+
+        .bg-upload i {
+            color: var(--text-tertiary);
+            font-size: var(--text-lg);
+        }
+
+        /* ========== Preview Area ========== */
+        .preview-area {
+            flex: 1;
+            background: 
+                repeating-linear-gradient(
+                    45deg,
+                    rgba(255, 255, 255, 0.02) 0px,
+                    rgba(255, 255, 255, 0.02) 10px,
+                    transparent 10px,
+                    transparent 20px
+                );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            overflow: auto;
+            position: relative;
+        }
+
+        /* Card Wrapper */
+        .card-wrapper {
+            box-shadow: var(--shadow-lg);
+            transition: all var(--duration-normal) var(--ease-smooth);
+            width: 600px;
+            height: 900px;
+            position: relative;
+        }
+
+        .card-wrapper:hover {
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Card */
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: #fff;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Card Layers */
+        .card-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            transition: filter var(--duration-fast);
+        }
+
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .card-noise {
+            position: absolute;
+            inset: 0;
+            z-index: 3;
+            pointer-events: none;
+            opacity: 0.12;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            display: flex;
+        }
+
+        /* Layout: Vertical (竖排) */
+        .layout-vertical {
+            flex-direction: row-reverse;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .layout-vertical .text-group {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+        }
+
+        .layout-vertical .poem-text {
+            margin-left: 32px;
+            margin-bottom: 0;
+        }
+
+        .layout-vertical .meta-group {
+            margin-left: 24px;
+            margin-top: 0;
+        }
+
+        .layout-vertical .title-text {
+            margin-top: 0;
+            margin-left: 16px;
+        }
+
+        .layout-vertical.align-top {
+            justify-content: flex-start;
+        }
+
+        .layout-vertical.align-bottom {
+            justify-content: flex-end;
+        }
+
+        /* Layout: Horizontal (横排) */
+        .layout-horizontal {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .layout-horizontal .poem-text {
+            margin-bottom: 32px;
+        }
+
+        .layout-horizontal .meta-group {
+            text-align: center;
+        }
+
+        .layout-horizontal.align-top {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .layout-horizontal.align-top .meta-group {
+            text-align: left;
+        }
+
+        .layout-horizontal.align-bottom {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .layout-horizontal.align-bottom .meta-group {
+            text-align: right;
+        }
+
+        /* Text Elements */
+        .text-group {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .poem-text {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            transition: all var(--duration-fast);
+            letter-spacing: 0.05em;
+        }
+
+        .meta-group {
+            margin-top: 24px;
+            transition: all var(--duration-fast);
+        }
+
+        .author-text,
+        .title-text {
+            font-size: 0.45em;
+            opacity: 0.75;
+            transition: all var(--duration-fast);
+            line-height: 1.6;
+        }
+
+        .title-text {
+            margin-top: 8px;
+        }
+
+        /* Font Families */
+        .font-song {
+            font-family: var(--font-family-serif);
+            font-weight: 700;
+        }
+
+        .font-kai {
+            font-family: var(--font-family-kai);
+            font-weight: 400;
+        }
+
+        .font-shufa {
+            font-family: var(--font-family-shufa);
+            font-weight: 400;
+        }
+
+        .font-hei {
+            font-family: var(--font-family-base);
+            font-weight: 300;
+        }
+
+        /* ========== Toast ========== */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translate(-50%, 100px);
+            background: var(--bg-toast);
+            backdrop-filter: var(--glass-md);
+            -webkit-backdrop-filter: var(--glass-md);
+            color: var(--text-primary);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-full);
+            border: var(--border-glass);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            opacity: 0;
+            transition: all var(--duration-normal) var(--ease-elastic);
+            pointer-events: none;
+            z-index: var(--z-max);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 1024px) {
+            .main {
+                flex-direction: column-reverse;
+                height: auto;
+            }
+
+            .controls-panel {
+                width: 100%;
+                border-right: none;
+                border-top: var(--border-glass);
+            }
+
+            .preview-area {
+                min-height: 600px;
+            }
+
+            .card-wrapper {
+                transform: scale(0.7);
+                margin: -80px 0;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 0 var(--space-4);
+            }
+
+            .brand {
+                font-size: var(--text-lg);
+            }
+
+            .btn {
+                padding: 0 var(--space-3);
+                font-size: var(--text-xs);
+            }
+
+            .controls-panel {
+                padding: var(--space-4);
+            }
+
+            .templates-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card-wrapper {
+                transform: scale(0.5);
+                margin: -150px 0;
+            }
+        }
+
+        /* ========== Loading Animation ========== */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fa-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* ========== Utility Classes ========== */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="fas fa-feather-alt"></i>
+            </div>
+            <span>诗词·云笺</span>
+        </div>
+        <div class="header-actions">
+            <button id="btnReset" class="btn btn-outline" title="重置为默认">
+                <i class="fas fa-undo"></i>
+                <span>重置</span>
+            </button>
+            <button id="btnShare" class="btn btn-outline" title="调用系统分享">
+                <i class="fas fa-share-alt"></i>
+                <span>分享</span>
+            </button>
+            <button id="btnDownload" class="btn btn-primary">
+                <i class="fas fa-download"></i>
+                <span>导出图片</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Control Panel -->
+        <aside class="controls-panel">
+            <!-- Templates -->
+            <section class="control-group">
+                <h3 class="group-title">
+                    <i class="fas fa-sparkles"></i>
+                    诗词模板
+                </h3>
+                <div class="templates-grid">
+                    <div class="template-card active" data-template="default">
+                        <div class="template-preview">黄沙百战穿金甲</div>
+                        <div class="template-title">从军行</div>
+                    </div>
+                    <div class="template-card" data-template="shuijiao">
+                        <div class="template-preview">春眠不觉晓</div>
+                        <div class="template-title">春晓</div>
+                    </div>
+                    <div class="template-card" data-template="jingye">
+                        <div class="template-preview">床前明月光</div>
+                        <div class="template-title">静夜思</div>
+                    </div>
+                    <div class="template-card" data-template="denglou">
+                        <div class="template-preview">白日依山尽</div>
+                        <div class="template-title">登鹳雀楼</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content -->
+            <section class="control-group">
+                <h3 class="group-title">
+                    <i class="fas fa-pen-nib"></i>
+                    内容编辑
+                </h3>
+                <div class="form-item">
+                    <label class="form-label">诗句 (支持回车换行)</label>
+                    <textarea id="inputPoem" class="form-textarea" placeholder="输入诗句...">黄沙百战穿金甲，
+不破楼兰终不还。</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">作者</label>
+                        <input type="text" id="inputAuthor" class="form-input" value="〔唐〕王昌龄" placeholder="例：〔唐〕李白">
+                    </div>
+                    <div class="form-col">
+                        <label class="form-label">标题</label>
+                        <input type="text" id="inputTitle" class="form-input" value="从军行" placeholder="例：静夜思">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Layout -->
+            <section class="control-group">
+                <h3 class="group-title">
+                    <i class="fas fa-align-left"></i>
+                    布局设置
+                </h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">排版方向</label>
+                        <select id="selectLayout" class="form-select">
+                            <option value="horizontal">横排 (现代)</option>
+                            <option value="vertical" selected>竖排 (古韵)</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label class="form-label">文本对齐</label>
+                        <select id="selectAlign" class="form-select">
+                            <option value="center">居中</option>
+                            <option value="top">起首</option>
+                            <option value="bottom">落脚</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">画布尺寸</label>
+                    <select id="selectSize" class="form-select">
+                        <option value="600x900">600 × 900 (竖版海报)</option>
+                        <option value="800x1200">800 × 1200 (长图)</option>
+                        <option value="1080x1080">1080 × 1080 (正方形)</option>
+                        <option value="1200x630">1200 × 630 (横版封面)</option>
+                        <option value="750x1334">750 × 1334 (手机壁纸)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Typography -->
+            <section class="control-group">
+                <h3 class="group-title">
+                    <i class="fas fa-font"></i>
+                    字体样式
+                </h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">字体</label>
+                        <select id="selectFont" class="form-select">
+                            <option value="font-song" selected>思源宋体</option>
+                            <option value="font-kai">霞鹜文楷</option>
+                            <option value="font-shufa">马善政书法</option>
+                            <option value="font-hei">HarmonyOS 黑体</option>
+                        </select>
+                    </div>
+                    <div class="form-col" style="flex: 0 0 60px;">
+                        <label class="form-label">颜色</label>
+                        <input type="color" id="inputColor" class="form-color" value="#2c1810">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-label">字号: <strong id="valSize">56</strong>px</label>
+                    <input type="range" id="rangeSize" class="form-range" min="24" max="120" value="56">
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">描边宽度: <strong id="valStroke">0</strong>px</label>
+                        <input type="range" id="rangeStroke" class="form-range" min="0" max="8" step="0.5" value="0">
+                    </div>
+                    <div class="form-col" style="flex: 0 0 60px;">
+                        <label class="form-label">描边色</label>
+                        <input type="color" id="inputStrokeColor" class="form-color" value="#ffffff">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label class="form-checkbox">
+                        <input type="checkbox" id="checkShadow" checked>
+                        <span>开启文字阴影</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Background -->
+            <section class="control-group">
+                <h3 class="group-title">
+                    <i class="fas fa-image"></i>
+                    背景设置
+                </h3>
+                <div class="form-item">
+                    <label class="form-label">选择背景</label>
+                    <div class="bg-grid">
+                        <div class="bg-item active" data-type="image" data-src="https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=800" style="background-image: url('https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=200')"></div>
+                        <div class="bg-item" data-type="image" data-src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=800" style="background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=200')"></div>
+                        <div class="bg-item" data-type="image" data-src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=200')"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(to top, #fdfbfb 0%, #ebedee 100%)" style="background: linear-gradient(to top, #fdfbfb 0%, #ebedee 100%)"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)" style="background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%)"></div>
+                        <div class="bg-item" data-type="css" data-src="linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)" style="background: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%)"></div>
+                        <div class="bg-item bg-upload" id="btnUpload">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">背景模糊: <strong id="valBlur">0</strong>px</label>
+                    <input type="range" id="rangeBlur" class="form-range" min="0" max="30" value="0">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">遮罩浓度: <strong id="valOverlay">20</strong>%</label>
+                    <input type="range" id="rangeOverlay" class="form-range" min="0" max="80" value="20">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">暗角强度: <strong id="valVignette">30</strong>%</label>
+                    <input type="range" id="rangeVignette" class="form-range" min="0" max="100" value="30">
+                </div>
+                <div class="form-item">
+                    <label class="form-label">纸张纹理: <strong id="valNoise">12</strong>%</label>
+                    <input type="range" id="rangeNoise" class="form-range" min="0" max="50" value="12">
+                </div>
+            </section>
+        </aside>
+
+        <!-- Preview Area -->
+        <section class="preview-area">
+            <div class="card-wrapper" id="cardWrapper">
+                <div class="card">
+                    <div class="card-bg" id="cardBg"></div>
+                    <div class="card-overlay" id="cardOverlay"></div>
+                    <canvas class="card-noise" id="cardNoise"></canvas>
+                    <div class="card-content layout-vertical font-song" id="cardContent">
+                        <div class="text-group">
+                            <div class="poem-text" id="displayPoem">黄沙百战穿金甲，
+不破楼兰终不还。</div>
+                            <div class="meta-group">
+                                <div class="author-text" id="displayAuthor">〔唐〕王昌龄</div>
+                                <div class="title-text" id="displayTitle">《从军行》</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <span id="toastMsg">操作成功</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        // ========== State Management ==========
+        const defaultState = {
+            poem: '黄沙百战穿金甲，\n不破楼兰终不还。',
+            author: '〔唐〕王昌龄',
+            title: '《从军行》',
+            layout: 'vertical',
+            align: 'center',
+            size: '600x900',
+            font: 'font-song',
+            color: '#2c1810',
+            fontSize: 56,
+            strokeWidth: 0,
+            strokeColor: '#ffffff',
+            shadow: true,
+            bgType: 'image',
+            bgSrc: 'https://images.unsplash.com/photo-1526336179256-1347bdb255ee?q=80&w=800',
+            blur: 0,
+            overlay: 20,
+            vignette: 30,
+            noise: 12
+        };
+
+        const state = { ...defaultState };
+
+        // ========== DOM Elements ==========
+        const elements = {
+            // Templates
+            templateCards: document.querySelectorAll('.template-card'),
+            
+            // Inputs
+            inputPoem: document.getElementById('inputPoem'),
+            inputAuthor: document.getElementById('inputAuthor'),
+            inputTitle: document.getElementById('inputTitle'),
+            selectLayout: document.getElementById('selectLayout'),
+            selectAlign: document.getElementById('selectAlign'),
+            selectSize: document.getElementById('selectSize'),
+            selectFont: document.getElementById('selectFont'),
+            inputColor: document.getElementById('inputColor'),
+            rangeSize: document.getElementById('rangeSize'),
+            valSize: document.getElementById('valSize'),
+            rangeStroke: document.getElementById('rangeStroke'),
+            valStroke: document.getElementById('valStroke'),
+            inputStrokeColor: document.getElementById('inputStrokeColor'),
+            checkShadow: document.getElementById('checkShadow'),
+            
+            // Background
+            rangeBlur: document.getElementById('rangeBlur'),
+            valBlur: document.getElementById('valBlur'),
+            rangeOverlay: document.getElementById('rangeOverlay'),
+            valOverlay: document.getElementById('valOverlay'),
+            rangeVignette: document.getElementById('rangeVignette'),
+            valVignette: document.getElementById('valVignette'),
+            rangeNoise: document.getElementById('rangeNoise'),
+            valNoise: document.getElementById('valNoise'),
+            bgItems: document.querySelectorAll('.bg-item:not(.bg-upload)'),
+            btnUpload: document.getElementById('btnUpload'),
+            fileInput: document.getElementById('fileInput'),
+            
+            // Card
+            cardWrapper: document.getElementById('cardWrapper'),
+            cardBg: document.getElementById('cardBg'),
+            cardOverlay: document.getElementById('cardOverlay'),
+            cardNoise: document.getElementById('cardNoise'),
+            cardContent: document.getElementById('cardContent'),
+            displayPoem: document.getElementById('displayPoem'),
+            displayAuthor: document.getElementById('displayAuthor'),
+            displayTitle: document.getElementById('displayTitle'),
+            
+            // Actions
+            btnReset: document.getElementById('btnReset'),
+            btnDownload: document.getElementById('btnDownload'),
+            btnShare: document.getElementById('btnShare'),
+            toast: document.getElementById('toast'),
+            toastMsg: document.getElementById('toastMsg')
+        };
+
+        // ========== Templates Data ==========
+        const templates = {
+            default: {
+                poem: '黄沙百战穿金甲，\n不破楼兰终不还。',
+                author: '〔唐〕王昌龄',
+                title: '《从军行》'
+            },
+            shuijiao: {
+                poem: '春眠不觉晓，\n处处闻啼鸟。\n夜来风雨声，\n花落知多少。',
+                author: '〔唐〕孟浩然',
+                title: '《春晓》'
+            },
+            jingye: {
+                poem: '床前明月光，\n疑是地上霜。\n举头望明月，\n低头思故乡。',
+                author: '〔唐〕李白',
+                title: '《静夜思》'
+            },
+            denglou: {
+                poem: '白日依山尽，\n黄河入海流。\n欲穷千里目，\n更上一层楼。',
+                author: '〔唐〕王之涣',
+                title: '《登鹳雀楼》'
+            }
+        };
+
+        // ========== Initialize ==========
+        function init() {
+            bindEvents();
+            renderAll();
+            drawNoise();
+        }
+
+        // ========== Event Bindings ==========
+        function bindEvents() {
+            // Templates
+            elements.templateCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    elements.templateCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    const template = templates[card.dataset.template];
+                    if (template) {
+                        state.poem = template.poem;
+                        state.author = template.author;
+                        state.title = template.title;
+                        elements.inputPoem.value = template.poem;
+                        elements.inputAuthor.value = template.author;
+                        elements.inputTitle.value = template.title;
+                        updateText();
+                        showToast('已加载模板');
+                    }
+                });
+            });
+
+            // Content
+            elements.inputPoem.addEventListener('input', e => {
+                state.poem = e.target.value;
+                updateText();
+            });
+            elements.inputAuthor.addEventListener('input', e => {
+                state.author = e.target.value;
+                updateText();
+            });
+            elements.inputTitle.addEventListener('input', e => {
+                state.title = e.target.value;
+                updateText();
+            });
+
+            // Layout
+            elements.selectLayout.addEventListener('change', e => {
+                state.layout = e.target.value;
+                updateLayout();
+            });
+            elements.selectAlign.addEventListener('change', e => {
+                state.align = e.target.value;
+                updateLayout();
+            });
+            elements.selectSize.addEventListener('change', e => {
+                state.size = e.target.value;
+                updateSize();
+            });
+
+            // Typography
+            elements.selectFont.addEventListener('change', e => {
+                state.font = e.target.value;
+                updateStyle();
+            });
+            elements.inputColor.addEventListener('input', e => {
+                state.color = e.target.value;
+                updateStyle();
+            });
+            elements.rangeSize.addEventListener('input', e => {
+                state.fontSize = parseInt(e.target.value);
+                elements.valSize.textContent = state.fontSize;
+                updateStyle();
+            });
+            elements.rangeStroke.addEventListener('input', e => {
+                state.strokeWidth = parseFloat(e.target.value);
+                elements.valStroke.textContent = state.strokeWidth;
+                updateStyle();
+            });
+            elements.inputStrokeColor.addEventListener('input', e => {
+                state.strokeColor = e.target.value;
+                updateStyle();
+            });
+            elements.checkShadow.addEventListener('change', e => {
+                state.shadow = e.target.checked;
+                updateStyle();
+            });
+
+            // Background
+            elements.rangeBlur.addEventListener('input', e => {
+                state.blur = e.target.value;
+                elements.valBlur.textContent = state.blur;
+                updateBgEffects();
+            });
+            elements.rangeOverlay.addEventListener('input', e => {
+                state.overlay = e.target.value;
+                elements.valOverlay.textContent = state.overlay;
+                updateBgEffects();
+            });
+            elements.rangeVignette.addEventListener('input', e => {
+                state.vignette = e.target.value;
+                elements.valVignette.textContent = state.vignette;
+                updateBgEffects();
+            });
+            elements.rangeNoise.addEventListener('input', e => {
+                state.noise = e.target.value;
+                elements.valNoise.textContent = state.noise;
+                drawNoise();
+            });
+
+            // Background Selection
+            elements.bgItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelector('.bg-item.active')?.classList.remove('active');
+                    item.classList.add('active');
+                    state.bgType = item.dataset.type || 'image';
+                    state.bgSrc = item.dataset.src;
+                    updateBg();
+                    console.log('Background changed:', { type: state.bgType, src: state.bgSrc.substring(0, 50) });
+                    showToast('背景已更换');
+                });
+            });
+
+            // Upload
+            elements.btnUpload.addEventListener('click', () => elements.fileInput.click());
+            elements.fileInput.addEventListener('change', handleUpload);
+
+            // Actions
+            elements.btnReset.addEventListener('click', resetToDefault);
+            elements.btnDownload.addEventListener('click', () => exportImage(false));
+            elements.btnShare.addEventListener('click', () => exportImage(true));
+        }
+
+        // ========== Render Functions ==========
+        function renderAll() {
+            updateText();
+            updateLayout();
+            updateSize();
+            updateStyle();
+            updateBg();
+            updateBgEffects();
+        }
+
+        function updateText() {
+            elements.displayPoem.textContent = state.poem;
+            elements.displayAuthor.textContent = state.author;
+            elements.displayTitle.textContent = state.title;
+        }
+
+        function updateLayout() {
+            const cl = elements.cardContent.classList;
+            cl.remove('layout-horizontal', 'layout-vertical', 'align-top', 'align-bottom');
+            cl.add(`layout-${state.layout}`);
+            if (state.align !== 'center') {
+                cl.add(`align-${state.align}`);
+            }
+        }
+
+        function updateSize() {
+            const [w, h] = state.size.split('x').map(Number);
+            elements.cardWrapper.style.width = w + 'px';
+            elements.cardWrapper.style.height = h + 'px';
+            setTimeout(drawNoise, 100);
+        }
+
+        function updateStyle() {
+            const cl = elements.cardContent.classList;
+            cl.remove('font-song', 'font-kai', 'font-hei', 'font-shufa');
+            cl.add(state.font);
+
+            elements.displayPoem.style.color = state.color;
+            elements.displayAuthor.style.color = adjustColorOpacity(state.color, 0.75);
+            elements.displayTitle.style.color = adjustColorOpacity(state.color, 0.75);
+            elements.displayPoem.style.fontSize = state.fontSize + 'px';
+
+            if (state.strokeWidth > 0) {
+                const stroke = `${state.strokeWidth}px ${state.strokeColor}`;
+                const metaStroke = `${state.strokeWidth/2}px ${state.strokeColor}`;
+                elements.displayPoem.style.webkitTextStroke = stroke;
+                elements.displayAuthor.style.webkitTextStroke = metaStroke;
+                elements.displayTitle.style.webkitTextStroke = metaStroke;
+            } else {
+                elements.displayPoem.style.webkitTextStroke = 'unset';
+                elements.displayAuthor.style.webkitTextStroke = 'unset';
+                elements.displayTitle.style.webkitTextStroke = 'unset';
+            }
+
+            if (state.shadow) {
+                const shadowValue = '0 2px 8px rgba(0,0,0,0.3)';
+                elements.displayPoem.style.textShadow = shadowValue;
+                elements.displayAuthor.style.textShadow = shadowValue;
+                elements.displayTitle.style.textShadow = shadowValue;
+            } else {
+                elements.displayPoem.style.textShadow = 'none';
+                elements.displayAuthor.style.textShadow = 'none';
+                elements.displayTitle.style.textShadow = 'none';
+            }
+        }
+
+        function updateBg() {
+            // Clear both properties first
+            elements.cardBg.style.background = '';
+            elements.cardBg.style.backgroundImage = '';
+            elements.cardBg.style.backgroundSize = '';
+            elements.cardBg.style.backgroundPosition = '';
+            
+            if (state.bgType === 'css') {
+                // CSS gradient
+                elements.cardBg.style.background = state.bgSrc;
+            } else {
+                // Image
+                elements.cardBg.style.backgroundImage = `url('${state.bgSrc}')`;
+                elements.cardBg.style.backgroundSize = 'cover';
+                elements.cardBg.style.backgroundPosition = 'center';
+            }
+        }
+
+        function updateBgEffects() {
+            elements.cardBg.style.filter = `blur(${state.blur}px)`;
+            
+            const overlayAlpha = state.overlay / 100;
+            const vignetteAlpha = state.vignette / 100;
+            
+            let bgString = `linear-gradient(rgba(0,0,0,${overlayAlpha}), rgba(0,0,0,${overlayAlpha}))`;
+            
+            if (state.vignette > 0) {
+                bgString += `, radial-gradient(circle at center, transparent 40%, rgba(0,0,0,${vignetteAlpha}) 100%)`;
+            }
+            
+            elements.cardOverlay.style.background = bgString;
+        }
+
+        function drawNoise() {
+            const canvas = elements.cardNoise;
+            const ctx = canvas.getContext('2d');
+            const w = elements.cardWrapper.offsetWidth;
+            const h = elements.cardWrapper.offsetHeight;
+            
+            canvas.width = w;
+            canvas.height = h;
+            ctx.clearRect(0, 0, w, h);
+
+            if (state.noise <= 0) return;
+
+            const alpha = state.noise / 100;
+            const idata = ctx.createImageData(w, h);
+            const buffer32 = new Uint32Array(idata.data.buffer);
+            const len = buffer32.length;
+
+            for (let i = 0; i < len; i++) {
+                if (Math.random() < 0.5) {
+                    buffer32[i] = (255 * alpha) << 24;
+                }
+            }
+            ctx.putImageData(idata, 0, 0);
+        }
+
+        // ========== Upload Handler ==========
+        function handleUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                state.bgType = 'image';
+                state.bgSrc = evt.target.result;
+                updateBg();
+                showToast('背景已上传');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ========== Reset ==========
+        function resetToDefault() {
+            Object.assign(state, defaultState);
+            
+            // Update UI
+            elements.inputPoem.value = state.poem;
+            elements.inputAuthor.value = state.author;
+            elements.inputTitle.value = state.title;
+            elements.selectLayout.value = state.layout;
+            elements.selectAlign.value = state.align;
+            elements.selectSize.value = state.size;
+            elements.selectFont.value = state.font;
+            elements.inputColor.value = state.color;
+            elements.rangeSize.value = state.fontSize;
+            elements.valSize.textContent = state.fontSize;
+            elements.rangeStroke.value = state.strokeWidth;
+            elements.valStroke.textContent = state.strokeWidth;
+            elements.inputStrokeColor.value = state.strokeColor;
+            elements.checkShadow.checked = state.shadow;
+            elements.rangeBlur.value = state.blur;
+            elements.valBlur.textContent = state.blur;
+            elements.rangeOverlay.value = state.overlay;
+            elements.valOverlay.textContent = state.overlay;
+            elements.rangeVignette.value = state.vignette;
+            elements.valVignette.textContent = state.vignette;
+            elements.rangeNoise.value = state.noise;
+            elements.valNoise.textContent = state.noise;
+            
+            elements.templateCards.forEach(c => c.classList.remove('active'));
+            elements.templateCards[0].classList.add('active');
+            
+            renderAll();
+            showToast('已重置为默认');
+        }
+
+        // ========== Export ==========
+        async function exportImage(isShare) {
+            const btn = isShare ? elements.btnShare : elements.btnDownload;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 处理中...';
+            btn.disabled = true;
+
+            try {
+                // Wait for fonts to load
+                showToast('准备字体...');
+                await document.fonts.ready;
+                
+                // Ensure noise is drawn
+                drawNoise();
+
+                // Additional wait for rendering
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                showToast('生成图片中...');
+
+                // Use html2canvas with optimal settings
+                const canvas = await html2canvas(elements.cardWrapper, {
+                    scale: 2, // 2x resolution for quality
+                    useCORS: true, // Enable CORS for images
+                    allowTaint: true, // Allow tainted canvas
+                    backgroundColor: null, // Preserve transparency
+                    logging: false, // Disable console logging
+                    imageTimeout: 15000, // 15s timeout for images
+                    removeContainer: true, // Clean up after rendering
+                    // Ignore elements that might cause CORS issues
+                    ignoreElements: (element) => {
+                        // Skip external scripts and non-essential elements
+                        if (element.tagName === 'SCRIPT') return true;
+                        return false;
+                    },
+                    onclone: (clonedDoc) => {
+                        // Ensure all styles are applied in the clone
+                        const clonedWrapper = clonedDoc.getElementById('cardWrapper');
+                        if (clonedWrapper) {
+                            // Force font loading in clone
+                            clonedWrapper.style.fontFamily = getComputedStyle(elements.cardWrapper).fontFamily;
+                        }
+                    }
+                });
+
+                // Convert canvas to blob
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create blob'));
+                        }
+                    }, 'image/png', 1);
+                });
+
+                if (!blob) {
+                    throw new Error('Failed to generate image');
+                }
+
+                await handleImageOutput(blob, isShare);
+
+            } catch (err) {
+                console.error('Export failed:', err);
+                showToast('导出失败。建议：1) 使用Chrome浏览器 2) 使用系统截图工具');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function handleImageOutput(blob, isShare) {
+            if (!blob) {
+                throw new Error('No blob generated');
+            }
+
+            if (isShare && navigator.share) {
+                try {
+                    const file = new File([blob], "poetry_card.png", { type: "image/png" });
+                    await navigator.share({
+                        files: [file],
+                        title: '诗词卡片',
+                        text: state.poem.substring(0, 50)
+                    });
+                    showToast('分享成功');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        downloadBlob(blob);
+                    }
+                }
+            } else {
+                downloadBlob(blob);
+            }
+        }
+
+        function downloadBlob(blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `诗词云笺_${Date.now()}.png`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast('图片已开始下载');
+        }
+
+        // ========== Utilities ==========
+        function adjustColorOpacity(hex, opacity) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+
+        function showToast(message) {
+            elements.toastMsg.textContent = message;
+            elements.toast.classList.add('show');
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // ========== Start Application ==========
+        init();
+    </script>
+</body>
+</html>

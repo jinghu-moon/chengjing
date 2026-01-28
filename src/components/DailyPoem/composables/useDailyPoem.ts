@@ -134,6 +134,9 @@ export function useDailyPoem() {
 
     loading.value = true
     try {
+      // 确保本地数据已加载 (IDB 是异步的)
+      await initLocalPoems()
+
       let newPoem: Poem | null = null
       
       if (settings.value.online) {
@@ -156,6 +159,9 @@ export function useDailyPoem() {
   const refresh = async () => {
     loading.value = true
     try {
+      // 确保本地数据已加载
+      await initLocalPoems()
+
       let newPoem: Poem | null = null
       
       if (settings.value.online) {

@@ -53,6 +53,7 @@ declare module 'vue' {
     PoemForm: typeof import('./components/DailyPoem/components/PoemForm.vue')['default']
     PoemList: typeof import('./components/DailyPoem/components/PoemList.vue')['default']
     PoemManager: typeof import('./components/DailyPoem/PoemManager.vue')['default']
+    PoemShareDialog: typeof import('./components/DailyPoem/PoemShareDialog.vue')['default']
     Pomodoro: typeof import('./components/Pomodoro.vue')['default']
     SearchBar: typeof import('./components/SearchBar.vue')['default']
     SearchInput: typeof import('./components/BookmarkPanel/components/SearchInput.vue')['default']
