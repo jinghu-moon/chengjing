@@ -32,6 +32,8 @@
     "@tiptap/extension-task-list": "^3.15.3",
     "@tiptap/starter-kit": "^3.15.3",
     "@tiptap/vue-3": "^3.15.3",
+    "@vueuse/core": "^14.1.0",
+    "@vueuse/integrations": "^14.1.0",
     "browser-image-compression": "^2.0.2",
     "chinese-days": "^1.5.4",
     "dayjs": "^1.11.19",
@@ -39,6 +41,7 @@
     "idb-keyval": "^6.2.2",
     "lowlight": "^3.3.0",
     "pinyin": "^4.0.0",
+    "tdesign-vue-next": "^1.18.0",
     "tiptap-markdown": "^0.9.0",
     "vue": "^3.4.0",
     "vue-draggable-plus": "^0.6.1"

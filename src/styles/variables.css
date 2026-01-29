@@ -135,9 +135,11 @@
 
   /* --- 4. 阴影系统 (Shadows) --- */
   --shadow-color: var(--nord0);
+  --shadow-xs: 0 1px 2px rgb(from var(--shadow-color) r g b / 0.1);
   --shadow-sm: 0 2px 4px rgb(from var(--shadow-color) r g b / 0.2);
   --shadow-md: 0 8px 16px rgb(from var(--shadow-color) r g b / 0.3);
   --shadow-lg: 0 16px 48px rgb(from var(--shadow-color) r g b / 0.5);
+  --shadow-xl: 0 24px 64px rgb(from var(--shadow-color) r g b / 0.6);
 
   --text-shadow: 0 2px 10px rgb(from var(--shadow-color) r g b / 0.3);
   --text-shadow-lg: 0 4px 16px rgb(from var(--shadow-color) r g b / 0.2);
@@ -181,9 +183,13 @@
   --duration-normal: 0.3s;
   --duration-slow: 0.5s;
 
-  --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   /* =================================================================
      7. 间距与字体 (Spacing & Typography)
@@ -220,6 +226,20 @@
   --height-xl: 3rem;
   /* 48px */
 
+  /* 组件内边距 - 非对称 (水平 > 垂直，适合按钮/标签) */
+  --comp-padding-xs: var(--space-1) var(--space-2);    /* 4px 8px */
+  --comp-padding-sm: var(--space-2) var(--space-3);    /* 8px 12px */
+  --comp-padding-md: var(--space-2) var(--space-4);    /* 8px 16px */
+  --comp-padding-lg: var(--space-3) var(--space-5);    /* 12px 20px */
+  --comp-padding-xl: var(--space-4) var(--space-6);    /* 16px 24px */
+
+  /* 组件内边距 - 均匀 (四边一致，适合卡片/面板) */
+  --comp-padding-square-xs: var(--space-1);    /* 4px */
+  --comp-padding-square-sm: var(--space-2);    /* 8px */
+  --comp-padding-square-md: var(--space-3);    /* 12px */
+  --comp-padding-square-lg: var(--space-4);    /* 16px */
+  --comp-padding-square-xl: var(--space-6);    /* 24px */
+
   /* 图标尺寸 */
   --icon-sm: 0.875rem;
   /* 14px */
@@ -239,6 +259,11 @@
   --line-tight: 1.2;
   --line-normal: 1.5;
   --line-loose: 1.8;
+
+  /* 字距 (Letter Spacing) - [新增] */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.05em;
 
   /* 字号 Scale (rem) */
   --text-xs: 0.75rem;
@@ -269,6 +294,54 @@
   --btn-hover-lift: translateY(-1px);
   --btn-hover-shadow: 0 4px 8px rgb(from var(--shadow-color) r g b / 0.15);
   --btn-hover-scale: scale(1.02);
+
+  /* =================================================================
+     9. 语义化间距 (Semantic Spacing) - [新增]
+     来源：TDesign 组件令牌理念
+     用途：语义化命名，提升代码可读性
+     ================================================================= */
+  --spacing-xs: var(--space-1);    /* 4px  - 极小间距 */
+  --spacing-sm: var(--space-2);    /* 8px  - 小间距 */
+  --spacing-md: var(--space-4);    /* 16px - 中等间距 (默认) */
+  --spacing-lg: var(--space-6);    /* 24px - 大间距 */
+  --spacing-xl: var(--space-8);    /* 32px - 超大间距 */
+
+  /* =================================================================
+     10. 过渡组合令牌 (Transition Composites) - [新增]
+     来源：TDesign 动效系统
+     用途：预定义的过渡效果，避免重复书写
+     ================================================================= */
+  --transition-fast: all var(--duration-fast) var(--ease-smooth);
+  --transition-base: all var(--duration-normal) var(--ease-in-out);
+  --transition-slow: all var(--duration-slow) var(--ease-smooth);
+  --transition-color: 
+    color var(--duration-fast) var(--ease-in-out),
+    background-color var(--duration-fast) var(--ease-in-out),
+    border-color var(--duration-fast) var(--ease-in-out);
+
+  /* =================================================================
+     11. 无障碍令牌 (Accessibility) - [新增]
+     来源：TDesign 无障碍规范
+     遵循：WCAG 2.0 AA 标准
+     ================================================================= */
+  /* Focus 可见性 (键盘导航) */
+  --focus-ring-color: var(--color-primary);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  --focus-ring-offset-shadow: 0 0 0 var(--focus-ring-offset) var(--nord);
+
+  /* 禁用态 */
+  --disabled-opacity: 0.5;
+
+  /* 最小触控区域 (iOS 无障碍标准) */
+  --touch-target-min: 44px;
+
+  /* =================================================================
+     12. 标准边框 (Standard Border) - [新增]
+     用途：通用边框样式
+     ================================================================= */
+  --border: 1px solid var(--color-divider);
 }
 
 /* =================================================================

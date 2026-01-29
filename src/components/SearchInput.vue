@@ -14,7 +14,6 @@ import { ref, computed, useSlots } from 'vue'
 import { IconSearch, IconX } from '@tabler/icons-vue'
 
 interface Props {
-  modelValue?: string
   placeholder?: string
   size?: 'sm' | 'md' | 'lg'
   showClear?: boolean
@@ -24,7 +23,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  modelValue: '',
   placeholder: '搜索...',
   size: 'md',
   showClear: true,
@@ -33,25 +31,18 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
   (e: 'focus'): void
   (e: 'blur'): void
   (e: 'clear'): void
   (e: 'submit', value: string): void
 }>()
 
+const modelValue = defineModel<string>({ required: true })
 const slots = useSlots()
-
 const inputRef = ref<HTMLInputElement | null>(null)
 const isFocused = ref(false)
 
-const inputValue = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
-
-const hasValue = computed(() => inputValue.value.length > 0)
-
+const hasValue = computed(() => modelValue.value.length > 0)
 const hasPrefix = computed(() => !!slots.prefix || props.showSearchIcon)
 const hasSuffix = computed(() => !!slots.suffix || hasValue.value || props.shortcut)
 
@@ -62,14 +53,14 @@ const sizeClasses = computed(() => ({
 }))
 
 const handleClear = () => {
-  inputValue.value = ''
+  modelValue.value = ''
   emit('clear')
   inputRef.value?.focus()
 }
 
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
-    emit('submit', inputValue.value)
+    emit('submit', modelValue.value)
   }
   if (e.key === 'Escape') {
     handleClear()
@@ -106,7 +97,7 @@ defineExpose({ focus, blur, inputRef })
     <!-- 输入框 -->
     <input
       ref="inputRef"
-      v-model="inputValue"
+      v-model="modelValue"
       type="text"
       class="search-input"
       :placeholder="placeholder"
