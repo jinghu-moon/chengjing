@@ -76,32 +76,6 @@ export const processMarkdownForExport = async (markdown: string): Promise<string
   return result
 }
 
-/**
- * 将字符串内容导出为文件下载
- * @param filename 文件名（包含后缀）
- * @param content 文件内容
- * @param mimeType MIME类型
- */
-export const downloadFile = (
-  filename: string,
-  content: string,
-  mimeType: string = 'text/plain'
-) => {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-
-  link.href = url
-  link.download = filename
-
-  // 必须添加到 body 才能在 Firefox 中生效
-  document.body.appendChild(link)
-  link.click()
-
-  // 清理
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
 
 /**
  * 从 Markdown 内容中去除标记，提取纯文本

@@ -4,8 +4,6 @@ import {
   IconX,
   IconPhoto,
   IconRefresh,
-  IconDownload,
-  IconUpload,
   IconLayoutDashboard,
   IconPalette,
   IconApps,
@@ -25,6 +23,7 @@ import { useDailyPoem } from '@/components/DailyPoem/composables/useDailyPoem'
 // [自动导入] useSettings 无需显式导入
 
 import SettingSlider from './components/SettingSlider.vue'
+import DataBackup from '@/components/DataBackup/index.vue'
 import SettingSwitch from './components/SettingSwitch.vue'
 import LayoutSettingsModal from './components/LayoutSettingsModal.vue'
 import CapsuleTabs from './components/CapsuleTabs.vue'
@@ -136,7 +135,6 @@ const onLeave = (el: Element) => {
 }
 
 const fileInput = ref<HTMLInputElement | null>(null)
-const configInput = ref<HTMLInputElement | null>(null)
 
 // 折叠状态管理
 const sectionState = reactive({
@@ -213,40 +211,6 @@ const handleReset = async () => {
   }
 }
 
-const exportConfig = () => {
-  const config = {
-    shortcuts: localStorage.getItem('shortcuts'),
-    iconConfig: localStorage.getItem('iconConfig'),
-    settings: localStorage.getItem('lime-settings'),
-  }
-  const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `chengjing-${Date.now()}.json`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-}
-
-const triggerImport = () => configInput.value?.click()
-const handleImportConfig = (e: Event) => {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = ev => {
-    try {
-      const config = JSON.parse(ev.target?.result as string)
-      if (config.shortcuts) localStorage.setItem('shortcuts', config.shortcuts)
-      if (config.iconConfig) localStorage.setItem('iconConfig', config.iconConfig)
-      if (config.settings) localStorage.setItem('lime-settings', config.settings)
-      location.reload()
-    } catch (err) {
-      alert('格式错误')
-    }
-  }
-  reader.readAsText(file)
-}
 
 const resetNotePadPos = () => {
   if (confirm('确定要重置便签位置吗？')) {
@@ -811,21 +775,7 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.data" class="card-content-wrapper">
               <div class="card-content-inner">
-                <div class="actions-grid">
-                  <button class="btn secondary" @click="exportConfig">
-                    <IconDownload :size="16" /> 备份配置
-                  </button>
-                  <button class="btn secondary" @click="triggerImport">
-                    <IconUpload :size="16" /> 恢复配置
-                  </button>
-                </div>
-                <input
-                  ref="configInput"
-                  type="file"
-                  hidden
-                  accept=".json"
-                  @change="handleImportConfig"
-                />
+                <DataBackup />
               </div>
             </div>
           </transition>

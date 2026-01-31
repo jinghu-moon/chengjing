@@ -1,5 +1,6 @@
 import { shallowRef, toRaw } from 'vue'
 import { get, set } from 'idb-keyval'
+import { downloadFile } from '@/utils/file'
 import { type LocalPoem } from '../types'
 import defaultPoemsData from '@/data/poems.json'
 
@@ -123,18 +124,12 @@ export function usePoemData() {
   }
 
   /** 导出诗词为 JSON */
+  /** 导出诗词为 JSON */
   const exportPoems = () => {
-    // 简单获取日期字符串用于文件名
     const now = new Date()
     const dateStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
     const data = JSON.stringify(localPoems.value, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `poems-backup-${dateStr}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    downloadFile(`poems-backup-${dateStr}.json`, data)
   }
 
   /** 导入诗词（合并模式） */
@@ -147,23 +142,29 @@ export function usePoemData() {
           let added = 0
           let skipped = 0
          
-          // 建立现有内容的指纹集合
+          // 建立现有内容的指纹集合 (优化 O(n))
           const existingContents = new Set(localPoems.value.map(p => `${p.content}|${p.author}`))
+          const toAdd: LocalPoem[] = []
           
           imported.forEach(p => {
             const key = `${p.content}|${p.author}`
             if (!existingContents.has(key)) {
-              localPoems.value = [...localPoems.value, {
+              toAdd.push({
                 ...p,
                 id: generateId(),
                 createdAt: p.createdAt || Date.now()
-              }]
+              })
               existingContents.add(key)
               added++
             } else {
               skipped++
             }
           })
+          
+          // 批量更新 Vue 响应式数据 (优化: 避免循环内展开数组)
+          if (toAdd.length > 0) {
+            localPoems.value = [...localPoems.value, ...toAdd]
+          }
           
           saveLocalPoems()
           resolve({ added, skipped })
@@ -176,6 +177,41 @@ export function usePoemData() {
     })
   }
 
+  /** 
+   * [Backup] 获取原始数据（同步+异步）
+   * 用于备份导出，确保获取到最新的 localPoems
+   */
+  const getRawData = async (): Promise<LocalPoem[]> => {
+    // 确保已初始化
+    if (!initialized) {
+      await initLocalPoems()
+    }
+    return toRaw(localPoems.value)
+  }
+
+  /**
+   * [Restore] 覆盖原始数据 (Batch Write)
+   * 采用重置 + 批量写入模式，提高性能
+   */
+  const overwriteRawData = async (newPoems: LocalPoem[]) => {
+    try {
+      // 1. 更新内存状态 (Vue Reactivity)
+      localPoems.value = newPoems
+      
+      // 2. 持久化 (IndexedDB)
+      // 直接覆盖 Key，idb-keyval 的 set 是原子操作，对于大数组可能较慢，
+      // 但对于 poems 这种单 key 存储数组的模式，直接 set 即可。
+      // 注意：之前的实现是把整个数组存为一个 Key 'daily-poem-local-poems'
+      // 所以这里直接 set 整个数组就是最高效的 "Batch Write"
+      await set(LOCAL_POEMS_KEY, toRaw(newPoems))
+      
+      console.log(`[DailyPoem] 已恢复 ${newPoems.length} 首诗词`)
+    } catch (e) {
+      console.error('[DailyPoem] 恢复数据失败', e)
+      throw e // 抛出错误供上层回滚
+    }
+  }
+
   return {
     localPoems,
     initLocalPoems,
@@ -185,6 +221,9 @@ export function usePoemData() {
     searchPoems,
     saveLocalPoems,
     exportPoems,
-    importPoems
+    importPoems,
+    // Backup API
+    getRawData,
+    overwriteRawData
   }
 }

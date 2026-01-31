@@ -7,9 +7,11 @@
 export {}
 declare global {
   const COMMON_DICT: typeof import('./utils/pinyinDict').COMMON_DICT
+  const CURRENT_BACKUP_VERSION: typeof import('./utils/backup-validator').CURRENT_BACKUP_VERSION
   const DESKTOP_PRESETS: typeof import('./composables/useSettings').DESKTOP_PRESETS
   const EffectScope: typeof import('vue').EffectScope
   const VIP_MAP: typeof import('./utils/pinyinDict').VIP_MAP
+  const analyzeBackup: typeof import('./utils/backup-diff').analyzeBackup
   const buildFolderMap: typeof import('./utils/bookmarksApi').buildFolderMap
   const calculateCoords: typeof import('./utils/positioning').calculateCoords
   const checkFit: typeof import('./utils/positioning').checkFit
@@ -21,7 +23,7 @@ declare global {
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const deleteImage: typeof import('./utils/db').deleteImage
-  const downloadFile: typeof import('./utils/export').downloadFile
+  const downloadFile: typeof import('./utils/file').downloadFile
   const effectScope: typeof import('vue').effectScope
   const extractFolders: typeof import('./utils/bookmarksApi').extractFolders
   const flattenBookmarks: typeof import('./utils/bookmarksApi').flattenBookmarks
@@ -67,6 +69,7 @@ declare global {
   const provide: typeof import('vue').provide
   const provideContextMenu: typeof import('./composables/useContextMenu').provideContextMenu
   const reactive: typeof import('vue').reactive
+  const readJsonFile: typeof import('./utils/file').readJsonFile
   const readonly: typeof import('vue').readonly
   const ref: typeof import('vue').ref
   const removeImage: typeof import('./utils/db').removeImage
@@ -93,6 +96,7 @@ declare global {
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
   const useDailyPoem: typeof import('./composables/useDailyPoem').useDailyPoem
+  const useDataBackup: typeof import('./composables/useDataBackup').useDataBackup
   const useDraggableCard: typeof import('./composables/useDraggableCard').useDraggableCard
   const useId: typeof import('vue').useId
   const useImageGC: typeof import('./composables/useImageGC').useImageGC
@@ -106,6 +110,7 @@ declare global {
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTodoDrag: typeof import('./composables/useTodoDrag').useTodoDrag
   const useTodos: typeof import('./composables/useTodos').useTodos
+  const validateBackup: typeof import('./utils/backup-validator').validateBackup
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -129,11 +134,20 @@ declare global {
   export type { ConverterType, ConverterCategory } from './composables/useConverter'
   import('./composables/useConverter')
   // @ts-ignore
+  export type { RestoreStats } from './composables/useDataBackup'
+  import('./composables/useDataBackup')
+  // @ts-ignore
   export type { Note, SortMode } from './composables/useNotes'
   import('./composables/useNotes')
   // @ts-ignore
   export type { TodoItem } from './composables/useTodos'
   import('./composables/useTodos')
+  // @ts-ignore
+  export type { DiffResult } from './utils/backup-diff'
+  import('./utils/backup-diff')
+  // @ts-ignore
+  export type { BackupMeta, BackupContainer, ValidationResult } from './utils/backup-validator'
+  import('./utils/backup-validator')
   // @ts-ignore
   export type { ChromeBookmarkNode } from './utils/bookmarksApi'
   import('./utils/bookmarksApi')
@@ -154,9 +168,11 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly COMMON_DICT: UnwrapRef<typeof import('./utils/pinyinDict')['COMMON_DICT']>
+    readonly CURRENT_BACKUP_VERSION: UnwrapRef<typeof import('./utils/backup-validator')['CURRENT_BACKUP_VERSION']>
     readonly DESKTOP_PRESETS: UnwrapRef<typeof import('./composables/useSettings')['DESKTOP_PRESETS']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly VIP_MAP: UnwrapRef<typeof import('./utils/pinyinDict')['VIP_MAP']>
+    readonly analyzeBackup: UnwrapRef<typeof import('./utils/backup-diff')['analyzeBackup']>
     readonly buildFolderMap: UnwrapRef<typeof import('./utils/bookmarksApi')['buildFolderMap']>
     readonly calculateCoords: UnwrapRef<typeof import('./utils/positioning')['calculateCoords']>
     readonly checkFit: UnwrapRef<typeof import('./utils/positioning')['checkFit']>
@@ -168,7 +184,7 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly deleteImage: UnwrapRef<typeof import('./utils/db')['deleteImage']>
-    readonly downloadFile: UnwrapRef<typeof import('./utils/export')['downloadFile']>
+    readonly downloadFile: UnwrapRef<typeof import('./utils/file')['downloadFile']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extractFolders: UnwrapRef<typeof import('./utils/bookmarksApi')['extractFolders']>
     readonly flattenBookmarks: UnwrapRef<typeof import('./utils/bookmarksApi')['flattenBookmarks']>
@@ -214,6 +230,7 @@ declare module 'vue' {
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
     readonly provideContextMenu: UnwrapRef<typeof import('./composables/useContextMenu')['provideContextMenu']>
     readonly reactive: UnwrapRef<typeof import('vue')['reactive']>
+    readonly readJsonFile: UnwrapRef<typeof import('./utils/file')['readJsonFile']>
     readonly readonly: UnwrapRef<typeof import('vue')['readonly']>
     readonly ref: UnwrapRef<typeof import('vue')['ref']>
     readonly removeImage: UnwrapRef<typeof import('./utils/db')['removeImage']>
@@ -239,6 +256,7 @@ declare module 'vue' {
     readonly useConverter: UnwrapRef<typeof import('./composables/useConverter')['useConverter']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
+    readonly useDataBackup: UnwrapRef<typeof import('./composables/useDataBackup')['useDataBackup']>
     readonly useDraggableCard: UnwrapRef<typeof import('./composables/useDraggableCard')['useDraggableCard']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useImageGC: UnwrapRef<typeof import('./composables/useImageGC')['useImageGC']>
@@ -251,6 +269,7 @@ declare module 'vue' {
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTodoDrag: UnwrapRef<typeof import('./composables/useTodoDrag')['useTodoDrag']>
     readonly useTodos: UnwrapRef<typeof import('./composables/useTodos')['useTodos']>
+    readonly validateBackup: UnwrapRef<typeof import('./utils/backup-validator')['validateBackup']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>

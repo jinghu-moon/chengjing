@@ -31,6 +31,8 @@ declare module 'vue' {
     ControlPanel: typeof import('./components/DailyPoem/components/ShareCard/ControlPanel.vue')['default']
     DailyPoem: typeof import('./components/DailyPoem/index.vue')['default']
     DashboardCards: typeof import('./components/CalendarPanel/components/DashboardCards.vue')['default']
+    DataBackup: typeof import('./components/DataBackup/index.vue')['default']
+    DataBackupSection: typeof import('./components/SettingsPanel/components/DataBackupSection.vue')['default']
     DatePicker: typeof import('./components/DatePicker/index.vue')['default']
     Dialog: typeof import('./components/Dialog/Dialog.vue')['default']
     DialogItem: typeof import('./components/Dialog/DialogItem.vue')['default']
