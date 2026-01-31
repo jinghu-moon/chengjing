@@ -7,6 +7,10 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
   "permissions": ["storage", "bookmarks"],
   "host_permissions": [
     "https://icons.bitwarden.net/*",

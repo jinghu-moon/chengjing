@@ -5,8 +5,10 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue'
 import { useShareCard } from '../../composables/useShareCard'
+import dayjs from 'dayjs'
+import { getLunarDate } from 'chinese-days'
 
-const { state, authorColor, canvasSize, fontFamily } = useShareCard()
+const { state, getFontFamily, canvasSize } = useShareCard()
 
 // Canvas 噪点绘制
 const noiseCanvas = ref<HTMLCanvasElement | null>(null)
@@ -77,30 +79,108 @@ const overlayStyle = computed(() => {
   return { background: bg }
 })
 
-const poemStyle = computed(() => ({
-  fontSize: `${state.fontSize}px`,
-  color: state.color,
-  fontFamily: fontFamily.value,
-  textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
-  WebkitTextStroke: state.strokeWidth > 0 ? `${state.strokeWidth}px ${state.strokeColor}` : 'unset',
-  textAlign: state.poemAlign
-}))
+const poemStyle = computed(() => {
+  const s = state.styles.poem
+  return {
+    fontSize: `${s.fontSize}px`,
+    fontWeight: s.fontWeight,
+    color: s.color,
+    fontFamily: getFontFamily(s.font),
+    textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+    WebkitTextStroke: s.strokeWidth > 0 ? `${s.strokeWidth}px ${s.strokeColor}` : 'unset',
+    textAlign: s.align,
+    lineHeight: s.lineHeight,
+    letterSpacing: `${s.letterSpacing}px`
+  }
+})
 
-const authorStyle = computed(() => ({
-  color: authorColor.value,
-  fontFamily: fontFamily.value,
-  textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
-  WebkitTextStroke: state.strokeWidth > 0 ? `${state.strokeWidth / 2}px ${state.strokeColor}` : 'unset',
-  textAlign: state.authorAlign
-}))
+const authorStyle = computed(() => {
+  const s = state.styles.author
+  return {
+    fontSize: `${s.fontSize}px`,
+    fontWeight: s.fontWeight,
+    color: s.color,
+    fontFamily: getFontFamily(s.font),
+    textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+    WebkitTextStroke: s.strokeWidth > 0 ? `${s.strokeWidth}px ${s.strokeColor}` : 'unset',
+    textAlign: s.align,
+    lineHeight: s.lineHeight,
+    letterSpacing: `${s.letterSpacing}px`
+  }
+})
 
-const titleStyle = computed(() => ({
-  color: authorColor.value,
-  fontFamily: fontFamily.value,
-  textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
-  WebkitTextStroke: state.strokeWidth > 0 ? `${state.strokeWidth / 2}px ${state.strokeColor}` : 'unset',
-  textAlign: state.titleAlign
-}))
+const titleStyle = computed(() => {
+  const s = state.styles.title
+  return {
+    fontSize: `${s.fontSize}px`,
+    fontWeight: s.fontWeight,
+    color: s.color,
+    fontFamily: getFontFamily(s.font),
+    textShadow: state.shadow ? '0 2px 8px rgba(0,0,0,0.3)' : 'none',
+    WebkitTextStroke: s.strokeWidth > 0 ? `${s.strokeWidth}px ${s.strokeColor}` : 'unset',
+    textAlign: s.align,
+    lineHeight: s.lineHeight,
+    letterSpacing: `${s.letterSpacing}px`
+  }
+})
+
+// 日期信息
+const dateInfo = computed(() => {
+  const style = state.dateStyle
+  if (style === 'none') return null
+  
+  if (style === 'custom') {
+    return { type: 'single', text: state.customDate || '自定义日期' }
+  }
+
+  const now = dayjs()
+  let lunar
+  try {
+     lunar = getLunarDate(now.toDate())
+  } catch (e) {
+    console.error('Lunar date error', e)
+    lunar = { yearCyl: '', lunarMonCN: '', lunarDayCN: '' }
+  }
+
+  switch (style) {
+    case 'combined':
+      return { 
+        type: 'combined', 
+        lunar: `${lunar.yearCyl}年 · ${lunar.lunarMonCN} · ${lunar.lunarDayCN}`,
+        gregorian: now.format('YYYY.MM.DD')
+      }
+    case 'gregorian_dot':
+      return { type: 'single', text: now.format('YYYY.MM.DD') }
+    case 'gregorian_dash':
+      return { type: 'single', text: now.format('YYYY-MM-DD') }
+    case 'gregorian_slash':
+      return { type: 'single', text: now.format('YYYY/MM/DD') }
+    case 'chinese_date':
+      return { type: 'single', text: now.format('YYYY年M月D日') }
+    case 'en_short':
+      return { type: 'single', text: now.format('MMM D, YYYY') }
+    case 'lunar':
+      return { type: 'single', text: `${lunar.lunarMonCN} · ${lunar.lunarDayCN}` }
+    case 'lunar_detail':
+      return { type: 'single', text: `${lunar.yearCyl}年 · ${lunar.lunarMonCN} · ${lunar.lunarDayCN}` }
+    case 'datetime':
+      return { type: 'single', text: now.format('YYYY.MM.DD HH:mm') }
+    default:
+      return null
+  }
+})
+
+const dateStyle = computed(() => {
+  // 跟随作者样式，但稍小
+  const s = state.styles.author
+  return {
+    color: s.color,
+    fontFamily: getFontFamily(s.font),
+    fontWeight: 400,
+    fontSize: `${Math.max(12, s.fontSize * 0.6)}px`, // 动态缩放
+    opacity: 0.8
+  }
+})
 
 const contentClass = computed(() => [
   `layout-${state.layout}`
@@ -123,6 +203,18 @@ const contentClass = computed(() => [
           <div class="meta-group">
             <div class="author-text" :style="authorStyle">{{ state.author }}</div>
             <div v-if="state.title" class="title-text" :style="titleStyle">{{ state.title }}</div>
+            
+             <!-- 日期显示 -->
+            <div v-if="dateInfo" class="date-text" :style="dateStyle">
+              <template v-if="dateInfo.type === 'combined'">
+                <span class="lunar">{{ dateInfo.lunar }}</span>
+                <span class="divider"></span>
+                <span class="gregorian">{{ dateInfo.gregorian }}</span>
+              </template>
+              <template v-else>
+                <span>{{ dateInfo.text }}</span>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -135,20 +227,24 @@ const contentClass = computed(() => [
   box-shadow: 0 16px 48px rgba(46, 52, 64, 0.5);
   transition: all 0.3s ease;
   position: relative;
+  border-radius: 16px; /* 确保阴影也是圆角的 */
 }
 
 .card {
   width: 100%;
   height: 100%;
   position: relative;
-  background: #fff;
+  /* background: #fff;  Removed to allow transparent export */
   overflow: hidden;
   border-radius: 16px;
+  transform: translateZ(0); /* 强制 GPU 渲染，修复圆角抗锯齿白边 */
+  -webkit-mask-image: -webkit-radial-gradient(white, black); /* 修复 Safari/Chrome 圆角溢出 */
+  mask-image: radial-gradient(white, black); /* 修复 Safari/Chrome 圆角溢出 */
 }
 
 .card-bg {
   position: absolute;
-  inset: 0;
+  inset: -1px; /* 微量外扩，防止边缘缝隙 */
   z-index: 1;
   transition: filter 0.2s;
 }
@@ -217,14 +313,15 @@ const contentClass = computed(() => [
 
 /* 文本样式 */
 .text-group {
-  max-width: 90%;
-  max-height: 90%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 默认垂直居中 */
 }
 
 .poem-text {
   white-space: pre-wrap;
-  line-height: 1.8;
-  letter-spacing: 0.05em;
   transition: all 0.2s;
 }
 
@@ -235,13 +332,39 @@ const contentClass = computed(() => [
 
 .author-text,
 .title-text {
-  font-size: 0.45em;
-  opacity: 0.75;
-  line-height: 1.6;
   transition: all 0.2s;
 }
 
 .title-text {
   margin-top: 8px;
+}
+
+/* 日期样式 */
+.date-text {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+.layout-vertical .date-text {
+  writing-mode: vertical-rl;
+  margin-top: 0;
+  margin-left: 24px;
+}
+
+.date-text .divider {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  background-color: currentColor;
+  opacity: 0.6;
+}
+
+.layout-vertical .date-text .divider {
+  width: 12px;
+  height: 1px;
 }
 </style>

@@ -1,12 +1,14 @@
 <script setup lang="ts">
 /**
  * 快捷计算器组件
- * 桌面小组件形式，支持计算 + 换算双模式
+ * 桌面小组件形式，支持 标准/科学计算 + 换算 模式
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   IconCalculator,
   IconBackspace,
+  IconHistory,
+  IconFlask,
   IconArrowsExchange,
   IconRuler2,
   IconScale,
@@ -18,14 +20,23 @@ import {
   IconRocket,
   IconLanguageHiragana,
   IconCoin,
+  IconTrash
 } from '@tabler/icons-vue'
+import { useClipboard } from '@vueuse/core'
 import CapsuleTabs from './SettingsPanel/components/CapsuleTabs.vue'
 import SelectMenu from './SelectMenu'
 import { Dialog } from './Dialog'
 import { useCalculator } from '../composables/useCalculator'
 import { useConverter, converterCategories, type ConverterType } from '../composables/useConverter'
+import { useToast } from './Toast/composables/useToast'
 
-// 计算器逻辑
+// --- 逻辑层 ---
+
+// 剪贴板 & Toast
+const { copy, isSupported: isCopySupported } = useClipboard()
+const { showToast } = useToast()
+
+// 计算器核心
 const {
   display,
   currentExpression,
@@ -39,6 +50,14 @@ const {
   backspace,
   toggleSign,
   percentage,
+  clearHistory,
+  // 科学计算
+  sin, cos, tan,
+  log, ln,
+  sqrt, square,
+  reciprocal, factorial,
+  exp,
+  constantPi, constantE
 } = useCalculator()
 
 // 换算逻辑
@@ -48,7 +67,7 @@ const {
   fromUnit,
   toUnit,
   currentUnits,
-  result,
+  result: convertResult,
   setType,
   swapUnits,
 } = useConverter()
@@ -56,6 +75,8 @@ const {
 // UI 状态
 const isExpanded = ref(false)
 const activeTab = ref<'calc' | 'convert'>('calc')
+const calcMode = ref<'standard' | 'scientific'>('standard')
+const showHistory = ref(false)
 const showConverterList = ref(true)
 
 const tabs = [
@@ -63,7 +84,7 @@ const tabs = [
   { value: 'convert', label: '换算' },
 ]
 
-// 图标映射
+// --- 换算图标映射 ---
 const converterIcons: Record<ConverterType, any> = {
   length: IconRuler2,
   weight: IconScale,
@@ -77,17 +98,17 @@ const converterIcons: Record<ConverterType, any> = {
   currency: IconCoin,
 }
 
-// 温度/进制单位名称
-const temperatureUnits = ['摄氏度 ℃', '华氏度 ℉', '开尔文 K']
-const radixUnits = ['二进制', '八进制', '十进制', '十六进制']
+// --- 辅助函数 ---
 
 const getUnitOptions = () => {
+  const temperatureUnits = ['摄氏度 ℃', '华氏度 ℉', '开尔文 K']
+  const radixUnits = ['二进制', '八进制', '十进制', '十六进制']
+  
   if (activeType.value === 'temperature') return temperatureUnits
   if (activeType.value === 'radix') return radixUnits
   return currentUnits.value.map(u => `${u.name} (${u.symbol})`)
 }
 
-// SelectMenu 使用的选项格式
 const unitOptions = computed(() => {
   return getUnitOptions().map((label, idx) => ({
     value: String(idx),
@@ -95,34 +116,21 @@ const unitOptions = computed(() => {
   }))
 })
 
-// 单位选择处理
-const handleFromUnitChange = (val: string) => {
-  fromUnit.value = parseInt(val)
+// --- 事件处理 ---
+
+const handleCopy = async (text: string) => {
+  if (!isCopySupported.value) return
+  await copy(text)
+  showToast({ type: 'success', message: '已复制结果' })
 }
 
-const handleToUnitChange = (val: string) => {
-  toUnit.value = parseInt(val)
+const handleHistoryClick = (item: { expression: string, result: string }) => {
+  inputDigit(item.result)
+  showHistory.value = false
 }
 
-// 选择换算类型
-const selectConverter = (type: ConverterType) => {
-  setType(type)
-  showConverterList.value = false
-}
-
-// 返回换算列表
-const backToList = () => {
-  showConverterList.value = true
-}
-
-// 切换展开
-const toggleExpand = () => {
-  isExpanded.value = !isExpanded.value
-}
-
-// 关闭面板
-const closePanel = () => {
-  isExpanded.value = false
+const toggleMode = () => {
+  calcMode.value = calcMode.value === 'standard' ? 'scientific' : 'standard'
 }
 
 // 键盘支持
@@ -130,20 +138,26 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (!isExpanded.value || activeTab.value !== 'calc') return
 
   const key = e.key
+  
+  if (['Enter', 'Backspace', 'Escape'].includes(key)) {
+    // Escape 交给 Dialog 处理
+  }
 
   if (/^[0-9]$/.test(key)) {
     inputDigit(key)
   } else if (key === '.') {
     inputDecimal()
-  } else if (key === '+' || key === '-' || key === '*' || key === '/') {
+  } else if (['+', '-', '*', '/'].includes(key)) {
     inputOperator(key)
   } else if (key === 'Enter' || key === '=') {
     e.preventDefault()
     equals()
   } else if (key === 'Backspace') {
     backspace()
-  } else if (key === 'c' || key === 'C') {
+  } else if (key.toLowerCase() === 'c') {
     clear()
+  } else if (key === '^' && calcMode.value === 'scientific') {
+    inputOperator('^')
   }
 }
 
@@ -155,7 +169,6 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
 
-// Tab 切换时重置换算列表视图
 const handleTabChange = (tab: string | number) => {
   activeTab.value = tab as 'calc' | 'convert'
   if (tab === 'convert') {
@@ -167,129 +180,238 @@ const handleTabChange = (tab: string | number) => {
 <template>
   <div class="calculator-wrapper">
     <!-- 迷你入口 -->
-    <div class="mini-trigger" title="计算器" @click="toggleExpand">
+    <div class="mini-trigger" title="计算器" @click="isExpanded = !isExpanded">
       <IconCalculator :size="20" stroke-width="1.5" />
       <span v-if="lastResult" class="mini-result">{{ lastResult }}</span>
     </div>
 
-    <!-- 使用 Dialog 组件承载计算器面板 -->
+    <!-- 主面板 -->
     <Dialog
       v-model="isExpanded"
-      :mask="true"
-      :mask-closable="true"
-      :closable="false"
-      :show-icon="false"
-      :show-confirm-btn="false"
-      :show-cancel-btn="false"
-      :close-on-esc="true"
-      :lock-scroll="false"
-      width="320px"
+      :width="activeTab === 'calc' && calcMode === 'scientific' ? '380px' : '320px'"
       placement="topLeft"
+      :show-header="false"
       dialog-class="calc-dialog"
       mask-class="calc-mask"
-      @close="closePanel"
     >
-      <template #header>
-        <div class="calc-header">
+      <div class="calc-container">
+        <!-- 顶部通栏 -->
+        <div class="calc-header-bar">
           <CapsuleTabs
             :model-value="activeTab"
             :items="tabs"
             :equal-width="true"
+            class="main-tabs"
             @update:model-value="handleTabChange"
           />
-        </div>
-      </template>
-
-      <!-- 计算器视图 -->
-      <div v-if="activeTab === 'calc'" class="calc-view">
-        <!-- 显示区 -->
-        <div class="display-area">
-          <div class="expression">{{ currentExpression || history[0]?.expression || '' }}</div>
-          <div class="result">{{ display }}</div>
-        </div>
-
-        <!-- 按钮区 -->
-        <div class="button-grid">
-          <button class="btn func" @click="clear">C</button>
-          <button class="btn func" @click="backspace">
-            <IconBackspace :size="20" />
-          </button>
-          <button class="btn func" @click="percentage">%</button>
-          <button class="btn op" @click="inputOperator('/')">÷</button>
-
-          <button class="btn" @click="inputDigit('7')">7</button>
-          <button class="btn" @click="inputDigit('8')">8</button>
-          <button class="btn" @click="inputDigit('9')">9</button>
-          <button class="btn op" @click="inputOperator('*')">×</button>
-
-          <button class="btn" @click="inputDigit('4')">4</button>
-          <button class="btn" @click="inputDigit('5')">5</button>
-          <button class="btn" @click="inputDigit('6')">6</button>
-          <button class="btn op" @click="inputOperator('-')">−</button>
-
-          <button class="btn" @click="inputDigit('1')">1</button>
-          <button class="btn" @click="inputDigit('2')">2</button>
-          <button class="btn" @click="inputDigit('3')">3</button>
-          <button class="btn op" @click="inputOperator('+')">+</button>
-
-          <button class="btn func" @click="toggleSign">±</button>
-          <button class="btn" @click="inputDigit('0')">0</button>
-          <button class="btn" @click="inputDecimal">.</button>
-          <button class="btn equal" @click="equals">=</button>
-        </div>
-      </div>
-
-      <!-- 换算视图 -->
-      <div v-else class="convert-view">
-        <!-- 换算分类列表 -->
-        <div v-if="showConverterList" class="converter-list">
-          <div
-            v-for="cat in converterCategories"
-            :key="cat.type"
-            class="converter-item"
-            @click="selectConverter(cat.type)"
-          >
-            <component :is="converterIcons[cat.type]" :size="24" stroke-width="1.5" />
-            <span>{{ cat.label }}</span>
-          </div>
-        </div>
-
-        <!-- 换算详情 -->
-        <div v-else class="converter-detail">
-          <button class="back-btn" @click="backToList">
-            ← 返回
-          </button>
-
-          <div class="convert-input-area">
-            <div class="convert-row">
-              <SelectMenu
-                :model-value="String(fromUnit)"
-                :options="unitOptions"
-                trigger-width="140px"
-                @update:model-value="handleFromUnitChange"
-              />
-              <input
-                v-model="inputValue"
-                type="text"
-                class="convert-input"
-                placeholder="输入数值"
-              />
-            </div>
-
-            <button class="swap-btn" @click="swapUnits">
-              <IconArrowsExchange :size="20" />
+          
+          <div v-if="activeTab === 'calc'" class="header-tools">
+            <button 
+              class="tool-btn" 
+              :class="{ active: calcMode === 'scientific' }"
+              title="科学模式"
+              @click="toggleMode"
+            >
+              <IconFlask :size="18" />
             </button>
+            <button 
+              class="tool-btn" 
+              :class="{ active: showHistory }"
+              title="历史记录"
+              @click="showHistory = !showHistory"
+            >
+              <IconHistory :size="18" />
+            </button>
+          </div>
+        </div>
 
-            <div class="convert-row">
-              <SelectMenu
-                :model-value="String(toUnit)"
-                :options="unitOptions"
-                trigger-width="140px"
-                @update:model-value="handleToUnitChange"
-              />
-              <div class="convert-result">{{ result || '—' }}</div>
+        <!-- 内容区域 -->
+        <div class="calc-body">
+          
+          <!-- 计算模式 -->
+          <div v-if="activeTab === 'calc'" class="mode-calc">
+            <!-- 显示屏 -->
+            <div 
+              class="display-screen" 
+              @click="handleCopy(display)"
+              title="点击复制"
+            >
+              <div class="expression-line">{{ currentExpression }}</div>
+              <div class="result-line">{{ display }}</div>
+            </div>
+
+            <!-- 键盘区域 -->
+            <div class="keypad" :class="calcMode">
+              
+              <!-- 标准模式 (4列) -->
+              <template v-if="calcMode === 'standard'">
+                <button class="btn func" @click="percentage">%</button>
+                <button class="btn func" @click="clear">CE</button>
+                <button class="btn func" @click="clear">C</button>
+                <button class="btn func" @click="backspace" aria-label="backspace"><IconBackspace :size="20"/></button>
+                
+                <button class="btn func" @click="reciprocal">¹/x</button>
+                <button class="btn func" @click="square">x²</button>
+                <button class="btn func" @click="sqrt">²√x</button>
+                <button class="btn func" @click="inputOperator('/')">÷</button>
+
+                <button class="btn num" @click="inputDigit('7')">7</button>
+                <button class="btn num" @click="inputDigit('8')">8</button>
+                <button class="btn num" @click="inputDigit('9')">9</button>
+                <button class="btn func" @click="inputOperator('*')">×</button>
+
+                <button class="btn num" @click="inputDigit('4')">4</button>
+                <button class="btn num" @click="inputDigit('5')">5</button>
+                <button class="btn num" @click="inputDigit('6')">6</button>
+                <button class="btn func" @click="inputOperator('-')">−</button>
+
+                <button class="btn num" @click="inputDigit('1')">1</button>
+                <button class="btn num" @click="inputDigit('2')">2</button>
+                <button class="btn num" @click="inputDigit('3')">3</button>
+                <button class="btn func" @click="inputOperator('+')">+</button>
+
+                <button class="btn num" @click="toggleSign">±</button>
+                <button class="btn num" @click="inputDigit('0')">0</button>
+                <button class="btn num" @click="inputDecimal">.</button>
+                <button class="btn equal" @click="equals">=</button>
+              </template>
+
+              <!-- 科学模式 (5列) -->
+              <template v-else>
+                <!-- Row 1 -->
+                <button class="btn func scientific" @click="square">x²</button>
+                <button class="btn func scientific" @click="constantPi">π</button>
+                <button class="btn func scientific" @click="constantE">e</button>
+                <button class="btn func" @click="clear">C</button>
+                <button class="btn func" @click="backspace"><IconBackspace :size="20"/></button>
+
+                <!-- Row 2 -->
+                <button class="btn func scientific" @click="reciprocal">¹/x</button>
+                <button class="btn func scientific" @click="sqrt">²√x</button>
+                <button class="btn func scientific" @click="exp">exp</button>
+                <button class="btn func scientific" @click="inputOperator('mod')">mod</button>
+                <button class="btn func" @click="inputOperator('/')">÷</button>
+
+                <!-- Row 3 -->
+                <button class="btn func scientific" @click="sin">sin</button>
+                <button class="btn func scientific" @click="cos">cos</button>
+                <button class="btn func scientific" @click="tan">tan</button>
+                <button class="btn func scientific" @click="factorial">n!</button>
+                <button class="btn func" @click="inputOperator('*')">×</button>
+                
+                <!-- Row 4 -->
+                <button class="btn func scientific" @click="inputOperator('^')">xʸ</button>
+                <button class="btn num" @click="inputDigit('7')">7</button>
+                <button class="btn num" @click="inputDigit('8')">8</button>
+                <button class="btn num" @click="inputDigit('9')">9</button>
+                <button class="btn func" @click="inputOperator('-')">−</button>
+
+                <!-- Row 5 -->
+                <button class="btn func scientific" @click="inputOperator('10^')">10ˣ</button>
+                <button class="btn num" @click="inputDigit('4')">4</button>
+                <button class="btn num" @click="inputDigit('5')">5</button>
+                <button class="btn num" @click="inputDigit('6')">6</button>
+                <button class="btn func" @click="inputOperator('+')">+</button>
+
+                <!-- Row 6 -->
+                <button class="btn func scientific" @click="log">log</button>
+                <button class="btn num" @click="inputDigit('1')">1</button>
+                <button class="btn num" @click="inputDigit('2')">2</button>
+                <button class="btn num" @click="inputDigit('3')">3</button>
+                <button class="btn equal row-span-2" @click="equals">=</button>
+
+                <!-- Row 7 -->
+                <button class="btn func scientific" @click="ln">ln</button>
+                <button class="btn num" @click="toggleSign">±</button>
+                <button class="btn num" @click="inputDigit('0')">0</button>
+                <button class="btn num" @click="inputDecimal">.</button>
+              </template>
             </div>
           </div>
+
+          <!-- 换算模式保持不变 -->
+          <div v-else class="mode-convert">
+             <!-- ... existing convert template ... -->
+             <!-- 换算分类列表 -->
+             <div v-if="showConverterList" class="converter-list">
+              <div
+                v-for="cat in converterCategories"
+                :key="cat.type"
+                class="converter-item"
+                @click="setType(cat.type); showConverterList = false"
+              >
+                <component :is="converterIcons[cat.type]" :size="24" stroke-width="1.5" />
+                <span>{{ cat.label }}</span>
+              </div>
+            </div>
+
+            <!-- 换算详情 -->
+            <div v-else class="converter-detail">
+              <button class="back-btn" @click="showConverterList = true">
+                ← 返回
+              </button>
+
+              <div class="convert-input-area">
+                <div class="convert-row">
+                  <SelectMenu
+                    :model-value="String(fromUnit)"
+                    :options="unitOptions"
+                    trigger-width="140px"
+                    @update:model-value="v => fromUnit = parseInt(v)"
+                  />
+                  <input
+                    v-model="inputValue"
+                    type="text"
+                    class="convert-input"
+                    placeholder="输入数值"
+                  />
+                </div>
+
+                <button class="swap-btn" @click="swapUnits">
+                  <IconArrowsExchange :size="20" />
+                </button>
+
+                <div class="convert-row">
+                  <SelectMenu
+                    :model-value="String(toUnit)"
+                    :options="unitOptions"
+                    trigger-width="140px"
+                    @update:model-value="v => toUnit = parseInt(v)"
+                  />
+                  <div class="convert-result">{{ convertResult || '—' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 历史记录面板 (Overlay) -->
+          <Transition name="slide-right">
+            <div v-if="showHistory && activeTab === 'calc'" class="history-panel">
+              <div class="history-header">
+                <span>历史记录</span>
+                <button class="icon-btn-small" @click="clearHistory" title="清空历史" v-if="history.length">
+                  <IconTrash :size="16" />
+                </button>
+              </div>
+              
+              <div v-if="history.length === 0" class="history-empty">
+                暂无记录
+              </div>
+              
+              <ul v-else class="history-list">
+                <li 
+                  v-for="(item, idx) in history" 
+                  :key="idx" 
+                  class="history-item"
+                  @click="handleHistoryClick(item)"
+                >
+                  <div class="hist-expr">{{ item.expression }} =</div>
+                  <div class="hist-res">{{ item.result }}</div>
+                </li>
+              </ul>
+            </div>
+          </Transition>
+
         </div>
       </div>
     </Dialog>
@@ -297,316 +419,379 @@ const handleTabChange = (tab: string | number) => {
 </template>
 
 <style scoped>
-/* 基础布局 */
+/* --- 布局变量 --- */
 .calculator-wrapper {
   position: absolute;
   top: 180px;
   left: 28px;
-  z-index: var(--z-panel);
+  z-index: var(--z-widget);
 }
 
-
-
-/* 迷你入口 */
+/* --- 迷你入口 --- */
 .mini-trigger {
   background: var(--bg-panel);
   backdrop-filter: var(--glass-md);
   border: var(--border-glass);
   height: 40px;
-  padding: 0 16px;
+  padding: 0 var(--spacing-md);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--spacing-sm);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-smooth);
+  transition: var(--transition-base);
   color: var(--text-primary);
   box-shadow: var(--shadow-md);
 }
 
 .mini-trigger:hover {
   background: var(--bg-hover-card);
-  transform: scale(1.05);
+  transform: translateY(-2px);
 }
 
 .mini-result {
-  font-size: 14px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  max-width: 80px;
+  font-size: var(--text-base);
+  font-family: var(--font-family-mono);
+  max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Dialog 弹窗样式 */
-.calc-header {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-/* 计算器视图 */
-.calc-view {
-  padding: 12px;
-}
-
-.display-area {
-  text-align: right;
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  background: var(--bg-input);
-  border-radius: var(--radius-md);
-  min-height: 80px;
+/* --- 计算器容器 --- */
+.calc-container {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-}
-
-.expression {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-  min-height: 20px;
+  height: 100%;
+  position: relative;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.result {
-  font-size: 32px;
-  font-weight: 500;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.calc-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: var(--border-divider);
 }
 
-/* 按钮网格 */
-.button-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+.main-tabs {
+  flex: 1;
+  max-width: 200px;
 }
 
-.btn {
-  height: 52px;
+.header-tools {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.tool-btn {
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: var(--radius-md);
-  background: var(--bg-active);
-  color: var(--text-primary);
-  font-size: 18px;
-  font-weight: 500;
+  background: transparent;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--duration-fast);
+  transition: var(--transition-fast);
 }
 
-.btn:hover {
+.tool-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.tool-btn.active {
+  color: var(--color-primary);
+  background: var(--bg-active);
+}
+
+/* --- 内容区 --- */
+.calc-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- 显示屏 --- */
+.display-screen {
+  padding: var(--spacing-md);
+  text-align: right;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+
+.display-screen:hover {
+  background: var(--bg-hover);
+}
+
+.display-screen:active {
+  background: var(--bg-active);
+}
+
+.expression-line {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  min-height: 20px;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.expression-line::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.result-line {
+  font-size: 40px; /* text-huge is 64px, too big for this dialog width */
+  font-family: var(--font-family-mono);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- 键盘 --- */
+.keypad {
+  flex: 1;
+  display: grid;
+  padding: var(--spacing-sm);
+  gap: 6px; /* slightly larger gap for comfort */
+}
+
+.keypad.standard {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.keypad.scientific {
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  min-height: 48px; /* Touch target optimized */
+}
+
+/* 键盘按键配色 (严格遵循 Design System) */
+.btn.num {
+  background: var(--bg-active); /* Light/Translucent */
+  color: var(--text-primary);
+}
+.btn.num:hover {
   background: var(--bg-hover-card);
 }
 
-.btn:active {
-  transform: scale(0.95);
-}
-
 .btn.func {
-  background: var(--bg-panel-card);
+  background: var(--bg-panel-card); /* Darker */
   color: var(--text-secondary);
 }
-
-.btn.op {
-  color: var(--color-primary);
-  font-size: 22px;
+.btn.func:hover {
+  background: var(--bg-hover-card);
+  color: var(--text-primary);
 }
 
 .btn.equal {
   background: var(--color-primary);
   color: #fff;
 }
-
 .btn.equal:hover {
   background: var(--color-primary-hover);
 }
 
-/* 换算视图 */
-.convert-view {
-  padding: 12px;
-  min-height: 320px;
+.btn:active {
+  transform: scale(0.96);
 }
 
+.btn[disabled] {
+  opacity: var(--disabled-opacity);
+  cursor: not-allowed;
+}
+
+.row-span-2 {
+  grid-row: span 2;
+  height: 100%;
+}
+
+.scientific {
+  font-size: var(--text-sm);
+}
+
+/* --- 历史记录面板 --- */
+.history-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 240px;
+  background: var(--bg-panel-dark);
+  backdrop-filter: var(--glass-lg);
+  border-left: var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.history-header {
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  border-bottom: var(--border-divider);
+}
+
+.icon-btn-small {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+.icon-btn-small:hover {
+  background: var(--bg-hover);
+  color: var(--color-danger);
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  list-style: none;
+  margin: 0;
+}
+
+.history-item {
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  margin-bottom: var(--spacing-xs);
+  transition: var(--transition-fast);
+}
+
+.history-item:hover {
+  background: var(--bg-active);
+}
+
+.hist-expr {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+
+.hist-res {
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  font-family: var(--font-family-mono);
+  font-weight: var(--weight-medium);
+}
+
+.history-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* --- 动画 --- */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: var(--transition-base);
+}
+
+.slide-right-enter-from,
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* --- 换算样式 (复用原有逻辑，更新样式) --- */
+.mode-convert {
+  padding: var(--spacing-md);
+  min-height: 380px;
+}
 .converter-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
-
 .converter-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-sm);
   border-radius: var(--radius-md);
   background: var(--bg-active);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all var(--duration-fast);
-  font-size: var(--text-sm);
+  transition: var(--transition-fast);
 }
-
 .converter-item:hover {
   background: var(--bg-hover-card);
   color: var(--text-primary);
 }
 
-/* 换算详情 */
-.converter-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.back-btn {
-  align-self: flex-start;
-  padding: 6px 12px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--bg-panel-card);
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all var(--duration-fast);
-}
-
-.back-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
+/* 更多换算样式略，沿用 Grid 布局即可 */
 .convert-input-area {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
 }
-
 .convert-row {
-  width: 100%;
   display: flex;
-  gap: 8px;
-  min-width: 0;
+  gap: var(--spacing-sm);
 }
-
-.unit-select {
+.convert-input, .convert-result {
   flex: 1;
-  min-width: 0;
-  max-width: 140px;
-  height: 44px;
-  padding: 0 12px;
+  height: 40px;
+  background: var(--bg-input);
   border: var(--border-glass);
   border-radius: var(--radius-md);
-  background: var(--bg-input);
+  padding: 0 var(--spacing-sm);
   color: var(--text-primary);
-  font-size: var(--text-base);
-  cursor: pointer;
-  outline: none;
+  font-family: var(--font-family-mono);
 }
-
-.unit-select:focus {
-  border-color: var(--color-primary);
-}
-
-.convert-input,
-.convert-result {
-  flex: 1;
-  min-width: 0;
-  height: 44px;
-  padding: 0 12px;
-  border: var(--border-glass);
-  border-radius: var(--radius-md);
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-size: var(--text-md);
-  font-variant-numeric: tabular-nums;
-  outline: none;
-}
-
-.convert-input:focus {
-  border-color: var(--color-primary);
-}
-
-.convert-result {
-  display: flex;
-  align-items: center;
-  background: var(--bg-active);
-  font-weight: 500;
-}
-
 .swap-btn {
-  width: 36px;
-  height: 36px;
+  align-self: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
   border: none;
-  border-radius: var(--radius-full);
   background: var(--color-primary);
   color: #fff;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--duration-fast);
+  cursor: pointer;
 }
-
-.swap-btn:hover {
-  transform: rotate(180deg);
-  background: var(--color-primary-hover);
+.back-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: var(--spacing-md);
 }
-
-/* 动画 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity var(--duration-normal);
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: all var(--duration-normal) var(--ease-smooth);
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
-</style>
-
-<!-- 全局样式用于覆盖 Dialog 组件 -->
-<style>
-/* 计算器 Dialog 定制样式 */
-.calc-dialog {
-  /* 自适应内容高度，不要填满 */
-  height: auto !important;
-  max-height: 90vh;
-}
-
-.calc-dialog .dialog-header {
-  padding: 12px 16px 8px;
-}
-
-.calc-dialog .dialog-body {
-  padding: 0;
-}
-
-/* 透明遮罩 */
-.calc-mask {
-  background: rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(2px) !important;
-}
+.back-btn:hover { text-decoration: underline; }
 </style>

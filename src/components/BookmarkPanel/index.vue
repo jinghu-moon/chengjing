@@ -3,7 +3,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { IconX, IconBookmarks } from '@tabler/icons-vue'
 import { useBookmarks } from './composables/useBookmarks'
 import { useBookmarkSearch } from './composables/useBookmarkSearch'
-import SearchInput from './components/SearchInput.vue'
+import BaseSearchInput from '../BaseSearchInput.vue'
 import SearchResults from './components/SearchResults.vue'
 import FolderTree from './components/FolderTree.vue'
 import Breadcrumb from './components/Breadcrumb.vue'
@@ -68,7 +68,7 @@ const handleFolderMove = (
 const { query, results, isSearching, hasQuery, search, clearSearch } = useBookmarkSearch(store)
 
 // Refs
-const searchInputRef = ref<InstanceType<typeof SearchInput> | null>(null)
+const searchInputRef = ref<InstanceType<typeof BaseSearchInput> | null>(null)
 const searchResultsRef = ref<InstanceType<typeof SearchResults> | null>(null)
 
 // 面包屑路径
@@ -211,12 +211,24 @@ watch(
   }
 )
 
+// Global shortcut for search (Ctrl+K)
+const handleGlobalKeydown = (e: KeyboardEvent) => {
+  // Pass to existing handler first
+  handleKeydown(e)
+  
+  // Ctrl+K to focus search (only if drawer is open)
+  if (props.isOpen && (e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault()
+    searchInputRef.value?.focus()
+  }
+}
+
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keydown', handleGlobalKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keydown', handleGlobalKeydown)
 })
 </script>
 
@@ -238,9 +250,11 @@ onUnmounted(() => {
 
           <!-- Search -->
           <div class="search-section">
-            <SearchInput
+            <BaseSearchInput
               ref="searchInputRef"
               :model-value="query"
+              placeholder="搜索书签..."
+              shortcut="Ctrl+K"
               @update:model-value="handleSearchInput"
               @keydown="handleSearchKeydown"
             />

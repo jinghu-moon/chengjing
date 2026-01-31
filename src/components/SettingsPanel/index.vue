@@ -462,6 +462,11 @@ const resetNotePadPos = () => {
                       @update:model-value="updatePoemSettings({ showCollect: $event })"
                     />
                     <SettingSwitch
+                      :model-value="poemSettings.showCopy"
+                      label="复制按钮"
+                      @update:model-value="updatePoemSettings({ showCopy: $event })"
+                    />
+                    <SettingSwitch
                       :model-value="poemSettings.showRefresh"
                       label="刷新按钮"
                       @update:model-value="updatePoemSettings({ showRefresh: $event })"

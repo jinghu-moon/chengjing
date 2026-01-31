@@ -3,12 +3,14 @@
  * 每日诗词组件
  * 横幅卡片形式展示每日诗词
  */
-import { ref, onMounted, computed } from 'vue'
-import { IconRefresh, IconStar, IconSettings, IconPhoto } from '@tabler/icons-vue'
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue'
+import { IconRefresh, IconStar, IconSettings, IconPhoto, IconCopy } from '@tabler/icons-vue'
 import { useDailyPoem } from './composables/useDailyPoem'
 import { useToast } from '../Toast/composables/useToast'
-import PoemManagerDialog from './PoemManager.vue'
-import ShareCardDialog from './components/ShareCard/index.vue'
+import { useClipboard } from '@vueuse/core'
+
+const PoemManagerDialog = defineAsyncComponent(() => import('./PoemManager.vue'))
+const ShareCardDialog = defineAsyncComponent(() => import('./components/ShareCard/index.vue'))
 
 const {
   poem,
@@ -29,6 +31,22 @@ const isShareCardOpen = ref(false)
 
 // 动效状态
 const isStarAnimating = ref(false)
+
+// 复制功能
+const { copy, isSupported } = useClipboard()
+
+const handleCopy = async () => {
+  if (!poem.value) return
+  
+  const content = `「${poem.value.content}」\n—— ${poem.value.author} ${poem.value.dynasty ? `〔${poem.value.dynasty}〕` : ''}`
+  
+  try {
+    await copy(content)
+    showToast({ type: 'success', message: '已复制到剪贴板' })
+  } catch (e) {
+    showToast({ type: 'error', message: '复制失败' })
+  }
+}
 
 // 收藏当前诗词
 const handleSave = () => {
@@ -71,16 +89,13 @@ const hasFooterContent = computed(() => {
 })
 
 // --- 动画逻辑 ---
+// --- 动画逻辑 ---
 const onEnter = (el: Element) => {
   const element = el as HTMLElement
-  element.style.height = 'auto'
-  const height = getComputedStyle(element).height
   element.style.height = '0'
-  // 强制重绘
-  getComputedStyle(element).height
-  requestAnimationFrame(() => {
-    element.style.height = height
-  })
+  // Force reflow
+  element.offsetHeight
+  element.style.height = `${element.scrollHeight}px`
 }
 
 const onAfterEnter = (el: Element) => {
@@ -90,12 +105,10 @@ const onAfterEnter = (el: Element) => {
 
 const onLeave = (el: Element) => {
   const element = el as HTMLElement
-  const height = getComputedStyle(element).height
-  element.style.height = height
-  getComputedStyle(element).height
-  requestAnimationFrame(() => {
-    element.style.height = '0'
-  })
+  element.style.height = `${element.scrollHeight}px`
+  // Force reflow
+  element.offsetHeight
+  element.style.height = '0'
 }
 
 </script>
@@ -134,6 +147,16 @@ const onLeave = (el: Element) => {
               </div>
               
               <TransitionGroup name="list-horizontal" tag="div" class="action-btns-group">
+                <!-- 复制按钮 -->
+                <button
+                  v-if="isSupported && settings.showCopy"
+                  key="copy"
+                  class="icon-btn"
+                  title="复制诗词"
+                  @click="handleCopy"
+                >
+                  <IconCopy :size="15" />
+                </button>
                 <!-- 收藏按钮 -->
                 <button
                   v-if="settings.showCollect && isOnlineMode"
@@ -269,7 +292,15 @@ const onLeave = (el: Element) => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  /* gap: 2px; Removed for animation control */
+}
+
+.footer-left > span {
+  line-height: 1.5;
+}
+
+.footer-left > span:last-child {
+  margin-bottom: 0;
 }
 
 .author-name {
@@ -287,12 +318,17 @@ const onLeave = (el: Element) => {
 /* 按钮组容器 */
 .action-btns-group {
   display: flex;
-  /* 移除背景色，保持原始样式 */
-  /* background: rgba(0, 0, 0, 0.1); */
-  /* backdrop-filter: blur(4px); */
   padding: 0; 
   border-radius: 0;
-  gap: 6px; /* 增加间距 */
+  /* gap: 6px; Removed for animation control */
+}
+
+.action-btns-group > .icon-btn {
+  margin-left: 6px;
+}
+
+.action-btns-group > .icon-btn:first-child {
+  margin-left: 0;
 }
 
 /* 移除 hover */
@@ -390,34 +426,61 @@ const onLeave = (el: Element) => {
 /* 垂直列表动画 (作者/标题) */
 .list-fade-enter-active,
 .list-fade-leave-active {
-  transition: all 0.3s ease;
+  transition-property: opacity, transform, max-height;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .list-fade-enter-from,
 .list-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+  max-height: 0;
+  margin-bottom: 0 !important; /* 强制覆盖 */
+}
+
+.list-fade-enter-to,
+.list-fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 24px;
+  margin-bottom: 2px;
 }
 
 /* 水平列表动画 (按钮组) */
 .list-horizontal-enter-active,
 .list-horizontal-leave-active {
-  transition: all 0.3s ease;
+  transition-property: opacity, transform, max-width, margin-left, padding;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap; /* 防止内容换行 */
 }
 
 .list-horizontal-enter-from,
 .list-horizontal-leave-to {
   opacity: 0;
-  transform: translateX(4px);
+  transform: scale(0.8);
+  max-width: 0;
+  margin-left: 0 !important; /* 强制覆盖，解决卡顿 */
+  padding-left: 0;
+  padding-right: 0;
 }
 
-/* 确保列表删除时布局平滑 (Vue TransitionGroup 技巧) */
-.list-fade-leave-active,
-.list-horizontal-leave-active {
-  position: absolute;
+.list-horizontal-enter-to,
+.list-horizontal-leave-from {
+  opacity: 1;
+  transform: scale(1);
+  max-width: 28px;
+  margin-left: 6px;
 }
 
-/* 列表移动动画 (FLIP) */
+/* 列表移动动画 - 需要保持 absolute 以确保平滑排序，但对于进入/离开，我们使用上面的 max-width/height 技巧 */
+/* 对于 Vue TransitionGroup，move class 需要在 items 改变位置时生效 */
+/* 但如果我们不再使用 position: absolute on leave，move 可能不会生效得很好，除非 content flow 改变触发 */
+/* 鉴于我们主要是显隐，而不是排序，我们可以简化掉 absolute */
+
 .list-fade-move,
 .list-horizontal-move {
   transition: transform 0.3s ease;

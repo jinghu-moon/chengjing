@@ -158,6 +158,7 @@ const handleWheel = (e: WheelEvent) => {
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: all 0.2s;
+  flex-shrink: 0; /* 防止在高密度布局下被压缩 */
 }
 
 .mini-btn:hover {
@@ -175,6 +176,7 @@ input[type='range'] {
   flex: 1;
   background: transparent;
   cursor: pointer;
+  min-width: 0; /* 允许 flex item 压缩到最小内容以下 */
 }
 
 input[type='range']:focus {

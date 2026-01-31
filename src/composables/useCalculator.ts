@@ -113,9 +113,21 @@ export function useCalculator() {
       const result = calculate(previousValue.value, inputValue, operator.value)
       display.value = formatDisplay(result)
       previousValue.value = result
-      expression.value = `${formatDisplay(result)} ${operatorSymbols[nextOperator] || nextOperator}`
+      // 修改：不再重置 expression 为结果，而是追加当前输入
+      // 之前: expression.value = `${formatDisplay(result)} ${operatorSymbols[nextOperator] || nextOperator}`
+      // 现在: 
+      expression.value += ` ${inputValue} ${operatorSymbols[nextOperator] || nextOperator}`
     } else {
-      expression.value = `${formatDisplay(previousValue.value)} ${operatorSymbols[nextOperator] || nextOperator}`
+      // 仅更换操作符
+      const oldOpSymbol = operatorSymbols[operator.value!] || operator.value!
+      // 移除末尾的操作符 ( + 2 spaces usually? logic below handles space)
+      // expression 格式总是 "NUM OP NUM OP"
+      if (expression.value.endsWith(` ${oldOpSymbol}`)) {
+         expression.value = expression.value.slice(0, -(oldOpSymbol.length + 1)) + ` ${operatorSymbols[nextOperator] || nextOperator}`
+      } else {
+         // Fallback just in case
+         expression.value = `${formatDisplay(previousValue.value!)} ${operatorSymbols[nextOperator] || nextOperator}`
+      }
     }
 
     operator.value = nextOperator
@@ -125,6 +137,10 @@ export function useCalculator() {
   // 计算结果
   const calculate = (left: number, right: number, op: string): number => {
     switch (op) {
+    // 幂运算需特殊处理，视为 binary operator
+      case '^': return Math.pow(left, right)
+      // Mod (取模)
+      case 'mod': return left % right // 注意 JS % 是求余，matches standard calc usually
       case '+': return left + right
       case '-': return left - right
       case '*': return left * right
@@ -139,10 +155,15 @@ export function useCalculator() {
 
     const inputValue = parseFloat(display.value)
     const result = calculate(previousValue.value, inputValue, operator.value)
+    
+    // 如果 expression 已经很长，我们只需追加最后的输入
+    // expression 目前是 "1 + 2 *" 形式
     const fullExpression = `${expression.value} ${inputValue}`
 
-    display.value = formatDisplay(result)
-    addToHistory(fullExpression, formatDisplay(result))
+    // 记录历史
+    const resultStr = formatDisplay(result)
+    display.value = resultStr
+    addToHistory(fullExpression, resultStr)
 
     // 重置状态
     expression.value = ''
@@ -163,7 +184,7 @@ export function useCalculator() {
   // 退格
   const backspace = () => {
     if (waitingForOperand.value) return
-    if (display.value.length === 1 || (display.value.length === 2 && display.value.startsWith('-'))) {
+    if (display.value.length === 1 || (display.value.length === 2 && display.value.startsWith('-')) || display.value === 'Error') {
       display.value = '0'
     } else {
       display.value = display.value.slice(0, -1)
@@ -180,6 +201,48 @@ export function useCalculator() {
   const percentage = () => {
     const value = parseFloat(display.value)
     display.value = formatDisplay(value / 100)
+  }
+
+  // ----------- 科学计算功能 (Unary Operations) -----------
+
+  // 通用单目运算执行器
+  const executeUnary = (fn: (n: number) => number) => {
+    const value = parseFloat(display.value)
+    const result = fn(value)
+    display.value = formatDisplay(result)
+    // 单目运算通常不需要进入 expression 历史（如 Windows 计算器），或者作为当前输入的一部分
+    // 这里简单处理：结果作为新输入，但 waitingForOperand 设为 true 以便用户直接输入新数字覆盖? 
+    // 不，Windows 计算器 behavior: sin(30) -> 0.5，之后按数字会追加还是覆盖? 通常是覆盖（waitingForOperand = true）
+    waitingForOperand.value = true 
+  }
+
+  const sin = () => executeUnary(Math.sin)
+  const cos = () => executeUnary(Math.cos)
+  const tan = () => executeUnary(Math.tan)
+  const log = () => executeUnary(Math.log10)
+  const ln = () => executeUnary(Math.log)
+  const sqrt = () => executeUnary(Math.sqrt)
+  const cbrt = () => executeUnary(Math.cbrt) // 立方根
+  const square = () => executeUnary(n => n * n)
+  const reciprocal = () => executeUnary(n => 1 / n)
+  const factorial = () => executeUnary(n => {
+    if (n < 0) return NaN
+    if (n === 0 || n === 1) return 1
+    let r = 1
+    for (let i = 2; i <= n; i++) r *= i
+    return r
+  })
+  const exp = () => executeUnary(Math.exp) // e^x
+  const abs = () => executeUnary(Math.abs)
+
+  // 常量
+  const constantPi = () => {
+    display.value = Math.PI.toString()
+    waitingForOperand.value = true
+  }
+  const constantE = () => {
+    display.value = Math.E.toString()
+    waitingForOperand.value = true
   }
 
   // 清空历史
@@ -212,5 +275,12 @@ export function useCalculator() {
     toggleSign,
     percentage,
     clearHistory,
+    // Scientific
+    sin, cos, tan,
+    log, ln,
+    sqrt, cbrt, square,
+    reciprocal, factorial,
+    exp, abs,
+    constantPi, constantE
   }
 }

@@ -32,6 +32,7 @@ export interface DailyPoemSettings {
   showTitle: boolean
   showCollect: boolean
   showRefresh: boolean
+  showCopy: boolean
   showCard: boolean
   showManager: boolean
 }

@@ -21,11 +21,27 @@ import {
   FONT_OPTIONS, 
   IMAGE_BACKGROUNDS, 
   GRADIENT_BACKGROUNDS,
-  GRID_PATTERN_BG
+  GRID_PATTERN_BG,
+  EXPORT_SCALE_OPTIONS
 } from '../../composables/useShareCard'
-import SettingSwitch from '@/components/SettingsPanel/components/SettingSwitch.vue'
 import SettingSlider from '@/components/SettingsPanel/components/SettingSlider.vue'
 import CapsuleTabs from '@/components/SettingsPanel/components/CapsuleTabs.vue'
+import ColorPicker from '@/components/ColorPicker/ColorPicker.vue'
+import SelectMenu from '@/components/SelectMenu/index.vue'
+
+const dateOptions = [
+  { label: '隐藏', value: 'none' },
+  { label: '公历 + 农历', value: 'combined', description: '2024.01.30 · 腊月廿一' },
+  { label: '公历 (点)', value: 'gregorian_dot', description: '2024.01.30' },
+  { label: '公历 (横线)', value: 'gregorian_dash', description: '2024-01-30' },
+  { label: '公历 (斜杠)', value: 'gregorian_slash', description: '2024/01/30' },
+  { label: '公历 (中文)', value: 'chinese_date', description: '2024年1月30日' },
+  { label: '英文 (短)', value: 'en_short', description: 'Jan 30, 2024' },
+  { label: '农历 (简约)', value: 'lunar', description: '腊月廿一' },
+  { label: '农历 (干支)', value: 'lunar_detail', description: '甲辰年 · 腊月廿一' },
+  { label: '日期 + 时间', value: 'datetime', description: '2024.01.30 14:00' },
+  { label: '自定义', value: 'custom' }
+]
 
 const { state, setBackground } = useShareCard()
 
@@ -56,6 +72,17 @@ const selectGridBg = () => {
   setBackground('gradient', GRID_PATTERN_BG.src)
 }
 
+// 目标切换
+const activeTarget = ref<'poem' | 'author' | 'title'>('poem')
+
+const targetTabs = [
+  { value: 'poem', label: '诗句' },
+  { value: 'author', label: '作者' },
+  { value: 'title', label: '标题' }
+]
+
+const targetStyle = computed(() => state.styles[activeTarget.value])
+
 // Tab 配置
 const layoutTabs = [
   { value: 'vertical', label: '竖排', icon: IconLayoutColumns },
@@ -78,6 +105,8 @@ const bgTypeTabs = [
 ]
 
 // 自定义尺寸输入
+const scaleTabs = EXPORT_SCALE_OPTIONS.map(s => ({ value: s.value, label: s.label }))
+
 const customWidth = ref<number | string>('')
 const customHeight = ref<number | string>('')
 
@@ -145,11 +174,33 @@ const handleWheel = (e: WheelEvent, target: 'width' | 'height') => {
           <input v-model="state.title" type="text" class="form-input" placeholder="《静夜思》" />
         </div>
       </div>
+      <div class="form-row">
+         <div class="form-col">
+           <label class="form-label">日期显示</label>
+           <SelectMenu
+             v-model="state.dateStyle"
+             :options="dateOptions"
+             trigger-width="100%"
+             placement="bottomRight"
+           />
+        </div>
+      </div>
+      <div class="form-row" v-if="state.dateStyle === 'custom'">
+        <div class="form-col">
+           <input
+             v-model="state.customDate"
+             type="text"
+             class="form-input"
+             placeholder="输入自定义日期文本"
+           />
+        </div>
+      </div>
     </section>
 
     <!-- 布局设置 -->
     <section class="control-group">
       <h3 class="group-title">布局设置</h3>
+
       <div class="form-item">
         <label class="form-label">排版方向</label>
         <CapsuleTabs v-model="state.layout" :items="layoutTabs" stretch />
@@ -185,48 +236,76 @@ const handleWheel = (e: WheelEvent, target: 'width' | 'height') => {
           </template>
         </CapsuleTabs>
       </div>
-      
-      <!-- 独立对齐控制 -->
-      <div class="form-item">
-        <label class="form-label">诗句对齐</label>
-        <CapsuleTabs v-model="state.poemAlign" :items="alignTabs" stretch />
-      </div>
-      <div class="form-item">
-        <label class="form-label">作者对齐</label>
-        <CapsuleTabs v-model="state.authorAlign" :items="alignTabs" stretch />
-      </div>
-      <div class="form-item">
-        <label class="form-label">标题对齐</label>
-        <CapsuleTabs v-model="state.titleAlign" :items="alignTabs" stretch />
-      </div>
     </section>
 
-    <!-- 字体样式 -->
+    <!-- 样式设置 (整合) -->
     <section class="control-group">
-      <h3 class="group-title">字体样式</h3>
+      <h3 class="group-title">样式设置</h3>
+      
+      <!-- 编辑目标切换 -->
+      <div class="form-item">
+        <CapsuleTabs v-model="activeTarget" :items="targetTabs" stretch />
+      </div>
+
+      <!-- 字体 -->
       <div class="form-item">
         <label class="form-label">字体</label>
-        <CapsuleTabs v-model="state.font" :items="fontTabs" layout="grid" :grid-cols="2" />
+        <CapsuleTabs v-model="targetStyle.font" :items="fontTabs" layout="grid" :grid-cols="2" />
+      </div>
+
+      <!-- 对齐方式 -->
+      <div class="form-item">
+        <label class="form-label">对齐方式</label>
+        <CapsuleTabs v-model="targetStyle.align" :items="alignTabs" stretch />
+      </div>
+
+      <!-- 字号 -->
+      <div class="form-row">
+        <div class="form-col">
+          <SettingSlider v-model="targetStyle.fontSize" label="字号" :min="12" :max="120" :step="1" unit="px" />
+        </div>
+      </div>
+
+       <!-- 字间距 & 行间距 -->
+      <div class="form-row">
+        <div class="form-col">
+          <SettingSlider v-model="targetStyle.letterSpacing" label="字距" :min="0" :max="30" :step="1" unit="px" />
+        </div>
+      </div>
+
+      <!-- 行距 & 字重 -->
+      <div class="form-row">
+         <div class="form-col">
+          <SettingSlider v-model="targetStyle.lineHeight" label="行距" :min="1.0" :max="3.0" :step="0.1" />
+        </div>
+        <div class="form-col">
+          <SettingSlider v-model="targetStyle.fontWeight" label="字重" :min="100" :max="900" :step="100" />
+        </div>
       </div>
       <div class="form-row">
         <div class="form-col">
-          <SettingSlider v-model="state.fontSize" label="字号" :min="24" :max="120" :step="2" unit="px" />
+           <SettingSlider v-model="targetStyle.strokeWidth" label="描边" :min="0" :max="8" :step="0.5" unit="px" />
         </div>
-        <div class="form-col color-col">
+      </div>
+
+      <!-- 颜色 & 描边色 -->
+      <div class="form-row">
+        <div class="form-col">
           <label class="form-label">颜色</label>
-          <input v-model="state.color" type="color" class="form-color" />
+          <ColorPicker v-model="targetStyle.color" />
+        </div>
+        <div class="form-col">
+          <label class="form-label">描边色</label>
+           <ColorPicker v-model="targetStyle.strokeColor" />
         </div>
       </div>
+
+      <!-- 阴影 -->
       <div class="form-row">
         <div class="form-col">
-          <SettingSlider v-model="state.strokeWidth" label="描边" :min="0" :max="8" :step="0.5" unit="px" />
-        </div>
-        <div class="form-col color-col">
-          <label class="form-label">描边色</label>
-          <input v-model="state.strokeColor" type="color" class="form-color" />
+           <SettingSwitch v-model="state.shadow" label="全局阴影" />
         </div>
       </div>
-      <SettingSwitch v-model="state.shadow" label="文字阴影" />
     </section>
 
     <!-- 背景设置 -->
@@ -290,36 +369,41 @@ const handleWheel = (e: WheelEvent, target: 'width' | 'height') => {
       <SettingSlider v-model="state.vignette" label="暗角强度" :min="0" :max="100" unit="%" />
       <SettingSlider v-model="state.noise" label="纸张纹理" :min="0" :max="50" unit="%" />
     </section>
+
+    <!-- 导出设置 -->
+    <section class="control-group">
+      <h3 class="group-title">
+        <IconUpload :size="16" />
+        导出设置
+      </h3>
+      <div class="form-item">
+        <label class="form-label">导出清晰度 (影响图片尺寸)</label>
+        <CapsuleTabs v-model="state.exportScale" :items="scaleTabs" stretch />
+      </div>
+    </section>
   </aside>
 </template>
 
 <style scoped>
 .control-panel {
-  width: 380px;
+  width: 420px;
+  height: 100%;
   background: var(--bg-panel);
   backdrop-filter: blur(16px);
   border-right: var(--border-glass);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: var(--space-6);
+  overflow-x: hidden;
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  flex-direction: column;
+  gap: var(--space-4);
   flex-shrink: 0;
+  border-radius: var(--radius-ml) 0 0 var(--radius-ml)
 }
 
-.control-panel::-webkit-scrollbar {
-  width: 6px;
-}
 
-.control-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.control-panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
 
 .control-group {
   border-bottom: var(--border-divider);
@@ -385,10 +469,18 @@ const handleWheel = (e: WheelEvent, target: 'width' | 'height') => {
 .form-row {
   display: flex;
   gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  align-items: center; /* 确保垂直对齐 */
+  width: 100%; /* 确保行占满容器宽度 */
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
 }
 
 .form-col {
   flex: 1;
+  min-width: 0; /* 关键：防止 flex 子项被内容撑开导致溢出 */
 }
 
 .color-col {

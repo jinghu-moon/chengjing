@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-vue'
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import { Button } from '../../Button'
-import SearchInput from '../../SearchInput.vue'
+import BaseSearchInput from '../../BaseSearchInput.vue'
 import type { LocalPoem } from '../types'
 import type { PoemListProps } from '../types'
 
@@ -71,7 +71,7 @@ const formatAuthor = (poem: LocalPoem) => {
   <div class="poem-list-view">
     <!-- 搜索栏 -->
     <div class="toolbar">
-      <SearchInput
+      <BaseSearchInput
         v-model="keyword"
         placeholder="搜索诗词..."
         size="md"

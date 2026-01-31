@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Background: typeof import('./components/Background.vue')['default']
+    BaseSearchInput: typeof import('./components/BaseSearchInput.vue')['default']
     BookmarkCard: typeof import('./components/BookmarkPanel/components/BookmarkCard.vue')['default']
     BookmarkGrid: typeof import('./components/BookmarkPanel/components/BookmarkGrid.vue')['default']
     BookmarkPanel: typeof import('./components/BookmarkPanel/index.vue')['default']
@@ -25,6 +26,7 @@ declare module 'vue' {
     CalendarPanel: typeof import('./components/CalendarPanel/index.vue')['default']
     CapsuleTabs: typeof import('./components/SettingsPanel/components/CapsuleTabs.vue')['default']
     ClockWeather: typeof import('./components/ClockWeather.vue')['default']
+    ColorPicker: typeof import('./components/ColorPicker/ColorPicker.vue')['default']
     ContextMenu: typeof import('./components/SelectMenu/components/ContextMenu.vue')['default']
     ControlPanel: typeof import('./components/DailyPoem/components/ShareCard/ControlPanel.vue')['default']
     DailyPoem: typeof import('./components/DailyPoem/index.vue')['default']
@@ -57,7 +59,6 @@ declare module 'vue' {
     PoetryCard: typeof import('./components/DailyPoem/components/ShareCard/PoetryCard.vue')['default']
     Pomodoro: typeof import('./components/Pomodoro.vue')['default']
     SearchBar: typeof import('./components/SearchBar.vue')['default']
-    SearchInput: typeof import('./components/BookmarkPanel/components/SearchInput.vue')['default']
     SearchResults: typeof import('./components/BookmarkPanel/components/SearchResults.vue')['default']
     SelectDropdown: typeof import('./components/SelectMenu/components/SelectDropdown.vue')['default']
     SelectMenu: typeof import('./components/SelectMenu/index.vue')['default']

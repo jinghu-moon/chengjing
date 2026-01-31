@@ -14,7 +14,8 @@ const defaultSettings: DailyPoemSettings = {
   showAuthor: true,
   showTitle: true,
   showCollect: true,
-  showRefresh: true,
+  showRefresh: false,
+  showCopy: true,
   showCard: true,
   showManager: true
 }

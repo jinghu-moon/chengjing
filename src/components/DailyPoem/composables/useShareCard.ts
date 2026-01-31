@@ -17,28 +17,45 @@ import bg7 from '@/assets/DailyPoemBackgroud/bg7.webp'
 // ============================================
 
 export type TextAlign = 'left' | 'center' | 'right'
+export type FontType = 'song' | 'kai' | 'shufa' | 'hei'
+
+export interface ElementStyle {
+  font: FontType
+  fontSize: number
+  fontWeight: number
+  color: string
+  strokeWidth: number
+  strokeColor: string
+  align: TextAlign
+  lineHeight: number
+  letterSpacing: number
+}
 
 export interface ShareCardState {
   // 内容
   poem: string
   author: string
   title: string
+  
   // 全局布局
   layout: 'horizontal' | 'vertical'
   size: string
-  // 诗词布局
-  poemAlign: TextAlign
-  // 作者布局
-  authorAlign: TextAlign
-  // 标题布局  
-  titleAlign: TextAlign
-  // 字体
-  font: 'song' | 'kai' | 'shufa' | 'hei'
-  color: string
-  fontSize: number
-  strokeWidth: number
-  strokeColor: string
+  
+  // 独立样式配置
+  styles: {
+    poem: ElementStyle
+    author: ElementStyle
+    title: ElementStyle
+  }
+
+  // 装饰元素
+  // 装饰元素
+  dateStyle: string // 'none' | 'combined' | 'gregorian' | 'lunar' | 'chinese' | 'datetime' | 'custom'
+  customDate: string
+
+  // 全局效果
   shadow: boolean
+  
   // 背景
   bgType: 'image' | 'gradient'
   bgSrc: string
@@ -46,6 +63,8 @@ export interface ShareCardState {
   overlay: number
   vignette: number
   noise: number
+  // 导出设置
+  exportScale: number
 }
 
 // ============================================
@@ -101,9 +120,51 @@ export const GRADIENT_BACKGROUNDS = [
   { src: 'linear-gradient(to top, #c1dfc4 0%, #deecdd 100%)', label: '青竹' },
 ]
 
+export const EXPORT_SCALE_OPTIONS = [
+  { value: 1, label: '1x (标准)' },
+  { value: 2, label: '2x (高清)' },
+  { value: 3, label: '3x (超清)' },
+]
+
 // ============================================
 // 默认状态
 // ============================================
+
+const defaultPoemStyle: ElementStyle = {
+  font: 'song',
+  fontSize: 56,
+  fontWeight: 400,
+  color: '#2c1810',
+  strokeWidth: 0,
+  strokeColor: '#ffffff',
+  align: 'center',
+  lineHeight: 1.8,
+  letterSpacing: 2
+}
+
+const defaultAuthorStyle: ElementStyle = {
+  font: 'song',
+  fontSize: 26,
+  fontWeight: 400,
+  color: 'rgba(44, 24, 16, 0.75)',
+  strokeWidth: 0,
+  strokeColor: '#ffffff',
+  align: 'center',
+  lineHeight: 1.6,
+  letterSpacing: 0
+}
+
+const defaultTitleStyle: ElementStyle = {
+  font: 'song',
+  fontSize: 24,
+  fontWeight: 400,
+  color: 'rgba(44, 24, 16, 0.75)',
+  strokeWidth: 0,
+  strokeColor: '#ffffff',
+  align: 'center',
+  lineHeight: 1.6,
+  letterSpacing: 0
+}
 
 const defaultState: ShareCardState = {
   poem: '',
@@ -111,21 +172,21 @@ const defaultState: ShareCardState = {
   title: '',
   layout: 'vertical',
   size: '600x900',
-  poemAlign: 'center',
-  authorAlign: 'center',
-  titleAlign: 'center',
-  font: 'song',
-  color: '#2c1810',
-  fontSize: 56,
-  strokeWidth: 0,
-  strokeColor: '#ffffff',
+  styles: {
+    poem: { ...defaultPoemStyle },
+    author: { ...defaultAuthorStyle },
+    title: { ...defaultTitleStyle }
+  },
+  dateStyle: 'combined',
+  customDate: '',
   shadow: true,
   bgType: 'image',
   bgSrc: bg2,
   blur: 0,
   overlay: 20,
   vignette: 30,
-  noise: 12
+  noise: 12,
+  exportScale: 2
 }
 
 // ============================================
@@ -133,12 +194,27 @@ const defaultState: ShareCardState = {
 // ============================================
 
 // 使用模块级变量实现单例状态
-const state = reactive<ShareCardState>({ ...defaultState })
+const state = reactive<ShareCardState>(JSON.parse(JSON.stringify(defaultState)))
 
 export function useShareCard() {
   /** 重置为默认值 */
   const reset = () => {
-    Object.assign(state, defaultState)
+    // 深度重置
+    state.layout = defaultState.layout
+    state.size = defaultState.size
+    state.styles.poem = { ...defaultPoemStyle }
+    state.styles.author = { ...defaultAuthorStyle }
+    state.styles.title = { ...defaultTitleStyle }
+    state.shadow = defaultState.shadow
+    state.bgType = defaultState.bgType
+    state.bgSrc = defaultState.bgSrc
+    state.blur = defaultState.blur
+    state.overlay = defaultState.overlay
+    state.vignette = defaultState.vignette
+    state.noise = defaultState.noise
+    state.dateStyle = 'combined'
+    state.customDate = ''
+    state.exportScale = defaultState.exportScale
   }
 
   /** 初始化诗词内容 */
@@ -148,31 +224,22 @@ export function useShareCard() {
     state.title = title ? `《${title}》` : ''
   }
 
-  /** 计算属性：作者颜色 (带 75% 透明度) */
-  const authorColor = computed(() => {
-    const hex = state.color
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    return `rgba(${r}, ${g}, ${b}, 0.75)`
-  })
-
   /** 计算属性：画布尺寸 */
   const canvasSize = computed(() => {
     const [w, h] = state.size.split('x').map(Number)
     return { width: w, height: h }
   })
 
-  /** 计算属性：字体 CSS 变量 */
-  const fontFamily = computed(() => {
+  /** 获取字体 CSS 变量 */
+  const getFontFamily = (font: FontType) => {
     const map: Record<string, string> = {
       song: "'Noto Serif SC', serif",
       kai: "'LXGW WenKai Screen', cursive",
       shufa: "'Ma Shan Zheng', cursive",
       hei: "'HarmonyOS Sans SC', sans-serif"
     }
-    return map[state.font] || map.song
-  })
+    return map[font] || map.song
+  }
 
   /** 设置背景 */
   const setBackground = (type: 'image' | 'gradient', src: string) => {
@@ -185,9 +252,8 @@ export function useShareCard() {
     ...toRefs(state),
     reset,
     init,
-    authorColor,
     canvasSize,
-    fontFamily,
+    getFontFamily,
     setBackground
   }
 }

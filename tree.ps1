@@ -7,7 +7,7 @@ $exclude_names = @(
     "icons", "debug", "release",
     "sv.ps1", "fileTree.txt", "tree.ps1",
     "test.svg", "gen", "workers",
-    "README.md", ".gitignore", "target",".spec-workflow",".trae","script"
+    "README.md", ".gitignore", "target",".spec-workflow",".trae","script",".agent"
 )
 
 # 按“路径”排除（整棵子树）
