@@ -1,12 +1,24 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { IconDatabase, IconDownload, IconUpload } from '@tabler/icons-vue'
 import Dialog from '@/components/Dialog/Dialog.vue'
+import Button from '@/components/Button/Button.vue'
 import { useDataBackup, type RestoreStats } from '@/composables/useDataBackup'
 import { useToast } from '@/components/Toast/composables/useToast'
 import type { DiffResult } from '@/utils/backup-diff'
 
+// V2.0 Components
+import PresetManager from './PresetManager.vue'
+import HistoryTimeline from './HistoryTimeline.vue'
+import { useHistory } from '@/composables/useHistory'
+
 const { showToast } = useToast()
+
+// V2.0: 初始化历史记录自动保存
+const { initAutoSaveWatcher } = useHistory()
+onMounted(() => {
+  initAutoSaveWatcher()
+})
 const { 
   exportBackup, 
   estimateSizeKB, 
@@ -34,6 +46,16 @@ const mergeOptions = reactive({
 })
 const showResultDialog = ref(false)
 const mergeReport = ref<any>(null)
+
+// V1.2 State
+import { getDetailedSettingsDiff, type SettingsDiffItem } from '@/utils/backup-diff'
+import SettingsDiffViewer from './SettingsDiffViewer.vue'
+
+const showSettingsDiffDialog = ref(false)
+const settingsDiffItems = ref<SettingsDiffItem[]>([])
+const selectedSettingsKeys = ref<string[]>([])
+const hasSelectedSettings = ref(false) // 是否选择了部分设置
+const { performSelectiveSettingsRestore } = useDataBackup()
 
 // 加载时预估大小
 const updateEstimate = async () => {
@@ -74,6 +96,22 @@ const onFileSelected = async (e: Event) => {
     restoreStats.value = result.stats!
     tempRestoreData.value = result.data
     
+    // V1.2: 预先计算设置差异
+    if (diff.settings.hasDiff) {
+      settingsDiffItems.value = getDetailedSettingsDiff(
+        result.data.settings,
+        result.data.iconConfig,
+        currentData.settings,
+        currentData.iconConfig
+      )
+    } else {
+      settingsDiffItems.value = []
+    }
+    
+    // 重置 V1.2 状态
+    selectedSettingsKeys.value = []
+    hasSelectedSettings.value = false
+    
     // 重置选项
     mergeOptions.includePoems = true
     mergeOptions.includeTodos = true
@@ -95,10 +133,39 @@ const handleMerge = async () => {
   
   isLoading.value = true
   try {
-    const report = await performMerge(diffResult.value, {
+    let report: any = {}
+
+    // 1. 常规合并 (Poems/Todos/Notes)
+    // 如果勾选了 overwriteSettings (全选)，则由 V1.1 逻辑处理 (全量覆盖)
+    // 如果没勾选 overwriteSettings，但 hasSelectedSettings 为 true，则由 V1.2 处理 (部分覆盖)
+    
+    // 修改策略：
+    // 即使 V1.1 performMerge 支持 overwriteSettings，我们也主要用 V1.2 的逻辑来做更精细控制？
+    // 为了兼容性，如果 mergeOptions.overwriteSettings 为 true，我们将其传递给 performMerge
+    // 如果为 false，我们再检查 V1.2 的 selectedSettingsKeys
+
+    const v1MergeOptions = {
       ...mergeOptions,
       sourceData: tempRestoreData.value
-    })
+    }
+    
+    // V1.1 合并执行 (含全量配置覆盖)
+    const v1Report = await performMerge(diffResult.value, v1MergeOptions)
+    report = v1Report
+
+    // V1.2: 如果没有全量覆盖，且有部分选择，则执行选择性恢复
+    if (!mergeOptions.overwriteSettings && hasSelectedSettings.value && selectedSettingsKeys.value.length > 0) {
+       const v12Report = await performSelectiveSettingsRestore(
+         selectedSettingsKeys.value,
+         tempRestoreData.value
+       )
+       if (!v12Report.success) {
+         throw new Error(v12Report.error)
+       }
+       // 记录设置更新数量
+       if (!report.addedCount) report.addedCount = {}
+       report.addedCount.settings = v12Report.appliedCount
+    }
     
     // 显示结果
     mergeReport.value = report.addedCount
@@ -132,50 +199,95 @@ const confirmRestore = async () => {
   }
 }
 
+// V1.2 UI Logic
+const openSettingsDiff = () => {
+  showSettingsDiffDialog.value = true
+}
+
+const handleSettingsSelection = (keys: string[]) => {
+  selectedSettingsKeys.value = keys
+  const totalCount = settingsDiffItems.value.filter(i => i.isDifferent).length
+  
+  hasSelectedSettings.value = keys.length > 0
+  
+  // 联动逻辑：全选时自动勾选主 Checkbox
+  if (keys.length > 0 && keys.length === totalCount) {
+    mergeOptions.overwriteSettings = true
+  } else {
+    // 否则作为“部分选择”状态，主 Checkbox 不勾选 (或者需要一个 indeterminate 状态，Vue checkbox 可通过 prop 控制)
+    mergeOptions.overwriteSettings = false
+  }
+}
+
+// 监听主 Checkbox 变化，联动 V1.2 状态
+const onMainSettingCheckboxChange = (e: Event) => {
+  const checked = (e.target as HTMLInputElement).checked
+  if (checked) {
+    // 全选所有差异项
+    selectedSettingsKeys.value = settingsDiffItems.value
+      .filter(i => i.isDifferent)
+      .map(i => i.key)
+    hasSelectedSettings.value = true
+  } else {
+    // 清空选择
+    selectedSettingsKeys.value = []
+    hasSelectedSettings.value = false
+  }
+}
+
 // Init
 updateEstimate()
 </script>
 
 <template>
   <div class="backup-section">
-    <div class="section-header">
-      <div class="title-row">
-        <IconDatabase size="20" class="icon" />
-        <h3>数据管理</h3>
+    <!-- V2.0 板块1: 快速预设 -->
+    <section class="panel preset-panel">
+      <PresetManager />
+    </section>
+
+    <!-- V2.0 板块2: 历史回溯 -->
+    <section class="panel history-panel">
+      <HistoryTimeline />
+    </section>
+
+    <!-- 板块3: 文件备份 (原有功能) -->
+    <section class="panel file-panel">
+      <div class="panel-header">
+        <IconDatabase :size="16" />
+        <span>文件备份</span>
       </div>
-      <span class="subtitle">备份或恢复您的配置与数据</span>
-    </div>
+      <div class="action-grid">
+        <!-- 导出 -->
+        <button class="action-card export" @click="handleExport" @mouseenter="updateEstimate">
+          <div class="icon-box">
+            <IconDownload size="24" />
+          </div>
+          <div class="info">
+            <span class="label">导出备份</span>
+            <span class="desc">JSON • 约 {{ sizeEstimate }} KB</span>
+          </div>
+        </button>
 
-    <div class="action-grid">
-      <!-- 导出 -->
-      <button class="action-card export" @click="handleExport" @mouseenter="updateEstimate">
-        <div class="icon-box">
-          <IconDownload size="24" />
-        </div>
-        <div class="info">
-          <span class="label">导出备份</span>
-          <span class="desc">JSON 格式 • 约 {{ sizeEstimate }} KB</span>
-        </div>
-      </button>
-
-      <!-- 导入 -->
-      <button class="action-card import" @click="triggerImport">
-        <div class="icon-box">
-          <IconUpload size="24" />
-        </div>
-        <div class="info">
-          <span class="label">恢复备份</span>
-          <span class="desc">支持 V1 版本文件</span>
-        </div>
-        <input 
-          ref="fileInput"
-          type="file" 
-          accept=".json,application/json" 
-          class="hidden-input"
-          @change="onFileSelected"
-        >
-      </button>
-    </div>
+        <!-- 导入 -->
+        <button class="action-card import" @click="triggerImport">
+          <div class="icon-box">
+            <IconUpload size="24" />
+          </div>
+          <div class="info">
+            <span class="label">恢复备份</span>
+            <span class="desc">支持 V1 版本</span>
+          </div>
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".json,application/json"
+            class="hidden-input"
+            @change="onFileSelected"
+          >
+        </button>
+      </div>
+    </section>
 
     <!-- Step 1: 确认与合并 Dialog -->
     <Dialog
@@ -232,19 +344,40 @@ updateEstimate()
             </div>
           </div>
 
-          <!-- 配置 (默认不合并) -->
-          <div class="diff-item settings" :class="{ active: mergeOptions.overwriteSettings }">
+          <!-- 配置 (V1.2 增强) -->
+          <div class="diff-item settings" :class="{ active: mergeOptions.overwriteSettings || hasSelectedSettings }">
              <div class="diff-label">
               <label>
-                <input type="checkbox" v-model="mergeOptions.overwriteSettings"> 
+                <input 
+                  type="checkbox" 
+                  v-model="mergeOptions.overwriteSettings"
+                  @change="onMainSettingCheckboxChange"
+                > 
                 覆盖设置 
                 <span class="badge" v-if="diffResult.settings.hasDiff">有差异</span>
               </label>
             </div>
-             <div class="diff-stat" v-if="diffResult.settings.hasDiff">
-               {{ diffResult.settings.diffKeys.length }} 项变动
-            </div>
-             <div class="diff-stat" v-else>无差异</div>
+             <div class="diff-right">
+               <div class="diff-stat" v-if="diffResult.settings.hasDiff">
+                 <span v-if="hasSelectedSettings && !mergeOptions.overwriteSettings" class="highlight-text">
+                   已选 {{ selectedSettingsKeys.length }} 项
+                 </span>
+                 <span v-else>
+                   {{ diffResult.settings.diffKeys.length }} 项变动
+                 </span>
+              </div>
+              
+              <!-- 详情按钮 -->
+              <Button
+                v-if="diffResult.settings.hasDiff"
+                size="small"
+                variant="outline"
+                title="查看差异详情"
+                @click="openSettingsDiff"
+              >
+                查看
+              </Button>
+             </div>
           </div>
         </div>
       </div>
@@ -253,13 +386,13 @@ updateEstimate()
       <template #footer>
         <div class="modal-actions-v2">
           <div class="left">
-             <button class="btn-text danger" @click="confirmRestore">⚠️ 覆盖恢复 (旧版)</button>
+             <Button variant="text" theme="danger" @click="confirmRestore">⚠️ 覆盖恢复 (旧版)</Button>
           </div>
           <div class="right">
-            <button class="btn-cancel" @click="showConfirmDialog = false">取消</button>
-            <button class="btn-confirm primary" @click="handleMerge" :disabled="isLoading">
+            <Button variant="outline" @click="showConfirmDialog = false">取消</Button>
+            <Button theme="primary" @click="handleMerge" :loading="isLoading">
               {{ isLoading ? '合并中...' : '开始合并' }}
-            </button>
+            </Button>
           </div>
         </div>
       </template>
@@ -276,11 +409,38 @@ updateEstimate()
     >
       <div class="result-box">
         <div class="result-list" v-if="mergeReport">
-          <div class="row"><span>新增诗词</span> <strong>{{ mergeReport.poems }}</strong></div>
-          <div class="row"><span>新增待办</span> <strong>{{ mergeReport.todos }}</strong></div>
-          <div class="row"><span>新增笔记</span> <strong>{{ mergeReport.notes }}</strong></div>
+          <div class="row"><span>新增诗词</span> <strong>{{ mergeReport.poems || 0 }}</strong></div>
+          <div class="row"><span>新增待办</span> <strong>{{ mergeReport.todos || 0 }}</strong></div>
+          <div class="row"><span>新增笔记</span> <strong>{{ mergeReport.notes || 0 }}</strong></div>
+          <div class="row" v-if="mergeReport.settings"><span>更新设置</span> <strong>{{ mergeReport.settings }} 项</strong></div>
+          <div class="row" v-if="mergeOptions.overwriteSettings && !mergeReport.settings"><span>更新设置</span> <strong>全部</strong></div>
         </div>
       </div>
+    </Dialog>
+
+    <!-- V1.2 Settings Diff Dialog -->
+    <Dialog
+      v-model="showSettingsDiffDialog"
+      title="配置差异对比"
+      width="700px"
+      type="info"
+      :show-icon="false"
+    >
+      <SettingsDiffViewer
+        :diff-items="settingsDiffItems"
+        :selected="selectedSettingsKeys"
+        @update:selected="handleSettingsSelection"
+      />
+      <template #footer>
+        <div class="diff-footer">
+          <div class="left-tip">
+             已选择 {{ selectedSettingsKeys.length }} 项待恢复设置
+          </div>
+          <Button theme="primary" @click="showSettingsDiffDialog = false">
+            确认选择
+          </Button>
+        </div>
+      </template>
     </Dialog>
   </div>
 </template>
@@ -289,26 +449,36 @@ updateEstimate()
 .backup-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   padding: 8px 0;
 }
 
-.section-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
+/* V2.0 板块通用样式 */
+.panel {
+  background: var(--bg-input);
+  border-radius: 12px;
+  padding: 16px;
 }
 
-.title-row {
+.panel-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
 }
 
-.icon { opacity: 0.8; }
-.subtitle { font-size: 13px; color: var(--text-tertiary); margin-left: 28px; }
+/* 文件备份板块 */
+.file-panel {
+  background: transparent;
+  padding: 0;
+}
+
+.file-panel .panel-header {
+  margin-bottom: 8px;
+}
 
 .action-grid {
   display: grid;
@@ -411,36 +581,6 @@ updateEstimate()
 
 .modal-actions-v2 .right { display: flex; gap: 12px; }
 
-.btn-text.danger {
-  background: none;
-  border: none;
-  color: var(--color-danger);
-  font-size: 12px;
-  cursor: pointer;
-  text-decoration: underline;
-  opacity: 0.8;
-}
-.btn-text.danger:hover { opacity: 1; }
-
-.btn-cancel {
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: transparent;
-  border: 1px solid var(--color-divider);
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.btn-confirm.primary {
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-.btn-confirm.primary:disabled { opacity: 0.6; cursor: not-allowed; }
-
 /* Result Box */
 .result-list {
   width: 100%;
@@ -455,5 +595,27 @@ updateEstimate()
   display: flex;
   justify-content: space-between;
   font-size: 14px;
+}
+
+.diff-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.highlight-text {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.diff-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.left-tip {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 </style>

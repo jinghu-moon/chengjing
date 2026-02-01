@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, defineAsyncComponent } from 'vue'
-import { IconSettings, IconBookmarks } from '@tabler/icons-vue'
+import { IconSettings, IconBookmarks, IconDatabase } from '@tabler/icons-vue'
 import DynamicCalendarIcon from './components/DynamicCalendarIcon.vue'
 
 import Background from './components/Background.vue'
@@ -19,6 +19,7 @@ const BookmarkPanel = defineAsyncComponent(() => import('./components/BookmarkPa
 const NotePad = defineAsyncComponent(() => import('./components/NotePad/index.vue'))
 const Calculator = defineAsyncComponent(() => import('./components/Calculator.vue'))
 const DailyPoem = defineAsyncComponent(() => import('./components/DailyPoem/index.vue'))
+const DataBackupPanel = defineAsyncComponent(() => import('./components/DataBackupPanel/index.vue'))
 
 import { useImageGC } from './composables/useImageGC'
 import { useSettings } from './composables/useSettings'
@@ -34,6 +35,7 @@ onMounted(() => {
 const isSettingsOpen = ref(false)
 const isCalendarOpen = ref(false)
 const isBookmarkOpen = ref(false)
+const isDataBackupOpen = ref(false)
 const isFocusMode = ref(false)
 
 const handleFocus = () => {
@@ -71,6 +73,11 @@ const handleBlur = () => {
       @update:is-open="isBookmarkOpen = $event"
     />
 
+    <DataBackupPanel
+      :is-open="isDataBackupOpen"
+      @update:is-open="isDataBackupOpen = $event"
+    />
+
     <div class="top-actions" :class="{ hidden: isFocusMode }">
       <button class="icon-btn" title="日历" @click="isCalendarOpen = true">
         <DynamicCalendarIcon />
@@ -79,7 +86,11 @@ const handleBlur = () => {
       <button class="icon-btn" title="书签管理器" @click="isBookmarkOpen = true">
         <IconBookmarks size="20" />
       </button>
- 
+
+      <button class="icon-btn" title="数据管理" @click="isDataBackupOpen = true">
+        <IconDatabase size="20" />
+      </button>
+
       <button class="icon-btn" title="设置" @click="isSettingsOpen = true">
         <IconSettings size="20" />
       </button>

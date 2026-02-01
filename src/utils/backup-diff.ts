@@ -1,6 +1,18 @@
 import type { TodoItem } from '../composables/useTodos'
 import type { Note } from '../composables/useNotes'
 import type { LocalPoem } from '../components/DailyPoem/types'
+import { SETTINGS_META, ICON_CONFIG_META, getSettingLabel } from './settings-meta'
+
+/**
+ * V1.2 详细设置差异项
+ */
+export interface SettingsDiffItem {
+  key: string
+  label: string
+  localValue: any
+  backupValue: any
+  isDifferent: boolean
+}
 
 /**
  * 差异分析结果接口
@@ -105,18 +117,18 @@ export function analyzeBackup(
 ): DiffResult {
   return {
     poems: diffCollection<LocalPoem>(
-      backupData.poems, 
-      currentData.poems, 
+      backupData.poems,
+      currentData.poems,
       Fingerprints.poem
     ),
     todos: diffCollection<TodoItem>(
-      backupData.todos, 
-      currentData.todos, 
+      backupData.todos,
+      currentData.todos,
       Fingerprints.todo
     ),
     notes: diffCollection<Note>(
-      backupData.notes, 
-      currentData.notes, 
+      backupData.notes,
+      currentData.notes,
       Fingerprints.note
     ),
     settings: diffSettings(
@@ -124,4 +136,59 @@ export function analyzeBackup(
       { ...currentData.settings, ...currentData.iconConfig }
     )
   }
+}
+
+/**
+ * 高效值比较（避免原始类型的 JSON.stringify 开销）
+ */
+function isValueEqual(a: any, b: any): boolean {
+  // 原始类型直接比较
+  if (typeof a !== 'object' || a === null) {
+    return a === b
+  }
+  // 对象/数组使用 JSON 比较
+  return JSON.stringify(a) === JSON.stringify(b)
+}
+
+/**
+ * V1.2: 获取详细的设置差异列表
+ * 用于细粒度配置对比界面
+ */
+export function getDetailedSettingsDiff(
+  backupSettings: any = {},
+  backupIconConfig: any = {},
+  currentSettings: any = {},
+  currentIconConfig: any = {}
+): SettingsDiffItem[] {
+  const result: SettingsDiffItem[] = []
+
+  // 处理 Settings
+  Object.keys(SETTINGS_META).forEach(key => {
+    const localValue = currentSettings[key]
+    const backupValue = backupSettings[key]
+
+    result.push({
+      key,
+      label: getSettingLabel(key),
+      localValue,
+      backupValue,
+      isDifferent: !isValueEqual(localValue, backupValue)
+    })
+  })
+
+  // 处理 IconConfig
+  Object.keys(ICON_CONFIG_META).forEach(key => {
+    const localValue = currentIconConfig[key]
+    const backupValue = backupIconConfig[key]
+
+    result.push({
+      key,
+      label: getSettingLabel(key),
+      localValue,
+      backupValue,
+      isDifferent: !isValueEqual(localValue, backupValue)
+    })
+  })
+
+  return result
 }

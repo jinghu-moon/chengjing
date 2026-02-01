@@ -19,6 +19,13 @@ Chrome/Firefox 新标签页扩展，基于 Vue 3 + TypeScript + Vite + CRXJS 构
 npm run release "<type>(<scope>): <中文描述>"
 ```
 
+#### 上下文工程 (context-zh)
+**触发词**: `省token`、`压缩上下文`、`优化上下文`、`太长了`、`为什么忘了`
+
+遵循规范: `.agent/skills/context-zh/SKILL.md`
+
+中文触发词转换层，映射到 context-engineering-fundamentals 插件。
+
 ### 知识库 Skills (按需查阅)
 
 | Skill | 路径 | 用途 |

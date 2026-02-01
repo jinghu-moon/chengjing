@@ -294,6 +294,51 @@ export function useDataBackup() {
     }
   }
 
+  /**
+   * V1.2: 选择性恢复设置项
+   * @param selectedKeys 用户选中的配置项 key 数组
+   * @param backupData 备份数据 (json.data)
+   */
+  const performSelectiveSettingsRestore = async (
+    selectedKeys: string[],
+    backupData: any
+  ) => {
+    isRestoring.value = true
+    try {
+      // 1. 创建安全快照
+      await createSafetySnapshot()
+
+      // 2. 分离 settings 和 iconConfig 的 keys
+      const settingsKeys = selectedKeys.filter(k => k in settings)
+      const iconKeys = selectedKeys.filter(k => k in iconConfig)
+
+      // 3. 选择性写入 settings
+      settingsKeys.forEach(key => {
+        if (backupData.settings && key in backupData.settings) {
+          (settings as any)[key] = backupData.settings[key]
+        }
+      })
+
+      // 4. 选择性写入 iconConfig
+      iconKeys.forEach(key => {
+        if (backupData.iconConfig && key in backupData.iconConfig) {
+          (iconConfig as any)[key] = backupData.iconConfig[key]
+        }
+      })
+
+      return {
+        success: true,
+        appliedCount: selectedKeys.length
+      }
+    } catch (e: any) {
+      console.error('[Backup] Selective restore failed:', e)
+      await rollback()
+      return { success: false, error: e.message }
+    } finally {
+      isRestoring.value = false
+    }
+  }
+
   return {
     isBackingUp,
     isRestoring,
@@ -301,10 +346,13 @@ export function useDataBackup() {
     exportBackup,
     parseAndValidate,
     performRestore,
-    
+
     // V1.1 Exports
-    collectAllData, // 暴露给外部做对比
-    analyzeBackup,  // 暴露纯函数或包装函数? 建议直接暴露工具函数
-    performMerge
+    collectAllData,
+    analyzeBackup,
+    performMerge,
+
+    // V1.2 Exports
+    performSelectiveSettingsRestore
   }
 }

@@ -6,15 +6,19 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const CATEGORY_LABELS: typeof import('./utils/settings-meta').CATEGORY_LABELS
   const COMMON_DICT: typeof import('./utils/pinyinDict').COMMON_DICT
   const CURRENT_BACKUP_VERSION: typeof import('./utils/backup-validator').CURRENT_BACKUP_VERSION
   const DESKTOP_PRESETS: typeof import('./composables/useSettings').DESKTOP_PRESETS
   const EffectScope: typeof import('vue').EffectScope
+  const ICON_CONFIG_META: typeof import('./utils/settings-meta').ICON_CONFIG_META
+  const SETTINGS_META: typeof import('./utils/settings-meta').SETTINGS_META
   const VIP_MAP: typeof import('./utils/pinyinDict').VIP_MAP
   const analyzeBackup: typeof import('./utils/backup-diff').analyzeBackup
   const buildFolderMap: typeof import('./utils/bookmarksApi').buildFolderMap
   const calculateCoords: typeof import('./utils/positioning').calculateCoords
   const checkFit: typeof import('./utils/positioning').checkFit
+  const cleanupOldSnapshots: typeof import('./utils/snapshot-storage').cleanupOldSnapshots
   const computed: typeof import('vue').computed
   const converterCategories: typeof import('./composables/useConverter').converterCategories
   const createApp: typeof import('vue').createApp
@@ -23,23 +27,32 @@ declare global {
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const deleteImage: typeof import('./utils/db').deleteImage
+  const deleteSnapshot: typeof import('./utils/snapshot-storage').deleteSnapshot
   const downloadFile: typeof import('./utils/file').downloadFile
   const effectScope: typeof import('vue').effectScope
   const extractFolders: typeof import('./utils/bookmarksApi').extractFolders
   const flattenBookmarks: typeof import('./utils/bookmarksApi').flattenBookmarks
+  const formatSettingValue: typeof import('./utils/settings-meta').formatSettingValue
   const getAllImageIds: typeof import('./utils/db').getAllImageIds
   const getAllKeys: typeof import('./utils/db').getAllKeys
+  const getAllSnapshotMetas: typeof import('./utils/snapshot-storage').getAllSnapshotMetas
   const getAvailableSpace: typeof import('./utils/positioning').getAvailableSpace
   const getBookmarkTree: typeof import('./utils/bookmarksApi').getBookmarkTree
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
+  const getDetailedSettingsDiff: typeof import('./utils/backup-diff').getDetailedSettingsDiff
   const getFirstLetter: typeof import('./utils/pinyin').getFirstLetter
   const getFolderPathFromMap: typeof import('./utils/bookmarksApi').getFolderPathFromMap
   const getImageKeys: typeof import('./utils/db').getImageKeys
   const getImageUrl: typeof import('./utils/db').getImageUrl
   const getPinyinFirstLetters: typeof import('./utils/pinyin').getPinyinFirstLetters
+  const getSettingCategory: typeof import('./utils/settings-meta').getSettingCategory
+  const getSettingLabel: typeof import('./utils/settings-meta').getSettingLabel
+  const getSnapshot: typeof import('./utils/snapshot-storage').getSnapshot
+  const getSnapshotCount: typeof import('./utils/snapshot-storage').getSnapshotCount
   const getWordCount: typeof import('./utils/wordCount').getWordCount
+  const groupSettingsByCategory: typeof import('./utils/settings-meta').groupSettingsByCategory
   const h: typeof import('vue').h
   const inject: typeof import('vue').inject
   const isExtensionEnvironment: typeof import('./utils/bookmarksApi').isExtensionEnvironment
@@ -75,6 +88,7 @@ declare global {
   const removeImage: typeof import('./utils/db').removeImage
   const resolveComponent: typeof import('vue').resolveComponent
   const saveImage: typeof import('./utils/db').saveImage
+  const saveSnapshot: typeof import('./utils/snapshot-storage').saveSnapshot
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
@@ -85,6 +99,7 @@ declare global {
   const toRef: typeof import('vue').toRef
   const toRefs: typeof import('vue').toRefs
   const toValue: typeof import('vue').toValue
+  const toggleSnapshotLock: typeof import('./utils/snapshot-storage').toggleSnapshotLock
   const triggerRef: typeof import('vue').triggerRef
   const unref: typeof import('vue').unref
   const useAsyncWordCount: typeof import('./composables/useAsyncWordCount').useAsyncWordCount
@@ -98,11 +113,13 @@ declare global {
   const useDailyPoem: typeof import('./composables/useDailyPoem').useDailyPoem
   const useDataBackup: typeof import('./composables/useDataBackup').useDataBackup
   const useDraggableCard: typeof import('./composables/useDraggableCard').useDraggableCard
+  const useHistory: typeof import('./composables/useHistory').useHistory
   const useId: typeof import('vue').useId
   const useImageGC: typeof import('./composables/useImageGC').useImageGC
   const useImageUpload: typeof import('./composables/useImageUpload').useImageUpload
   const useModel: typeof import('vue').useModel
   const useNotes: typeof import('./composables/useNotes').useNotes
+  const usePresets: typeof import('./composables/usePresets').usePresets
   const useSettings: typeof import('./composables/useSettings').useSettings
   const useShortcutDrag: typeof import('./composables/useShortcutDrag').useShortcutDrag
   const useSimpleDrag: typeof import('./composables/useSimpleDrag').useSimpleDrag
@@ -143,7 +160,7 @@ declare global {
   export type { TodoItem } from './composables/useTodos'
   import('./composables/useTodos')
   // @ts-ignore
-  export type { DiffResult } from './utils/backup-diff'
+  export type { SettingsDiffItem, DiffResult } from './utils/backup-diff'
   import('./utils/backup-diff')
   // @ts-ignore
   export type { BackupMeta, BackupContainer, ValidationResult } from './utils/backup-validator'
@@ -158,6 +175,9 @@ declare global {
   export type { BaseDirection, Alignment, Rect, Viewport, PositionResult } from './utils/positioning'
   import('./utils/positioning')
   // @ts-ignore
+  export type { SettingCategory, SettingMetaItem } from './utils/settings-meta'
+  import('./utils/settings-meta')
+  // @ts-ignore
   export type { WordCountResult } from './utils/wordCount'
   import('./utils/wordCount')
 }
@@ -167,15 +187,19 @@ import { UnwrapRef } from 'vue'
 declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
+    readonly CATEGORY_LABELS: UnwrapRef<typeof import('./utils/settings-meta')['CATEGORY_LABELS']>
     readonly COMMON_DICT: UnwrapRef<typeof import('./utils/pinyinDict')['COMMON_DICT']>
     readonly CURRENT_BACKUP_VERSION: UnwrapRef<typeof import('./utils/backup-validator')['CURRENT_BACKUP_VERSION']>
     readonly DESKTOP_PRESETS: UnwrapRef<typeof import('./composables/useSettings')['DESKTOP_PRESETS']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly ICON_CONFIG_META: UnwrapRef<typeof import('./utils/settings-meta')['ICON_CONFIG_META']>
+    readonly SETTINGS_META: UnwrapRef<typeof import('./utils/settings-meta')['SETTINGS_META']>
     readonly VIP_MAP: UnwrapRef<typeof import('./utils/pinyinDict')['VIP_MAP']>
     readonly analyzeBackup: UnwrapRef<typeof import('./utils/backup-diff')['analyzeBackup']>
     readonly buildFolderMap: UnwrapRef<typeof import('./utils/bookmarksApi')['buildFolderMap']>
     readonly calculateCoords: UnwrapRef<typeof import('./utils/positioning')['calculateCoords']>
     readonly checkFit: UnwrapRef<typeof import('./utils/positioning')['checkFit']>
+    readonly cleanupOldSnapshots: UnwrapRef<typeof import('./utils/snapshot-storage')['cleanupOldSnapshots']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly converterCategories: UnwrapRef<typeof import('./composables/useConverter')['converterCategories']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
@@ -184,23 +208,32 @@ declare module 'vue' {
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly deleteImage: UnwrapRef<typeof import('./utils/db')['deleteImage']>
+    readonly deleteSnapshot: UnwrapRef<typeof import('./utils/snapshot-storage')['deleteSnapshot']>
     readonly downloadFile: UnwrapRef<typeof import('./utils/file')['downloadFile']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
     readonly extractFolders: UnwrapRef<typeof import('./utils/bookmarksApi')['extractFolders']>
     readonly flattenBookmarks: UnwrapRef<typeof import('./utils/bookmarksApi')['flattenBookmarks']>
+    readonly formatSettingValue: UnwrapRef<typeof import('./utils/settings-meta')['formatSettingValue']>
     readonly getAllImageIds: UnwrapRef<typeof import('./utils/db')['getAllImageIds']>
     readonly getAllKeys: UnwrapRef<typeof import('./utils/db')['getAllKeys']>
+    readonly getAllSnapshotMetas: UnwrapRef<typeof import('./utils/snapshot-storage')['getAllSnapshotMetas']>
     readonly getAvailableSpace: UnwrapRef<typeof import('./utils/positioning')['getAvailableSpace']>
     readonly getBookmarkTree: UnwrapRef<typeof import('./utils/bookmarksApi')['getBookmarkTree']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
     readonly getCurrentWatcher: UnwrapRef<typeof import('vue')['getCurrentWatcher']>
+    readonly getDetailedSettingsDiff: UnwrapRef<typeof import('./utils/backup-diff')['getDetailedSettingsDiff']>
     readonly getFirstLetter: UnwrapRef<typeof import('./utils/pinyin')['getFirstLetter']>
     readonly getFolderPathFromMap: UnwrapRef<typeof import('./utils/bookmarksApi')['getFolderPathFromMap']>
     readonly getImageKeys: UnwrapRef<typeof import('./utils/db')['getImageKeys']>
     readonly getImageUrl: UnwrapRef<typeof import('./utils/db')['getImageUrl']>
     readonly getPinyinFirstLetters: UnwrapRef<typeof import('./utils/pinyin')['getPinyinFirstLetters']>
+    readonly getSettingCategory: UnwrapRef<typeof import('./utils/settings-meta')['getSettingCategory']>
+    readonly getSettingLabel: UnwrapRef<typeof import('./utils/settings-meta')['getSettingLabel']>
+    readonly getSnapshot: UnwrapRef<typeof import('./utils/snapshot-storage')['getSnapshot']>
+    readonly getSnapshotCount: UnwrapRef<typeof import('./utils/snapshot-storage')['getSnapshotCount']>
     readonly getWordCount: UnwrapRef<typeof import('./utils/wordCount')['getWordCount']>
+    readonly groupSettingsByCategory: UnwrapRef<typeof import('./utils/settings-meta')['groupSettingsByCategory']>
     readonly h: UnwrapRef<typeof import('vue')['h']>
     readonly inject: UnwrapRef<typeof import('vue')['inject']>
     readonly isExtensionEnvironment: UnwrapRef<typeof import('./utils/bookmarksApi')['isExtensionEnvironment']>
@@ -236,6 +269,7 @@ declare module 'vue' {
     readonly removeImage: UnwrapRef<typeof import('./utils/db')['removeImage']>
     readonly resolveComponent: UnwrapRef<typeof import('vue')['resolveComponent']>
     readonly saveImage: UnwrapRef<typeof import('./utils/db')['saveImage']>
+    readonly saveSnapshot: UnwrapRef<typeof import('./utils/snapshot-storage')['saveSnapshot']>
     readonly shallowReactive: UnwrapRef<typeof import('vue')['shallowReactive']>
     readonly shallowReadonly: UnwrapRef<typeof import('vue')['shallowReadonly']>
     readonly shallowRef: UnwrapRef<typeof import('vue')['shallowRef']>
@@ -246,6 +280,7 @@ declare module 'vue' {
     readonly toRef: UnwrapRef<typeof import('vue')['toRef']>
     readonly toRefs: UnwrapRef<typeof import('vue')['toRefs']>
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
+    readonly toggleSnapshotLock: UnwrapRef<typeof import('./utils/snapshot-storage')['toggleSnapshotLock']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly useAsyncWordCount: UnwrapRef<typeof import('./composables/useAsyncWordCount')['useAsyncWordCount']>
@@ -258,11 +293,13 @@ declare module 'vue' {
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
     readonly useDataBackup: UnwrapRef<typeof import('./composables/useDataBackup')['useDataBackup']>
     readonly useDraggableCard: UnwrapRef<typeof import('./composables/useDraggableCard')['useDraggableCard']>
+    readonly useHistory: UnwrapRef<typeof import('./composables/useHistory')['useHistory']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useImageGC: UnwrapRef<typeof import('./composables/useImageGC')['useImageGC']>
     readonly useImageUpload: UnwrapRef<typeof import('./composables/useImageUpload')['useImageUpload']>
     readonly useModel: UnwrapRef<typeof import('vue')['useModel']>
     readonly useNotes: UnwrapRef<typeof import('./composables/useNotes')['useNotes']>
+    readonly usePresets: UnwrapRef<typeof import('./composables/usePresets')['usePresets']>
     readonly useSettings: UnwrapRef<typeof import('./composables/useSettings')['useSettings']>
     readonly useSimpleDrag: UnwrapRef<typeof import('./composables/useSimpleDrag')['useSimpleDrag']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>

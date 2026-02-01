@@ -23,7 +23,6 @@ import { useDailyPoem } from '@/components/DailyPoem/composables/useDailyPoem'
 // [自动导入] useSettings 无需显式导入
 
 import SettingSlider from './components/SettingSlider.vue'
-import DataBackup from '@/components/DataBackup/index.vue'
 import SettingSwitch from './components/SettingSwitch.vue'
 import LayoutSettingsModal from './components/LayoutSettingsModal.vue'
 import CapsuleTabs from './components/CapsuleTabs.vue'
@@ -753,29 +752,6 @@ const resetNotePadPos = () => {
                 <div class="divider"></div>
                 <SettingSwitch v-model="settings.openNewTab" label="新标签页打开链接" />
                 <SettingSwitch v-model="settings.deleteEmptyFolder" label="清空后删除文件夹" />
-              </div>
-            </div>
-          </transition>
-        </div>
-
-        <div class="section-card" :class="{ collapsed: !sectionState.data }">
-          <div class="card-header" @click="toggleSection('data')">
-            <div class="header-label">
-              <IconDatabase :size="16" stroke-width="2" />
-              <span>数据管理</span>
-            </div>
-            <IconChevronDown :size="18" class="toggle-icon" />
-          </div>
-
-          <transition
-            name="accordion"
-            @enter="onEnter"
-            @after-enter="onAfterEnter"
-            @leave="onLeave"
-          >
-            <div v-show="sectionState.data" class="card-content-wrapper">
-              <div class="card-content-inner">
-                <DataBackup />
               </div>
             </div>
           </transition>
