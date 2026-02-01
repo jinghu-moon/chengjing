@@ -8,7 +8,7 @@ export function useShortcutLayout(
 ) {
   const pagedShortcuts = ref<Shortcut[][]>([])
 
-  const pageCapacity = computed(() => settings.gridRows * settings.gridCols)
+  const pageCapacity = computed(() => settings.layoutGridRows * settings.layoutGridCols)
 
   /**
    * 计算单个 item 占用的槽位数
@@ -18,12 +18,12 @@ export function useShortcutLayout(
     if (item.type === 'app') return 1
 
     // 优先使用 item 自身的 folderMode，否则用全局默认
-    const mode = item.folderMode || settings.defaultFolderMode || settings.folderPreviewMode
+    const mode = item.folderMode || settings.folderDefaultMode || settings.folderPreviewMode
     const [r, c] = mode.split('x').map(Number)
 
     // 1x8 扁平化适配：桌面只有 1 行时，强制高度为 1
-    const actualR = settings.gridRows === 1 ? 1 : Math.min(r, settings.gridRows)
-    const actualC = Math.min(c, settings.gridCols)
+    const actualR = settings.layoutGridRows === 1 ? 1 : Math.min(r, settings.layoutGridRows)
+    const actualC = Math.min(c, settings.layoutGridCols)
 
     return actualR * actualC
   }
@@ -72,11 +72,11 @@ export function useShortcutLayout(
   // 添加 flush: 'post' 确保在 DOM 更新后执行
   watch(
     [
-      () => settings.gridRows,
-      () => settings.gridCols,
+      () => settings.layoutGridRows,
+      () => settings.layoutGridCols,
       () => settings.folderPreviewMode,
-      () => settings.defaultFolderMode,
-      () => settings.compressLargeFolders,
+      () => settings.folderDefaultMode,
+      () => settings.folderCompressLarge,
     ],
     () => {
       reflowShortcuts()

@@ -163,15 +163,15 @@ const folderPresets = ['2x2', '2x3', '3x2', '3x3', '4x4']
 // 更新文件夹行数
 const updateFolderRows = (e: Event) => {
   const rows = (e.target as HTMLInputElement).value
-  const cols = settings.defaultFolderMode.split('x')[1]
-  settings.defaultFolderMode = `${rows}x${cols}` as any
+  const cols = settings.folderDefaultMode.split('x')[1]
+  settings.folderDefaultMode = `${rows}x${cols}` as any
 }
 
 // 更新文件夹列数
 const updateFolderCols = (e: Event) => {
-  const rows = settings.defaultFolderMode.split('x')[0]
+  const rows = settings.folderDefaultMode.split('x')[0]
   const cols = (e.target as HTMLInputElement).value
-  settings.defaultFolderMode = `${rows}x${cols}` as any
+  settings.folderDefaultMode = `${rows}x${cols}` as any
 }
 
 const triggerUpload = () => {
@@ -186,7 +186,7 @@ const handleFileChange = (e: Event) => {
         const base64Data = ev.target?.result as string
         await saveImage('custom-bg', base64Data)
         localStorage.removeItem('custom-bg')
-        if (settings.dailyWallpaper) settings.dailyWallpaper = false
+        if (settings.wallpaperDailyEnabled) settings.wallpaperDailyEnabled = false
         forceWallpaperUpdate()
       } catch (err) {
         console.error(err)
@@ -284,9 +284,9 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.todo" class="card-content-wrapper">
               <div class="card-content-inner">
-                <SettingSwitch v-model="settings.showTodo" label="开启待办清单" />
+                <SettingSwitch v-model="settings.todoShow" label="开启待办清单" />
                 <transition name="slide-fade">
-                  <div v-if="settings.showTodo" class="sub-settings">
+                  <div v-if="settings.todoShow" class="sub-settings">
                     <SettingSwitch v-model="settings.todoDefaultCollapsed" label="默认折叠清单" />
                     <div class="divider"></div>
                     <SettingSlider
@@ -328,9 +328,9 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.notepad" class="card-content-wrapper">
               <div class="card-content-inner">
-                <SettingSwitch v-model="settings.showNotePad" label="启用便签功能" />
+                <SettingSwitch v-model="settings.notePadShow" label="启用便签功能" />
                 <transition name="slide-fade">
-                  <div v-if="settings.showNotePad" class="sub-settings">
+                  <div v-if="settings.notePadShow" class="sub-settings">
                     <div class="divider"></div>
                     <div class="control-row">
                       <span>编辑器模式</span>
@@ -395,10 +395,10 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.dailyPoem" class="card-content-wrapper">
               <div class="card-content-inner">
-                <SettingSwitch v-model="settings.showDailyPoem" label="开启每日诗词" />
+                <SettingSwitch v-model="settings.poemShow" label="开启每日诗词" />
                 
                 <transition name="slide-fade">
-                  <div v-if="settings.showDailyPoem" class="sub-settings">
+                  <div v-if="settings.poemShow" class="sub-settings">
                     <SettingSwitch
                       :model-value="isPoemOnline"
                       label="使用在线 API"
@@ -575,12 +575,12 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.search" class="card-content-wrapper">
               <div class="card-content-inner">
-                <SettingSwitch v-model="settings.showSearchBar" label="显示搜索栏" />
+                <SettingSwitch v-model="settings.searchBarShow" label="显示搜索栏" />
 
                 <transition name="slide-fade">
-                  <div v-if="settings.showSearchBar" class="sub-settings">
+                  <div v-if="settings.searchBarShow" class="sub-settings">
                     <div class="divider"></div>
-                    <SettingSwitch v-model="settings.showSearchIcon" label="显示右侧搜索按钮" />
+                    <SettingSwitch v-model="settings.searchBarShowIcon" label="显示右侧搜索按钮" />
                     <div class="divider"></div>
                     <SettingSlider
                       v-model="settings.searchBarWidth"
@@ -664,7 +664,7 @@ const resetNotePadPos = () => {
                 <div class="setting-sub-group">
                   <span class="sub-label">文件夹默认大小</span>
                   <CapsuleTabs
-                    v-model="settings.defaultFolderMode"
+                    v-model="settings.folderDefaultMode"
                     :items="folderPresets.map(p => ({ label: p, value: p }))"
                     :equal-width="true"
                   />
@@ -675,10 +675,10 @@ const resetNotePadPos = () => {
                         type="range"
                         :min="1"
                         :max="5"
-                        :value="parseInt(settings.defaultFolderMode.split('x')[0])"
+                        :value="parseInt(settings.folderDefaultMode.split('x')[0])"
                         @input="updateFolderRows($event)"
                       />
-                      <span class="slider-value">{{ settings.defaultFolderMode.split('x')[0] }}</span>
+                      <span class="slider-value">{{ settings.folderDefaultMode.split('x')[0] }}</span>
                     </div>
                     <div class="slider-row">
                       <span class="slider-label">列</span>
@@ -686,10 +686,10 @@ const resetNotePadPos = () => {
                         type="range"
                         :min="1"
                         :max="5"
-                        :value="parseInt(settings.defaultFolderMode.split('x')[1])"
+                        :value="parseInt(settings.folderDefaultMode.split('x')[1])"
                         @input="updateFolderCols($event)"
                       />
-                      <span class="slider-value">{{ settings.defaultFolderMode.split('x')[1] }}</span>
+                      <span class="slider-value">{{ settings.folderDefaultMode.split('x')[1] }}</span>
                     </div>
                   </div>
                 </div>
@@ -711,7 +711,7 @@ const resetNotePadPos = () => {
                   :step="5"
                   unit="%"
                 />
-                <SettingSwitch v-model="settings.dailyWallpaper" label="每日 Bing 壁纸" />
+                <SettingSwitch v-model="settings.wallpaperDailyEnabled" label="每日 Bing 壁纸" />
                 <div class="upload-area" @click="triggerUpload">
                   <IconPhoto :size="20" />
                   <span>上传自定义壁纸</span>
@@ -745,13 +745,13 @@ const resetNotePadPos = () => {
           >
             <div v-show="sectionState.features" class="card-content-wrapper">
               <div class="card-content-inner">
-                <SettingSwitch v-model="settings.showClock" label="时钟与日期" />
-                <SettingSwitch v-model="settings.showShortcuts" label="快捷方式网格" />
-                <SettingSwitch v-model="settings.showCalculator" label="计算器" />
+                <SettingSwitch v-model="settings.clockShow" label="时钟与日期" />
+                <SettingSwitch v-model="settings.shortcutsShow" label="快捷方式网格" />
+                <SettingSwitch v-model="settings.calculatorShow" label="计算器" />
 
                 <div class="divider"></div>
-                <SettingSwitch v-model="settings.openNewTab" label="新标签页打开链接" />
-                <SettingSwitch v-model="settings.deleteEmptyFolder" label="清空后删除文件夹" />
+                <SettingSwitch v-model="settings.generalOpenInNewTab" label="新标签页打开链接" />
+                <SettingSwitch v-model="settings.folderAutoCleanEmpty" label="清空后删除文件夹" />
               </div>
             </div>
           </transition>

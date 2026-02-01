@@ -229,7 +229,7 @@ const getPriorityLabel = (p?: string) => {
 
 <template>
   <div
-    v-if="settings.showTodo"
+    v-if="settings.todoShow"
     class="todo-wrapper"
     :class="{ 'collapsed-bg': isCollapsed }"
     :style="wrapperStyle"

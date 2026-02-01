@@ -1,5 +1,5 @@
 import { reactive, ref, watch } from 'vue'
-import type { Settings, IconConfig } from '../types'
+import type { Settings, IconConfig, DesktopPreset, FolderLayoutMode } from '../types'
 
 // 桌面预设
 export const DESKTOP_PRESETS = {
@@ -8,66 +8,117 @@ export const DESKTOP_PRESETS = {
   spacious: { gridRows: 3, gridCols: 8, gridGapX: 40, gridGapY: 48, boxSize: 80, label: '宽敞 3×8' },
 } as const
 
-
-
+// 默认设置 (使用新命名规范)
 const defaultSettings: Settings = {
-  openNewTab: false,
-  showClock: true,
-  showShortcuts: true,
-  showTodo: true,
-  dailyWallpaper: false,
+  // General
+  generalOpenInNewTab: false,
+
+  // Clock
+  clockShow: true,
+
+  // Shortcuts
+  shortcutsShow: true,
+
+  // Todo
+  todoShow: true,
   todoDefaultCollapsed: false,
-  // [新增] 默认值
   todoWidth: 320,
   todoListMaxHeight: 320,
 
-  // [新增] 便签默认值
-  showNotePad: true,
+  // Wallpaper
+  wallpaperDailyEnabled: false,
+  wallpaperBlur: 0,
+  wallpaperMask: 20,
+
+  // NotePad
+  notePadShow: true,
   notePadWidth: 320,
   notePadHeight: 280,
   notePadEditorMode: 'rich',
-  compressImages: true,
-  maxImageSizeMB: 1,
-  maxImageWidth: 1200,
+  notePadImageCompress: true,
+  notePadImageMaxSizeMB: 1,
+  notePadImageMaxWidth: 1200,
 
-  deleteEmptyFolder: true,
+  // Folder
+  folderAutoCleanEmpty: true,
   folderPreviewMode: '2x2',
   folderInnerSpacing: 8,
-  wallpaperBlur: 0,
-  wallpaperMask: 20,
-  gridRows: 2,
-  gridCols: 6,
-  gridGapX: 32,
-  gridGapY: 40,
-  compressLargeFolders: true,
+  folderCompressLarge: true,
+  folderDefaultMode: '2x2',
+  folderSmartSuggestion: true,
 
-  // 桌面预设
-  desktopPreset: 'standard',
-  defaultFolderMode: '2x2',
-  enableSmartFolderSuggestion: true,
-
-  // 布局
+  // Layout
+  layoutPreset: 'standard',
+  layoutGridRows: 2,
+  layoutGridCols: 6,
+  layoutGridGapX: 32,
+  layoutGridGapY: 40,
   layoutPaddingTop: 22,
   layoutGap: 48,
 
-  showSearchBar: true,
-  showSearchIcon: true,
+  // SearchBar
+  searchBarShow: true,
+  searchBarShowIcon: true,
   searchBarWidth: 40,
   searchBarHeight: 64,
   searchBarRadius: 32,
   searchBarOpacity: 15,
 
+  // Weather
   weatherAutoLocation: true,
   weatherCity: '',
 
+  // Pomodoro
   pomodoroWorkMinutes: 25,
   pomodoroBreakMinutes: 5,
   pomodoroAutoBreak: false,
   pomodoroAutoWork: false,
   pomodoroIntent: '',
-  showCalculator: true,
-  showDailyPoem: true,
-  dailyPoemOnline: false,
+
+  // Calculator
+  calculatorShow: true,
+
+  // Poem
+  poemShow: true,
+  poemFetchOnline: false,
+}
+
+// 迁移映射表：旧键 -> 新键
+export const SETTINGS_MIGRATION_MAP: Record<string, string> = {
+  // General
+  openNewTab: 'generalOpenInNewTab',
+  // Clock
+  showClock: 'clockShow',
+  // Wallpaper
+  dailyWallpaper: 'wallpaperDailyEnabled',
+  // Layout
+  desktopPreset: 'layoutPreset',
+  gridRows: 'layoutGridRows',
+  gridCols: 'layoutGridCols',
+  gridGapX: 'layoutGridGapX',
+  gridGapY: 'layoutGridGapY',
+  // SearchBar
+  showSearchBar: 'searchBarShow',
+  showSearchIcon: 'searchBarShowIcon',
+  // Shortcuts
+  showShortcuts: 'shortcutsShow',
+  // Folder
+  deleteEmptyFolder: 'folderAutoCleanEmpty',
+  compressLargeFolders: 'folderCompressLarge',
+  defaultFolderMode: 'folderDefaultMode',
+  enableSmartFolderSuggestion: 'folderSmartSuggestion',
+  // Todo
+  showTodo: 'todoShow',
+  // NotePad
+  showNotePad: 'notePadShow',
+  compressImages: 'notePadImageCompress',
+  maxImageSizeMB: 'notePadImageMaxSizeMB',
+  maxImageWidth: 'notePadImageMaxWidth',
+  // Calculator
+  showCalculator: 'calculatorShow',
+  // Poem
+  showDailyPoem: 'poemShow',
+  dailyPoemOnline: 'poemFetchOnline',
 }
 
 const defaultIconConfig: IconConfig = {
@@ -79,7 +130,6 @@ const defaultIconConfig: IconConfig = {
   showShadow: false,
 }
 
-// ... (以下代码保持不变)
 const settings = reactive<Settings>({ ...defaultSettings })
 const iconConfig = reactive<IconConfig>({ ...defaultIconConfig })
 
@@ -93,7 +143,30 @@ const loadSettings = () => {
   if (s) {
     try {
       const parsed = JSON.parse(s)
-      Object.assign(settings, { ...defaultSettings, ...parsed })
+
+      // 执行迁移逻辑
+      let migrated = false
+      Object.keys(parsed).forEach(key => {
+        const newKey = SETTINGS_MIGRATION_MAP[key]
+        if (newKey && parsed[key] !== undefined) {
+           parsed[newKey] = parsed[key]
+           // 删除旧键，避免污染 settings 对象
+           delete parsed[key]
+           migrated = true
+        }
+      })
+
+      if (migrated) {
+        console.log('[Settings] Migrated old settings to new format.')
+      }
+
+      // 只保留 defaultSettings 中定义的键，过滤掉未知字段
+      const validKeys = Object.keys(defaultSettings)
+      const filteredParsed = Object.fromEntries(
+        Object.entries(parsed).filter(([key]) => validKeys.includes(key))
+      )
+
+      Object.assign(settings, { ...defaultSettings, ...filteredParsed })
     } catch (e) {
       console.error(e)
     }

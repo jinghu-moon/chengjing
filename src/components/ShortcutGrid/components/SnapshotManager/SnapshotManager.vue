@@ -88,7 +88,7 @@
                  <span>{{ selectedSnapshot.data.settings.folderPreviewMode || '2x2' }}</span>
                  <span class="v-line"></span>
                  <IconGrid3x3 :size="13" />
-                 <span>{{ selectedSnapshot.data.settings.gridRows }}×{{ selectedSnapshot.data.settings.gridCols }}</span>
+                 <span>{{ selectedSnapshot.data.settings.layoutGridRows }}×{{ selectedSnapshot.data.settings.layoutGridCols }}</span>
                </div>
 
                <div class="stat-pill time" title="创建时间">

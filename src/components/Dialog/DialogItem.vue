@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRef } from 'vue'
+import { toRef, provide, ref } from 'vue'
 import Dialog from './Dialog.vue'
 import type { DialogInstance } from './types'
 import { useDialog } from './composables/useDialog'
@@ -8,8 +8,18 @@ const props = defineProps<{
   instance: DialogInstance
 }>()
 
-const { remove } = useDialog()
+const { remove, close } = useDialog()
 const instance = toRef(props, 'instance')
+
+// 存储自定义组件返回的结果
+const componentResult = ref<any>(null)
+
+// 提供 dialogClose 方法给子组件
+// 子组件可以调用此方法关闭对话框并传递结果
+provide('dialogClose', (result?: any) => {
+  componentResult.value = result
+  close(instance.value.id, true)
+})
 
 // Mapping Events
 const handleOk = async () => {

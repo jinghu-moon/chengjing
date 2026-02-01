@@ -56,7 +56,7 @@ const handleBlur = () => {
 
     <NotePad />
     <TodoList />
-    <DailyPoem v-if="settings.showDailyPoem" />
+    <DailyPoem v-if="settings.poemShow" />
 
     <SettingsPanel
       :is-open="isSettingsOpen"
@@ -108,7 +108,7 @@ const handleBlur = () => {
 
       <Pomodoro class="app-component" :class="{ dimmed: isFocusMode }" />
 
-      <Calculator v-if="settings.showCalculator" class="app-component" :class="{ dimmed: isFocusMode }" />
+      <Calculator v-if="settings.calculatorShow" class="app-component" :class="{ dimmed: isFocusMode }" />
 
       <SearchBar @focus="handleFocus" @blur="handleBlur" />
 

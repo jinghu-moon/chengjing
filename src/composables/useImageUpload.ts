@@ -23,9 +23,9 @@ export function useImageUpload(editor: Ref<Editor | undefined>) {
       try {
         // 1. Process/Compress Image
         const result = await processImageWithWorker(file, {
-          enabled: settings.compressImages,
-          maxSizeMB: settings.maxImageSizeMB,
-          maxWidthOrHeight: settings.maxImageWidth,
+          enabled: settings.notePadImageCompress,
+          maxSizeMB: settings.notePadImageMaxSizeMB,
+          maxWidthOrHeight: settings.notePadImageMaxWidth,
           onProgress: p => {
             // Calculate overall progress if needed, for now just show current file progress
             // In a multi-file scenario, this simple progress might jump around, but acceptable for MVP

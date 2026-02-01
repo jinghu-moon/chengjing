@@ -13,7 +13,7 @@ const defaultWallpaper =
 const bingDailyUrl = 'https://bing.img.run/1920x1080.php'
 
 const loadWallpaper = async () => {
-  if (settings.dailyWallpaper) {
+  if (settings.wallpaperDailyEnabled) {
     wallpaperUrl.value = `${bingDailyUrl}?t=${new Date().getDate()}`
   } else {
     try {

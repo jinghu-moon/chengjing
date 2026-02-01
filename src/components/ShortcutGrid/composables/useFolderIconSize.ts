@@ -13,8 +13,8 @@ export function useFolderIconSize(settings: any, iconConfig: any) {
   const calculateModeVars = (mode: string) => {
     const [r, c] = mode.split('x').map(Number)
     const itemSize = iconConfig.boxSize
-    const gapX = settings.gridGapX
-    const gapY = settings.gridGapY
+    const gapX = settings.layoutGridGapX
+    const gapY = settings.layoutGridGapY
 
     // 1x1 特殊处理：内部强制 3x3 网格
     const isSmall = r === 1 && c === 1

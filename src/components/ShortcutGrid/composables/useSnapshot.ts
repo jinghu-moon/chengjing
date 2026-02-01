@@ -10,10 +10,10 @@ export interface LayoutSnapshot {
   data: {
     shortcuts: Shortcut[]
     settings: {
-      gridRows: number
-      gridCols: number
-      gridGapX: number
-      gridGapY: number
+      layoutGridRows: number
+      layoutGridCols: number
+      layoutGridGapX: number
+      layoutGridGapY: number
       folderPreviewMode?: string
       iconConfig: IconConfig
     }
@@ -95,10 +95,10 @@ export function useSnapshot() {
         snap.data &&
         Array.isArray(snap.data.shortcuts) &&
         snap.data.settings &&
-        typeof snap.data.settings.gridRows === 'number' &&
-        typeof snap.data.settings.gridCols === 'number' &&
-        typeof snap.data.settings.gridGapX === 'number' &&
-        typeof snap.data.settings.gridGapY === 'number' &&
+        typeof snap.data.settings.layoutGridRows === 'number' &&
+        typeof snap.data.settings.layoutGridCols === 'number' &&
+        typeof snap.data.settings.layoutGridGapX === 'number' &&
+        typeof snap.data.settings.layoutGridGapY === 'number' &&
         snap.data.settings.iconConfig &&
         typeof snap.data.settings.iconConfig === 'object'
       )
@@ -138,10 +138,10 @@ export function useSnapshot() {
     name: string,
     shortcuts: Shortcut[],
     settings: {
-      gridRows: number
-      gridCols: number
-      gridGapX: number
-      gridGapY: number
+      layoutGridRows: number
+      layoutGridCols: number
+      layoutGridGapX: number
+      layoutGridGapY: number
       folderPreviewMode?: string
       iconConfig: IconConfig
     }

@@ -12,7 +12,12 @@ declare global {
   const DESKTOP_PRESETS: typeof import('./composables/useSettings').DESKTOP_PRESETS
   const EffectScope: typeof import('vue').EffectScope
   const ICON_CONFIG_META: typeof import('./utils/settings-meta').ICON_CONFIG_META
+  const ICON_LABELS: typeof import('./utils/qr-codec').ICON_LABELS
+  const MAX_QR_CHARS: typeof import('./utils/qr-codec').MAX_QR_CHARS
+  const PROTOCOL_VERSION: typeof import('./utils/qr-codec').PROTOCOL_VERSION
+  const SETTINGS_LABELS: typeof import('./utils/qr-codec').SETTINGS_LABELS
   const SETTINGS_META: typeof import('./utils/settings-meta').SETTINGS_META
+  const SETTINGS_MIGRATION_MAP: typeof import('./composables/useSettings').SETTINGS_MIGRATION_MAP
   const VIP_MAP: typeof import('./utils/pinyinDict').VIP_MAP
   const analyzeBackup: typeof import('./utils/backup-diff').analyzeBackup
   const buildFolderMap: typeof import('./utils/bookmarksApi').buildFolderMap
@@ -24,12 +29,14 @@ declare global {
   const createApp: typeof import('vue').createApp
   const customRef: typeof import('vue').customRef
   const debounce: typeof import('./utils/debounce').debounce
+  const decode: typeof import('./utils/qr-codec').decode
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const deleteImage: typeof import('./utils/db').deleteImage
   const deleteSnapshot: typeof import('./utils/snapshot-storage').deleteSnapshot
   const downloadFile: typeof import('./utils/file').downloadFile
   const effectScope: typeof import('vue').effectScope
+  const encode: typeof import('./utils/qr-codec').encode
   const extractFolders: typeof import('./utils/bookmarksApi').extractFolders
   const flattenBookmarks: typeof import('./utils/bookmarksApi').flattenBookmarks
   const formatSettingValue: typeof import('./utils/settings-meta').formatSettingValue
@@ -120,6 +127,7 @@ declare global {
   const useModel: typeof import('vue').useModel
   const useNotes: typeof import('./composables/useNotes').useNotes
   const usePresets: typeof import('./composables/usePresets').usePresets
+  const useQRSync: typeof import('./composables/useQRSync').useQRSync
   const useSettings: typeof import('./composables/useSettings').useSettings
   const useShortcutDrag: typeof import('./composables/useShortcutDrag').useShortcutDrag
   const useSimpleDrag: typeof import('./composables/useSimpleDrag').useSimpleDrag
@@ -127,6 +135,7 @@ declare global {
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTodoDrag: typeof import('./composables/useTodoDrag').useTodoDrag
   const useTodos: typeof import('./composables/useTodos').useTodos
+  const validate: typeof import('./utils/qr-codec').validate
   const validateBackup: typeof import('./utils/backup-validator').validateBackup
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
@@ -194,6 +203,7 @@ declare module 'vue' {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly ICON_CONFIG_META: UnwrapRef<typeof import('./utils/settings-meta')['ICON_CONFIG_META']>
     readonly SETTINGS_META: UnwrapRef<typeof import('./utils/settings-meta')['SETTINGS_META']>
+    readonly SETTINGS_MIGRATION_MAP: UnwrapRef<typeof import('./composables/useSettings')['SETTINGS_MIGRATION_MAP']>
     readonly VIP_MAP: UnwrapRef<typeof import('./utils/pinyinDict')['VIP_MAP']>
     readonly analyzeBackup: UnwrapRef<typeof import('./utils/backup-diff')['analyzeBackup']>
     readonly buildFolderMap: UnwrapRef<typeof import('./utils/bookmarksApi')['buildFolderMap']>

@@ -288,7 +288,7 @@ export function useShortcutDrag(
         }
 
         // 3. 空文件夹清理
-        if (settings.deleteEmptyFolder && folder.children.length === 0) {
+        if (settings.folderAutoCleanEmpty && folder.children.length === 0) {
           const folderIndex = shortcuts.value.findIndex(
             item => String(item.id) === String(context.folderId)
           )

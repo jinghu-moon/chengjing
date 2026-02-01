@@ -5,8 +5,10 @@ import svgLoader from 'vite-svg-loader'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { crx } from '@crxjs/vite-plugin'
-// @ts-ignore
-import manifest from './src/manifest.json'
+import { readFileSync } from 'node:fs'
+import settingsLabelsPlugin from './vite/vite-plugin-settings-labels'
+
+const manifest = JSON.parse(readFileSync('./src/manifest.json', 'utf-8'))
 
 // ===== 环境变量 =====
 const isDev = process.env.NODE_ENV === 'development'
@@ -18,6 +20,7 @@ console.log('[Vite Config] using @crxjs/vite-plugin')
 export default defineConfig({
   plugins: [
     vue(),
+    settingsLabelsPlugin(),
     svgLoader({
       svgoConfig: {
         plugins: [

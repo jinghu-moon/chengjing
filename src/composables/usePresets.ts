@@ -26,13 +26,13 @@ const SYSTEM_PRESETS: AppPreset[] = [
     createdAt: 0,
     data: {
       settings: {
-        showTodo: false,
-        showNotePad: false,
-        showCalculator: false,
-        showDailyPoem: false,
-        gridRows: 1,
-        gridCols: 8,
-        desktopPreset: 'compact'
+        todoShow: false,
+        notePadShow: false,
+        calculatorShow: false,
+        poemShow: false,
+        layoutGridRows: 1,
+        layoutGridCols: 8,
+        layoutPreset: 'compact'
       },
       iconConfig: {
         hideLabel: true,
@@ -49,13 +49,13 @@ const SYSTEM_PRESETS: AppPreset[] = [
     createdAt: 0,
     data: {
       settings: {
-        showTodo: true,
-        showNotePad: true,
-        showCalculator: true,
-        showDailyPoem: true,
-        gridRows: 2,
-        gridCols: 6,
-        desktopPreset: 'standard'
+        todoShow: true,
+        notePadShow: true,
+        calculatorShow: true,
+        poemShow: true,
+        layoutGridRows: 2,
+        layoutGridCols: 6,
+        layoutPreset: 'standard'
       },
       iconConfig: {
         hideLabel: false,
@@ -72,10 +72,10 @@ const SYSTEM_PRESETS: AppPreset[] = [
     createdAt: 0,
     data: {
       settings: {
-        showTodo: true,
-        showNotePad: false,
-        showCalculator: false,
-        showDailyPoem: false,
+        todoShow: true,
+        notePadShow: false,
+        calculatorShow: false,
+        poemShow: false,
         pomodoroWorkMinutes: 25,
         pomodoroBreakMinutes: 5,
         pomodoroAutoBreak: true

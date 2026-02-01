@@ -233,26 +233,26 @@ const gridStyle = computed(() => ({
   '--bg-opacity': iconConfig.value.opacity / 100,
   '--shadow-display': iconConfig.value.showShadow ? 'block' : 'none',
   '--label-display': iconConfig.value.hideLabel ? 'none' : 'block',
-  '--grid-cols': settings.value.gridCols,
-  '--grid-rows': settings.value.gridRows,
-  '--grid-gap-x': `${settings.value.gridGapX}px`,
-  '--grid-gap-y': `${settings.value.gridGapY}px`,
+  '--grid-cols': settings.value.layoutGridCols,
+  '--grid-rows': settings.value.layoutGridRows,
+  '--grid-gap-x': `${settings.value.layoutGridGapX}px`,
+  '--grid-gap-y': `${settings.value.layoutGridGapY}px`,
   ...folderSizeVars.value,
 }))
 
 const containerWidthStyle = computed(() => {
-  const cols = settings.value.gridCols
+  const cols = settings.value.layoutGridCols
   const boxSize = iconConfig.value.boxSize
-  const gapX = settings.value.gridGapX
+  const gapX = settings.value.layoutGridGapX
   const contentPadding = 40
   const totalWidth = cols * boxSize + (cols - 1) * gapX + contentPadding
   return { '--dynamic-container-width': `${totalWidth}px` }
 })
 
 const containerHeightStyle = computed(() => {
-  const rows = settings.value.gridRows
+  const rows = settings.value.layoutGridRows
   const boxSize = iconConfig.value.boxSize
-  const gapY = settings.value.gridGapY
+  const gapY = settings.value.layoutGridGapY
   const paddingY = 20 
   const totalHeight = rows * boxSize + (rows - 1) * gapY + paddingY
   return { height: `${totalHeight}px` }
@@ -260,14 +260,14 @@ const containerHeightStyle = computed(() => {
 
 const containerClasses = computed(() => ({
   'shortcuts-wrapper': true,
-  'compress-mode': settings.value.compressLargeFolders,
-  'overflow-mode': !settings.value.compressLargeFolders,
+  'compress-mode': settings.value.folderCompressLarge,
+  'overflow-mode': !settings.value.folderCompressLarge,
   'is-preview': isPreview.value
 }))
 
 const openShortcut = (url?: string) => {
   if (isPreview.value || !url) return
-  if (settings.value.openNewTab) window.open(url, '_blank')
+  if (settings.value.generalOpenInNewTab) window.open(url, '_blank')
   else window.location.href = url
 }
 
@@ -393,10 +393,10 @@ const handleSaveLayout = () => {
     if (name) {
         try {
             const snapshotSettings = {
-                gridRows: settings.value.gridRows,
-                gridCols: settings.value.gridCols,
-                gridGapX: settings.value.gridGapX,
-                gridGapY: settings.value.gridGapY,
+                layoutGridRows: settings.value.layoutGridRows,
+                layoutGridCols: settings.value.layoutGridCols,
+                layoutGridGapX: settings.value.layoutGridGapX,
+                layoutGridGapY: settings.value.layoutGridGapY,
                 folderPreviewMode: settings.value.folderPreviewMode,
                 iconConfig: { ...iconConfig.value }
             }
@@ -410,10 +410,10 @@ const handleSaveLayout = () => {
 
 watch(
   [
-    () => settings.value.gridRows,
-    () => settings.value.gridCols,
+    () => settings.value.layoutGridRows,
+    () => settings.value.layoutGridCols,
     () => settings.value.folderPreviewMode,
-    () => settings.value.compressLargeFolders,
+    () => settings.value.folderCompressLarge,
   ],
   () => {
     currentPage.value = 0
@@ -453,7 +453,7 @@ onMounted(() => {
     </transition>
 
     <div
-      v-if="isPreview || settings.showShortcuts"
+      v-if="isPreview || settings.shortcutsShow"
       ref="pagesContainerRef"
       class="pages-container"
       :class="{ 'preview-container': isPreview }"

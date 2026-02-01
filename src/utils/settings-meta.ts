@@ -5,28 +5,36 @@
 
 // 设置分类
 export type SettingCategory =
-  | 'display'      // 显示控制
+  | 'general'      // 通用
+  | 'clock'        // 时钟
+  | 'wallpaper'    // 壁纸
   | 'layout'       // 布局参数
   | 'searchBar'    // 搜索栏
-  | 'pomodoro'     // 番茄钟
-  | 'notePad'      // 便签
-  | 'todo'         // 待办
+  | 'shortcuts'    // 快捷方式
   | 'folder'       // 文件夹
-  | 'wallpaper'    // 壁纸
+  | 'todo'         // 待办
+  | 'notePad'      // 便签
+  | 'pomodoro'     // 番茄钟
   | 'weather'      // 天气
+  | 'calculator'   // 计算器
+  | 'poem'         // 每日一言
   | 'icon'         // 图标样式
 
 // 分类中文映射
 export const CATEGORY_LABELS: Record<SettingCategory, string> = {
-  display: '显示控制',
+  general: '通用',
+  clock: '时钟',
+  wallpaper: '壁纸',
   layout: '布局参数',
   searchBar: '搜索栏',
-  pomodoro: '番茄钟',
-  notePad: '便签',
-  todo: '待办事项',
+  shortcuts: '快捷方式',
   folder: '文件夹',
-  wallpaper: '壁纸',
+  todo: '待办事项',
+  notePad: '便签',
+  pomodoro: '番茄钟',
   weather: '天气',
+  calculator: '计算器',
+  poem: '每日一言',
   icon: '图标样式'
 }
 
@@ -44,60 +52,159 @@ export interface SettingMetaItem {
  * Settings 元数据注册表
  */
 export const SETTINGS_META: Record<string, SettingMetaItem> = {
-  // ========== 显示控制 ==========
-  showClock: {
-    label: '显示时钟',
-    category: 'display',
-    type: 'boolean'
-  },
-  showShortcuts: {
-    label: '显示快捷方式',
-    category: 'display',
-    type: 'boolean'
-  },
-  showTodo: {
-    label: '显示待办',
-    category: 'display',
-    type: 'boolean'
-  },
-  showNotePad: {
-    label: '显示便签',
-    category: 'display',
-    type: 'boolean'
-  },
-  showSearchBar: {
-    label: '显示搜索栏',
-    category: 'display',
-    type: 'boolean'
-  },
-  showSearchIcon: {
-    label: '显示搜索图标',
-    category: 'display',
-    type: 'boolean'
-  },
-  showCalculator: {
-    label: '显示计算器',
-    category: 'display',
-    type: 'boolean'
-  },
-  showDailyPoem: {
-    label: '显示每日诗词',
-    category: 'display',
-    type: 'boolean'
-  },
-  dailyPoemOnline: {
-    label: '在线诗词模式',
-    category: 'display',
-    type: 'boolean'
-  },
-  openNewTab: {
+  // ========== 通用 ==========
+  generalOpenInNewTab: {
     label: '新标签页打开链接',
-    category: 'display',
+    category: 'general',
+    type: 'boolean'
+  },
+
+  // ========== 时钟 ==========
+  clockShow: {
+    label: '显示时钟',
+    category: 'clock',
+    type: 'boolean'
+  },
+
+  // ========== 快捷方式 ==========
+  shortcutsShow: {
+    label: '显示快捷方式',
+    category: 'shortcuts',
+    type: 'boolean'
+  },
+
+  // ========== 待办 ==========
+  todoShow: {
+    label: '显示待办',
+    category: 'todo',
+    type: 'boolean'
+  },
+  todoDefaultCollapsed: {
+    label: '默认折叠待办',
+    category: 'todo',
+    type: 'boolean'
+  },
+  todoWidth: {
+    label: '待办宽度',
+    category: 'todo',
+    type: 'number',
+    unit: 'px'
+  },
+  todoListMaxHeight: {
+    label: '待办列表最大高度',
+    category: 'todo',
+    type: 'number',
+    unit: 'px'
+  },
+
+  // ========== 便签 ==========
+  notePadShow: {
+    label: '显示便签',
+    category: 'notePad',
+    type: 'boolean'
+  },
+  notePadWidth: {
+    label: '便签宽度',
+    category: 'notePad',
+    type: 'number',
+    unit: 'px'
+  },
+  notePadHeight: {
+    label: '便签高度',
+    category: 'notePad',
+    type: 'number',
+    unit: 'px'
+  },
+  notePadEditorMode: {
+    label: '编辑器模式',
+    category: 'notePad',
+    type: 'select',
+    options: [
+      { value: 'rich', label: '富文本' },
+      { value: 'plain', label: '纯文本' }
+    ]
+  },
+  notePadImageCompress: {
+    label: '压缩图片',
+    category: 'notePad',
+    type: 'boolean'
+  },
+  notePadImageMaxSizeMB: {
+    label: '图片大小限制',
+    category: 'notePad',
+    type: 'number',
+    unit: 'MB'
+  },
+  notePadImageMaxWidth: {
+    label: '图片宽度限制',
+    category: 'notePad',
+    type: 'number',
+    unit: 'px'
+  },
+
+  // ========== 壁纸 ==========
+  wallpaperDailyEnabled: {
+    label: '每日壁纸',
+    category: 'wallpaper',
+    type: 'boolean'
+  },
+  wallpaperBlur: {
+    label: '壁纸模糊度',
+    category: 'wallpaper',
+    type: 'number',
+    unit: 'px'
+  },
+  wallpaperMask: {
+    label: '壁纸遮罩',
+    category: 'wallpaper',
+    type: 'number',
+    unit: '%'
+  },
+
+  // ========== 文件夹 ==========
+  folderAutoCleanEmpty: {
+    label: '自动删除空文件夹',
+    category: 'folder',
+    type: 'boolean'
+  },
+  folderPreviewMode: {
+    label: '文件夹预览模式',
+    category: 'folder',
+    type: 'select',
+    options: [
+      { value: '2x2', label: '2×2 网格' },
+      { value: '3x3', label: '3×3 网格' },
+      { value: 'list', label: '列表' }
+    ]
+  },
+  folderInnerSpacing: {
+    label: '文件夹内间距',
+    category: 'folder',
+    type: 'number',
+    unit: 'px'
+  },
+  folderCompressLarge: {
+    label: '压缩大文件夹',
+    category: 'folder',
+    type: 'boolean'
+  },
+  folderDefaultMode: {
+    label: '默认文件夹模式',
+    category: 'folder',
+    type: 'select',
+    options: [
+      { value: '2x2', label: '2×2 网格' },
+      { value: '3x3', label: '3×3 网格' }
+    ]
+  },
+  folderSmartSuggestion: {
+    label: '智能文件夹建议',
+    category: 'folder',
     type: 'boolean'
   },
 
   // ========== 布局参数 ==========
-  desktopPreset: {
+  layoutPreset: {
     label: '桌面预设',
     category: 'layout',
     type: 'select',
@@ -107,25 +214,25 @@ export const SETTINGS_META: Record<string, SettingMetaItem> = {
       { value: 'spacious', label: '宽敞 3×8' }
     ]
   },
-  gridRows: {
+  layoutGridRows: {
     label: '网格行数',
     category: 'layout',
     type: 'number',
     unit: '行'
   },
-  gridCols: {
+  layoutGridCols: {
     label: '网格列数',
     category: 'layout',
     type: 'number',
     unit: '列'
   },
-  gridGapX: {
+  layoutGridGapX: {
     label: '水平间距',
     category: 'layout',
     type: 'number',
     unit: 'px'
   },
-  gridGapY: {
+  layoutGridGapY: {
     label: '垂直间距',
     category: 'layout',
     type: 'number',
@@ -145,6 +252,16 @@ export const SETTINGS_META: Record<string, SettingMetaItem> = {
   },
 
   // ========== 搜索栏 ==========
+  searchBarShow: {
+    label: '显示搜索栏',
+    category: 'searchBar',
+    type: 'boolean'
+  },
+  searchBarShowIcon: {
+    label: '显示搜索图标',
+    category: 'searchBar',
+    type: 'boolean'
+  },
   searchBarWidth: {
     label: '搜索栏宽度',
     category: 'searchBar',
@@ -168,126 +285,6 @@ export const SETTINGS_META: Record<string, SettingMetaItem> = {
     category: 'searchBar',
     type: 'number',
     unit: '%'
-  },
-
-  // ========== 壁纸 ==========
-  dailyWallpaper: {
-    label: '每日壁纸',
-    category: 'wallpaper',
-    type: 'boolean'
-  },
-  wallpaperBlur: {
-    label: '壁纸模糊度',
-    category: 'wallpaper',
-    type: 'number',
-    unit: 'px'
-  },
-  wallpaperMask: {
-    label: '壁纸遮罩',
-    category: 'wallpaper',
-    type: 'number',
-    unit: '%'
-  },
-
-  // ========== 文件夹 ==========
-  deleteEmptyFolder: {
-    label: '自动删除空文件夹',
-    category: 'folder',
-    type: 'boolean'
-  },
-  folderPreviewMode: {
-    label: '文件夹预览模式',
-    category: 'folder',
-    type: 'select',
-    options: [
-      { value: '2x2', label: '2×2 网格' },
-      { value: '3x3', label: '3×3 网格' },
-      { value: 'list', label: '列表' }
-    ]
-  },
-  folderInnerSpacing: {
-    label: '文件夹内间距',
-    category: 'folder',
-    type: 'number',
-    unit: 'px'
-  },
-  compressLargeFolders: {
-    label: '压缩大文件夹',
-    category: 'folder',
-    type: 'boolean'
-  },
-  defaultFolderMode: {
-    label: '默认文件夹模式',
-    category: 'folder',
-    type: 'select',
-    options: [
-      { value: '2x2', label: '2×2 网格' },
-      { value: '3x3', label: '3×3 网格' }
-    ]
-  },
-  enableSmartFolderSuggestion: {
-    label: '智能文件夹建议',
-    category: 'folder',
-    type: 'boolean'
-  },
-
-  // ========== 待办 ==========
-  todoDefaultCollapsed: {
-    label: '默认折叠待办',
-    category: 'todo',
-    type: 'boolean'
-  },
-  todoWidth: {
-    label: '待办宽度',
-    category: 'todo',
-    type: 'number',
-    unit: 'px'
-  },
-  todoListMaxHeight: {
-    label: '待办列表最大高度',
-    category: 'todo',
-    type: 'number',
-    unit: 'px'
-  },
-
-  // ========== 便签 ==========
-  notePadWidth: {
-    label: '便签宽度',
-    category: 'notePad',
-    type: 'number',
-    unit: 'px'
-  },
-  notePadHeight: {
-    label: '便签高度',
-    category: 'notePad',
-    type: 'number',
-    unit: 'px'
-  },
-  notePadEditorMode: {
-    label: '编辑器模式',
-    category: 'notePad',
-    type: 'select',
-    options: [
-      { value: 'rich', label: '富文本' },
-      { value: 'plain', label: '纯文本' }
-    ]
-  },
-  compressImages: {
-    label: '压缩图片',
-    category: 'notePad',
-    type: 'boolean'
-  },
-  maxImageSizeMB: {
-    label: '图片大小限制',
-    category: 'notePad',
-    type: 'number',
-    unit: 'MB'
-  },
-  maxImageWidth: {
-    label: '图片宽度限制',
-    category: 'notePad',
-    type: 'number',
-    unit: 'px'
   },
 
   // ========== 番茄钟 ==========
@@ -329,6 +326,25 @@ export const SETTINGS_META: Record<string, SettingMetaItem> = {
     label: '城市',
     category: 'weather',
     type: 'string'
+  },
+
+  // ========== 计算器 ==========
+  calculatorShow: {
+    label: '显示计算器',
+    category: 'calculator',
+    type: 'boolean'
+  },
+
+  // ========== 每日诗词 ==========
+  poemShow: {
+    label: '显示每日诗词',
+    category: 'poem',
+    type: 'boolean'
+  },
+  poemFetchOnline: {
+    label: '在线诗词模式',
+    category: 'poem',
+    type: 'boolean'
   }
 }
 

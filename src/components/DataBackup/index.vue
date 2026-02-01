@@ -12,6 +12,10 @@ import PresetManager from './PresetManager.vue'
 import HistoryTimeline from './HistoryTimeline.vue'
 import { useHistory } from '@/composables/useHistory'
 
+// V2.1 QR Sync
+import QRSync from '@/components/QRSync/index.vue'
+import { IconQrcode } from '@tabler/icons-vue'
+
 const { showToast } = useToast()
 
 // V2.0: 初始化历史记录自动保存
@@ -251,7 +255,16 @@ updateEstimate()
       <HistoryTimeline />
     </section>
 
-    <!-- 板块3: 文件备份 (原有功能) -->
+    <!-- V2.1 板块3: 二维码同步 -->
+    <section class="panel qr-panel">
+      <div class="panel-header">
+        <IconQrcode :size="16" />
+        <span>二维码同步</span>
+      </div>
+      <QRSync />
+    </section>
+
+    <!-- 板块4: 文件备份 (原有功能) -->
     <section class="panel file-panel">
       <div class="panel-header">
         <IconDatabase :size="16" />

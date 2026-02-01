@@ -1,915 +1,435 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TDesign 风格折叠面板 - 完整增强版</title>
-    <link rel="stylesheet" href="./src/styles/variables.css">
-    <style>
-        /* --- 基础重置 --- */
-        body {
-            margin: 0;
-            padding: var(--space-5);
-            background-color: var(--bg-panel-card);
-            font-family: var(--font-family-base);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            line-height: var(--line-normal);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue 折叠面板组件 - 独立示例</title>
+  <link rel="stylesheet" href="./src/styles/variables.css">
+  <link rel="stylesheet" href="./src/styles/global.css">
+  <style>
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--space-5);
+    }
 
-        /* --- 控制面板 --- */
-        .control-panel {
-            width: 100%;
-            max-width: 800px;
-            background-color: var(--bg-panel);
-            backdrop-filter: var(--glass-sm);
-            border-radius: var(--radius-md);
-            padding: var(--space-5) var(--space-6);
-            margin-bottom: var(--spacing-lg);
-            box-shadow: var(--shadow-sm);
-            border: var(--border-glass);
-        }
+    .control-panel {
+      background-color: var(--bg-panel);
+      backdrop-filter: var(--glass-sm);
+      border-radius: var(--radius-md);
+      padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+      border: var(--border-glass);
+    }
 
-        .control-panel h3 {
-            margin: 0 0 var(--space-4) 0;
-            font-size: var(--text-md);
-            font-weight: var(--weight-semibold);
-            color: var(--text-primary);
-        }
+    .control-panel h3 {
+      margin: 0 0 var(--space-4) 0;
+      font-size: var(--text-md);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
 
-        .control-section {
-            margin-bottom: var(--spacing-md);
-            padding-bottom: var(--spacing-md);
-            border-bottom: var(--border-divider);
-        }
+    .btn-group {
+      display: flex;
+      gap: var(--space-3);
+      margin-bottom: var(--space-4);
+    }
 
-        .control-section:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
+    .btn {
+      padding: var(--comp-padding-md);
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      transition: var(--transition-base);
+    }
 
-        .control-section-title {
-            font-size: var(--text-sm);
-            font-weight: var(--weight-medium);
-            color: var(--text-secondary);
-            margin-bottom: var(--space-2);
-        }
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
 
-        .control-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-4);
-        }
+    .btn-primary:hover {
+      background-color: var(--color-primary-hover);
+    }
 
-        .control-item {
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-        }
+    .demo-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
 
-        .control-item input[type="radio"],
-        .control-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: var(--color-primary);
-        }
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
 
-        .control-item label {
-            font-size: var(--text-base);
-            cursor: pointer;
-            user-select: none;
-            color: var(--text-primary);
-            transition: var(--transition-color);
-        }
+    .feature-item {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+    }
 
-        .control-item:hover label {
-            color: var(--color-primary-hover);
-        }
+    /* 折叠面板样式 */
+    .t-collapse-item {
+      background-color: var(--bg-panel);
+      backdrop-filter: var(--glass-sm);
+      border-radius: var(--radius-md);
+      border: var(--border-glass);
+      box-shadow: var(--shadow-xs);
+      transition: var(--transition-base);
+      overflow: clip;
+      display: flex;
+      flex-direction: column;
+    }
 
-        /* --- 容器布局 --- */
-        .page-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .t-collapse-item:hover {
+      box-shadow: var(--shadow-sm);
+      border-color: var(--color-border-glass);
+    }
 
-        .demo-container {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-4);
-        }
+    .t-collapse-item.is-active {
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-md);
+    }
 
-        /* --- 组件样式 --- */
-        .t-collapse-item {
-            background-color: var(--bg-panel);
-            backdrop-filter: var(--glass-sm);
-            border-radius: var(--radius-md);
-            border: var(--border-glass);
-            box-shadow: var(--shadow-xs);
-            transition: var(--transition-base);
-            overflow: clip;
-        }
+    .t-collapse-header {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-widget);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--comp-padding-xl);
+      background-color: var(--bg-panel);
+      backdrop-filter: var(--glass-sm);
+      user-select: none;
+      border-bottom: 1px solid transparent;
+      transition: var(--transition-color);
+      gap: var(--space-3);
+      flex-shrink: 0;
+    }
 
-        .t-collapse-item:hover {
-            box-shadow: var(--shadow-sm);
-            border-color: var(--color-border-glass);
-        }
+    .t-collapse-item.is-active > .t-collapse-header {
+      border-bottom-color: var(--color-divider);
+      background-color: var(--color-primary-alpha);
+    }
 
-        .t-collapse-item.is-active {
-            border-color: var(--color-primary);
-            box-shadow: var(--shadow-md);
-        }
+    .t-collapse-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex: 1;
+    }
 
-        /* --- 嵌套面板样式 --- */
-        .t-collapse-item.nested {
-            background-color: var(--bg-panel-card);
-            border-color: var(--color-border-light);
-            box-shadow: none;
-        }
+    .t-collapse-icon {
+      width: var(--icon-lg);
+      height: var(--icon-lg);
+      color: var(--text-secondary);
+      transition: transform var(--duration-normal) var(--ease-smooth), 
+                  color var(--duration-fast) var(--ease-in-out);
+      flex-shrink: 0;
+    }
 
-        .t-collapse-item.nested:hover {
-            box-shadow: var(--shadow-xs);
-        }
+    .t-collapse-item.is-active .t-collapse-icon {
+      transform: rotate(180deg);
+      color: var(--color-primary);
+    }
 
-        .t-collapse-item.nested.is-active {
-            border-color: var(--color-primary-hover);
-            box-shadow: var(--shadow-sm);
-        }
+    .t-collapse-title {
+      font-size: var(--text-md);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
 
-        /* 嵌套容器 */
-        .t-collapse-nested-container {
-            padding: var(--space-4);
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-3);
-        }
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      background-color: rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: background-color 0.3s var(--ease-smooth);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
 
-        /* --- 标题行 --- */
-        .t-collapse-header {
-            position: sticky;
-            top: 0;
-            z-index: var(--z-widget);
-            display: flex;
-            align-items: center;
-            padding: var(--comp-padding-xl);
-            background-color: var(--bg-panel);
-            backdrop-filter: var(--glass-sm);
-            user-select: none;
-            border-bottom: 1px solid transparent;
-            transition: var(--transition-color);
-            gap: var(--space-3);
-        }
+    .toggle-switch::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background-color: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s var(--ease-smooth);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
 
-        /* 嵌套面板的标题行 */
-        .t-collapse-item.nested .t-collapse-header {
-            background-color: var(--bg-panel-card);
-            padding: var(--space-3) var(--space-4);
-        }
+    .toggle-switch.active {
+      background-color: var(--color-primary);
+    }
 
-        /* 触发区域控制 */
-        .t-collapse-header[data-trigger="header"] {
-            cursor: pointer;
-        }
+    .toggle-switch.active::before {
+      transform: translateX(20px);
+    }
 
-        .t-collapse-header[data-trigger="title"] .t-collapse-title {
-            cursor: pointer;
-        }
+    .t-collapse-body-wrapper {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows var(--duration-normal) var(--ease-out);
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
 
-        .t-collapse-header[data-trigger="icon"] .t-collapse-icon {
-            cursor: pointer;
-        }
+    .t-collapse-body {
+      display: grid;
+      grid-template-rows: subgrid;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* 标题位置布局 */
-        .t-collapse-header[data-title-position="left"] {
-            justify-content: flex-start;
-        }
+    .t-collapse-content {
+      padding: 0 var(--comp-padding-square-xl);
+      font-size: var(--text-base);
+      line-height: var(--line-normal);
+      color: var(--text-secondary);
+      min-height: 0;
+      transition: padding var(--duration-normal) var(--ease-out), 
+                  opacity var(--duration-normal) var(--ease-out);
+      opacity: 0;
+    }
 
-        .t-collapse-header[data-title-position="center"] {
-            justify-content: center;
-        }
+    .t-collapse-item.is-expand > .t-collapse-body-wrapper {
+      grid-template-rows: 1fr;
+    }
 
-        .t-collapse-header[data-title-position="right"] {
-            justify-content: flex-end;
-        }
+    .t-collapse-item.is-expand .t-collapse-content {
+      padding: var(--comp-padding-square-xl);
+      opacity: 1;
+    }
 
-        /* 图标位置控制 */
-        .t-collapse-header[data-icon-position="left"] .t-collapse-icon {
-            order: -1;
-        }
+    .status-indicator {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-3);
+    }
 
-        .t-collapse-header[data-icon-position="right"] .t-collapse-icon {
-            order: 1;
-        }
+    .status-indicator.expanded {
+      background-color: var(--color-success-bg);
+      color: var(--color-success);
+    }
 
-        /* 当标题居中且图标在左时，使用绝对定位 */
-        .t-collapse-header[data-title-position="center"][data-icon-position="left"] {
-            position: relative;
-        }
-
-        .t-collapse-header[data-title-position="center"][data-icon-position="left"] .t-collapse-icon {
-            position: absolute;
-            left: var(--space-6);
-        }
-
-        /* 当标题居中且图标在右时，使用绝对定位 */
-        .t-collapse-header[data-title-position="center"][data-icon-position="right"] {
-            position: relative;
-        }
-
-        .t-collapse-header[data-title-position="center"][data-icon-position="right"] .t-collapse-icon {
-            position: absolute;
-            right: var(--space-6);
-        }
-
-        /* 当标题在左且图标在右，或标题在右且图标在左时，需要自动撑开空间 */
-        .t-collapse-header[data-title-position="left"][data-icon-position="right"],
-        .t-collapse-header[data-title-position="right"][data-icon-position="left"] {
-            justify-content: space-between;
-        }
-        
-        .t-collapse-header:hover {
-            background-color: var(--bg-hover);
-        }
-
-        .t-collapse-item.is-active .t-collapse-header {
-            border-bottom-color: var(--color-divider);
-            background-color: var(--color-primary-alpha);
-        }
-
-        .t-collapse-item.nested.is-active .t-collapse-header {
-            background-color: rgb(from var(--color-primary) r g b / 0.1);
-        }
-
-        .t-collapse-title {
-            font-size: var(--text-md);
-            font-weight: var(--weight-semibold);
-            color: var(--text-primary);
-            order: 0;
-        }
-
-        .t-collapse-item.nested .t-collapse-title {
-            font-size: var(--text-base);
-            font-weight: var(--weight-medium);
-        }
-
-        /* 图标样式 */
-        .t-collapse-icon {
-            width: var(--icon-lg);
-            height: var(--icon-lg);
-            color: var(--text-secondary);
-            transition: transform var(--duration-normal) var(--ease-smooth), 
-                        color var(--duration-fast) var(--ease-in-out);
-            flex-shrink: 0;
-        }
-
-        .t-collapse-item.nested .t-collapse-icon {
-            width: var(--icon-md);
-            height: var(--icon-md);
-        }
-
-        /* 隐藏图标 */
-        .t-collapse-item[data-show-icon="false"] .t-collapse-icon {
-            display: none;
-        }
-
-        .t-collapse-item.is-active .t-collapse-icon {
-            transform: rotate(180deg);
-            color: var(--color-primary);
-        }
-
-        /* --- 折叠动画 --- */
-        .t-collapse-body-wrapper {
-            display: grid;
-            grid-template-rows: 0fr;
-            transition: grid-template-rows var(--duration-normal) var(--ease-out);
-        }
-
-        .t-collapse-item.is-active .t-collapse-body-wrapper {
-            grid-template-rows: 1fr;
-        }
-
-        .t-collapse-body {
-            overflow: hidden;
-            min-height: 0;
-        }
-
-        .t-collapse-content {
-            padding: var(--comp-padding-square-xl);
-            font-size: var(--text-base);
-            line-height: var(--line-normal);
-            color: var(--text-secondary);
-        }
-
-        .t-collapse-item.nested .t-collapse-content {
-            padding: var(--space-4);
-        }
-
-        /* 自定义图标样式 */
-        .custom-icon {
-            width: var(--icon-lg);
-            height: var(--icon-lg);
-            color: var(--text-secondary);
-            transition: transform var(--duration-normal) var(--ease-smooth),
-                        color var(--duration-fast) var(--ease-in-out),
-                        fill var(--duration-fast) var(--ease-in-out);
-            flex-shrink: 0;
-        }
-
-        .t-collapse-item.is-active .custom-icon {
-            color: var(--color-primary);
-        }
-
-        /* 星形图标不旋转，只改变颜色和填充 */
-        .custom-icon.icon-star {
-            transform: none !important;
-        }
-
-        .t-collapse-item.is-active .custom-icon.icon-star {
-            fill: var(--color-primary);
-        }
-
-        /* 代码块样式 */
-        code {
-            background-color: var(--bg-input);
-            padding: var(--space-1) var(--space-2);
-            border-radius: var(--radius-sm);
-            font-family: var(--font-family-mono);
-            font-size: var(--text-sm);
-            color: var(--color-primary);
-        }
-
-        strong {
-            color: var(--text-primary);
-            font-weight: var(--weight-semibold);
-        }
-
-        hr {
-            border: 0;
-            border-top: var(--border-divider);
-            margin: var(--spacing-md) 0;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            body {
-                padding: var(--space-3);
-            }
-
-            .control-panel,
-            .demo-container {
-                max-width: 100%;
-            }
-
-            .control-group {
-                flex-direction: column;
-                gap: var(--space-3);
-            }
-        }
-    </style>
+    .status-indicator.collapsed {
+      background-color: var(--bg-input);
+      color: var(--text-tertiary);
+    }
+  </style>
 </head>
 <body>
-
-    <div class="page-wrapper">
+  <div id="app">
+    <div class="app-container">
+      
+      <!-- 控制面板 -->
+      <div class="control-panel">
+        <h3>💡 Vue 折叠面板组件示例</h3>
         
-        <!-- 控制面板 -->
-        <div class="control-panel">
-            <h3>折叠面板配置</h3>
-            
-            <!-- 手风琴模式 -->
-            <div class="control-section">
-                <div class="control-section-title">展开模式</div>
-                <div class="control-group">
-                    <div class="control-item">
-                        <input type="checkbox" id="accordionMode" onchange="toggleAccordionMode(this.checked)">
-                        <label for="accordionMode">手风琴模式（每次只展开一个）</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 触发区域 -->
-            <div class="control-section">
-                <div class="control-section-title">触发区域</div>
-                <div class="control-group">
-                    <div class="control-item">
-                        <input type="radio" id="triggerHeader" name="triggerArea" value="header" checked onchange="changeTriggerArea('header')">
-                        <label for="triggerHeader">标题行</label>
-                    </div>
-                    <div class="control-item">
-                        <input type="radio" id="triggerTitle" name="triggerArea" value="title" onchange="changeTriggerArea('title')">
-                        <label for="triggerTitle">标题文本</label>
-                    </div>
-                    <div class="control-item">
-                        <input type="radio" id="triggerIcon" name="triggerArea" value="icon" onchange="changeTriggerArea('icon')">
-                        <label for="triggerIcon">图标</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 标题位置 -->
-            <div class="control-section">
-                <div class="control-section-title">标题位置</div>
-                <div class="control-group">
-                    <div class="control-item">
-                        <input type="radio" id="titleLeft" name="titlePosition" value="left" checked onchange="changeTitlePosition('left')">
-                        <label for="titleLeft">左边</label>
-                    </div>
-                    <div class="control-item">
-                        <input type="radio" id="titleCenter" name="titlePosition" value="center" onchange="changeTitlePosition('center')">
-                        <label for="titleCenter">中间</label>
-                    </div>
-                    <div class="control-item">
-                        <input type="radio" id="titleRight" name="titlePosition" value="right" onchange="changeTitlePosition('right')">
-                        <label for="titleRight">右边</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 图标位置 -->
-            <div class="control-section">
-                <div class="control-section-title">图标位置</div>
-                <div class="control-group">
-                    <div class="control-item">
-                        <input type="radio" id="iconLeft" name="iconPosition" value="left" onchange="changeIconPosition('left')">
-                        <label for="iconLeft">左边</label>
-                    </div>
-                    <div class="control-item">
-                        <input type="radio" id="iconRight" name="iconPosition" value="right" checked onchange="changeIconPosition('right')">
-                        <label for="iconRight">右边</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 图标显示 -->
-            <div class="control-section">
-                <div class="control-section-title">图标设置</div>
-                <div class="control-group">
-                    <div class="control-item">
-                        <input type="checkbox" id="showIcon" checked onchange="toggleIconVisibility(this.checked)">
-                        <label for="showIcon">显示展开/收起图标</label>
-                    </div>
-                </div>
-            </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" @click="expandAll">全部展开</button>
+          <button class="btn btn-primary" @click="collapseAll">全部收起</button>
         </div>
 
-        <div class="demo-container" id="collapseContainer">
-            
-            <!-- 面板 1：基础介绍 -->
-            <div class="t-collapse-item" data-show-icon="true">
-                <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                    <span class="t-collapse-title">基础面板：完整功能介绍</span>
-                    <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-                <div class="t-collapse-body-wrapper">
-                    <div class="t-collapse-body">
-                        <div class="t-collapse-content">
-                            这是一个功能完整的折叠面板组件，使用了 <code>variables.css</code> 设计变量。
-                            <br><br>
-                            <strong>✨ 全部功能：</strong>
-                            <br>• 手风琴模式
-                            <br>• 三种触发区域：标题行、标题文本、图标
-                            <br>• 标题位置：左、中、右
-                            <br>• 图标位置：左、右
-                            <br>• 支持多级嵌套
-                            <br>• 自定义图标
-                            <br>• 平滑动画过渡
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 面板 2：嵌套演示 -->
-            <div class="t-collapse-item" data-show-icon="true">
-                <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                    <span class="t-collapse-title">嵌套折叠面板演示</span>
-                    <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-                <div class="t-collapse-body-wrapper">
-                    <div class="t-collapse-body">
-                        <div class="t-collapse-content">
-                            <p><strong>支持多级嵌套：</strong>折叠面板可以包含子折叠面板，形成树形结构。</p>
-                            
-                            <div class="t-collapse-nested-container">
-                                
-                                <!-- 嵌套面板 2-1 -->
-                                <div class="t-collapse-item nested" data-show-icon="true">
-                                    <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                        <span class="t-collapse-title">子面板 1：前端技术栈</span>
-                                        <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                    <div class="t-collapse-body-wrapper">
-                                        <div class="t-collapse-body">
-                                            <div class="t-collapse-content">
-                                                <strong>HTML + CSS + JavaScript</strong>
-                                                <br><br>
-                                                本组件使用纯原生技术实现，无需任何框架依赖。
-                                                <br><br>
-                                                <div class="t-collapse-nested-container">
-                                                    
-                                                    <!-- 三级嵌套 -->
-                                                    <div class="t-collapse-item nested" data-show-icon="true">
-                                                        <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                                            <span class="t-collapse-title">CSS 特性</span>
-                                                            <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </div>
-                                                        <div class="t-collapse-body-wrapper">
-                                                            <div class="t-collapse-body">
-                                                                <div class="t-collapse-content">
-                                                                    • CSS Grid 布局<br>
-                                                                    • CSS 变量系统<br>
-                                                                    • Backdrop Filter 玻璃态<br>
-                                                                    • Sticky 定位<br>
-                                                                    • Transition 动画
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 嵌套面板 2-2 -->
-                                <div class="t-collapse-item nested" data-show-icon="true">
-                                    <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                        <span class="t-collapse-title">子面板 2：设计系统</span>
-                                        <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                    <div class="t-collapse-body-wrapper">
-                                        <div class="t-collapse-body">
-                                            <div class="t-collapse-content">
-                                                <strong>Nord 配色 + TDesign 规范</strong>
-                                                <br><br>
-                                                结合了 Nord 的优雅配色和 TDesign 的组件规范。
-                                                <br><br>
-                                                • 16 种精选颜色<br>
-                                                • 语义化的变量命名<br>
-                                                • 完整的间距系统<br>
-                                                • 统一的动画曲线
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 嵌套面板 2-3 -->
-                                <div class="t-collapse-item nested" data-show-icon="true">
-                                    <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                        <span class="t-collapse-title">子面板 3：动画系统</span>
-                                        <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                    <div class="t-collapse-body-wrapper">
-                                        <div class="t-collapse-body">
-                                            <div class="t-collapse-content">
-                                                使用 <code>grid-template-rows</code> 实现高度动画，配合缓动函数：
-                                                <br><br>
-                                                • <code>--ease-smooth</code> - 平滑过渡<br>
-                                                • <code>--ease-out</code> - 出场动画<br>
-                                                • <code>--ease-in-out</code> - 进出动画
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 面板 3：触发区域演示 -->
-            <div class="t-collapse-item" data-show-icon="true">
-                <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                    <span class="t-collapse-title">触发区域配置说明</span>
-                    <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-                <div class="t-collapse-body-wrapper">
-                    <div class="t-collapse-body">
-                        <div class="t-collapse-content">
-                            <strong>三种触发模式：</strong>
-                            <br><br>
-                            <strong>1. 标题行（默认）</strong>
-                            <br>点击整个标题栏区域都可以展开/收起面板，交互范围最大。
-                            <br><br>
-                            <strong>2. 标题文本</strong>
-                            <br>只有点击标题文字时才会触发，适合标题栏有其他交互元素的场景。
-                            <br><br>
-                            <strong>3. 图标</strong>
-                            <br>只有点击图标才会触发，最精确的控制方式，适合复杂的交互场景。
-                            <br><br>
-                            <hr>
-                            <p style="color: var(--text-tertiary); font-size: var(--text-sm);">
-                                💡 提示：请在顶部控制面板切换触发区域，体验不同的交互方式。
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 面板 4：自定义图标 -->
-            <div class="t-collapse-item" data-show-icon="true">
-                <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                    <span class="t-collapse-title">自定义图标 - 星形</span>
-                    <svg class="t-collapse-icon custom-icon icon-star" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                    </svg>
-                </div>
-                <div class="t-collapse-body-wrapper">
-                    <div class="t-collapse-body">
-                        <div class="t-collapse-content">
-                            支持自定义图标，可以使用任何 SVG 图标。
-                            <br><br>
-                            星形图标在展开时不会旋转，只会改变颜色和填充状态。
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 面板 5：复杂嵌套演示 -->
-            <div class="t-collapse-item" data-show-icon="true">
-                <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                    <span class="t-collapse-title">复杂嵌套结构演示</span>
-                    <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </div>
-                <div class="t-collapse-body-wrapper">
-                    <div class="t-collapse-body">
-                        <div class="t-collapse-content">
-                            <p>演示更复杂的嵌套场景，比如产品分类目录：</p>
-                            
-                            <div class="t-collapse-nested-container">
-                                
-                                <!-- 一级分类：电子产品 -->
-                                <div class="t-collapse-item nested" data-show-icon="true">
-                                    <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                        <span class="t-collapse-title">📱 电子产品</span>
-                                        <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                    <div class="t-collapse-body-wrapper">
-                                        <div class="t-collapse-body">
-                                            <div class="t-collapse-content">
-                                                <div class="t-collapse-nested-container">
-                                                    
-                                                    <!-- 二级分类：手机 -->
-                                                    <div class="t-collapse-item nested" data-show-icon="true">
-                                                        <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                                            <span class="t-collapse-title">手机</span>
-                                                            <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </div>
-                                                        <div class="t-collapse-body-wrapper">
-                                                            <div class="t-collapse-body">
-                                                                <div class="t-collapse-content">
-                                                                    • iPhone 16 Pro<br>
-                                                                    • Samsung Galaxy S24<br>
-                                                                    • Google Pixel 9
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- 二级分类：电脑 -->
-                                                    <div class="t-collapse-item nested" data-show-icon="true">
-                                                        <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                                            <span class="t-collapse-title">电脑</span>
-                                                            <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </div>
-                                                        <div class="t-collapse-body-wrapper">
-                                                            <div class="t-collapse-body">
-                                                                <div class="t-collapse-content">
-                                                                    • MacBook Pro M4<br>
-                                                                    • ThinkPad X1 Carbon<br>
-                                                                    • Surface Laptop 6
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- 一级分类：家居用品 -->
-                                <div class="t-collapse-item nested" data-show-icon="true">
-                                    <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                        <span class="t-collapse-title">🏠 家居用品</span>
-                                        <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                    <div class="t-collapse-body-wrapper">
-                                        <div class="t-collapse-body">
-                                            <div class="t-collapse-content">
-                                                <div class="t-collapse-nested-container">
-                                                    
-                                                    <div class="t-collapse-item nested" data-show-icon="true">
-                                                        <div class="t-collapse-header" data-title-position="left" data-icon-position="right" data-trigger="header">
-                                                            <span class="t-collapse-title">厨房电器</span>
-                                                            <svg class="t-collapse-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </div>
-                                                        <div class="t-collapse-body-wrapper">
-                                                            <div class="t-collapse-body">
-                                                                <div class="t-collapse-content">
-                                                                    • 咖啡机<br>
-                                                                    • 空气炸锅<br>
-                                                                    • 洗碗机
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div>
+          <span class="status-indicator" :class="panel1Expanded ? 'expanded' : 'collapsed'">
+            面板1: {{ panel1Expanded ? '已展开' : '已收起' }}
+          </span>
+          <span class="status-indicator" :class="panel2Expanded ? 'expanded' : 'collapsed'">
+            面板2: {{ panel2Expanded ? '已展开' : '已收起' }}
+          </span>
         </div>
+      </div>
+
+      <!-- 折叠面板 -->
+      <div class="demo-container">
+        
+        <!-- 面板 1 -->
+        <collapse-panel 
+          v-model="panel1Expanded"
+          title="📋 待办清单设置"
+          @change="onPanel1Change"
+        >
+          <div class="feature-list">
+            <div class="feature-item">✓ 开启待办清单功能</div>
+            <div class="feature-item">✓ 默认折叠清单</div>
+            <div class="feature-item">✓ 自动保存到本地存储</div>
+            <div class="feature-item">✓ 支持标签分类</div>
+          </div>
+        </collapse-panel>
+
+        <!-- 面板 2 -->
+        <collapse-panel 
+          v-model="panel2Expanded"
+          title="⚙️ 高级功能"
+        >
+          <div class="feature-list">
+            <div class="feature-item">✓ 启用快捷键支持</div>
+            <div class="feature-item">✓ 自动备份数据</div>
+            <div class="feature-item">✓ 番茄钟集成</div>
+            <div class="feature-item">✓ 导出为 Markdown</div>
+          </div>
+        </collapse-panel>
+
+        <!-- 面板 3 -->
+        <collapse-panel 
+          title="🎨 默认展开示例"
+          :default-expanded="true"
+        >
+          <p style="margin-bottom: 12px;">这个面板默认是展开状态。</p>
+          <p>你可以通过设置 <code>:default-expanded="true"</code> 来实现。</p>
+        </collapse-panel>
+
+      </div>
 
     </div>
+  </div>
 
-    <script>
-        // 全局配置
-        let isAccordionMode = false;
-        let currentTriggerArea = 'header';
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <script>
+    const { createApp, ref, computed } = Vue
 
-        // 存储每个 header 的事件处理器，用于移除
-        const headerHandlers = new WeakMap();
+    // 折叠面板组件
+    const CollapsePanel = {
+      template: `
+        <div 
+          class="t-collapse-item" 
+          :class="{ 'is-active': isExpanded, 'is-expand': isExpanded }"
+        >
+          <div class="t-collapse-header">
+            <div class="t-collapse-header-left">
+              <svg 
+                v-if="showIcon"
+                class="t-collapse-icon" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+              <span class="t-collapse-title">{{ title }}</span>
+            </div>
+            <div 
+              v-if="showSwitch"
+              class="toggle-switch" 
+              :class="{ active: isExpanded }"
+              @click="toggle"
+            ></div>
+          </div>
+          <div class="t-collapse-body-wrapper">
+            <div class="t-collapse-body">
+              <div class="t-collapse-content">
+                <slot></slot>
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      props: {
+        title: {
+          type: String,
+          default: '折叠面板'
+        },
+        defaultExpanded: {
+          type: Boolean,
+          default: false
+        },
+        showIcon: {
+          type: Boolean,
+          default: true
+        },
+        showSwitch: {
+          type: Boolean,
+          default: true
+        },
+        modelValue: {
+          type: Boolean,
+          default: undefined
+        }
+      },
+      emits: ['update:modelValue', 'change', 'expand', 'collapse'],
+      setup(props, { emit }) {
+        const innerExpanded = ref(props.defaultExpanded)
 
-        // 初始化：为所有面板添加点击事件
-        function initCollapse() {
-            document.querySelectorAll('.t-collapse-header').forEach(header => {
-                // 移除旧的事件监听器
-                if (headerHandlers.has(header)) {
-                    const oldHandlers = headerHandlers.get(header);
-                    if (oldHandlers.headerHandler) {
-                        header.removeEventListener('click', oldHandlers.headerHandler);
-                    }
-                    if (oldHandlers.titleHandler) {
-                        const title = header.querySelector('.t-collapse-title');
-                        if (title) title.removeEventListener('click', oldHandlers.titleHandler);
-                    }
-                    if (oldHandlers.iconHandler) {
-                        const icon = header.querySelector('.t-collapse-icon');
-                        if (icon) icon.removeEventListener('click', oldHandlers.iconHandler);
-                    }
-                }
-                
-                const item = header.parentElement;
-                const title = header.querySelector('.t-collapse-title');
-                const icon = header.querySelector('.t-collapse-icon');
-                
-                // 根据触发区域添加事件监听器
-                const triggerArea = header.getAttribute('data-trigger');
-                const handlers = {};
-                
-                if (triggerArea === 'header') {
-                    // 整个标题行可点击
-                   handlers.headerHandler = function(e) {
-                        // 1. 核心修复：显式阻止事件冒泡，防止点击子面板时误触父面板
-                        e.stopPropagation();
-                        
-                        // 2. 核心修复：直接执行切换，不再进行脆弱的 DOM 层级比对
-                        togglePanel(item);
-                    };
-                    header.addEventListener('click', handlers.headerHandler);
-                } else if (triggerArea === 'title') {
-                    // 仅标题文本可点击
-                    if (title) {
-                        handlers.titleHandler = function(e) {
-                            e.stopPropagation();
-                            togglePanel(item);
-                        };
-                        title.addEventListener('click', handlers.titleHandler);
-                    }
-                } else if (triggerArea === 'icon') {
-                    // 仅图标可点击
-                    if (icon) {
-                        handlers.iconHandler = function(e) {
-                            e.stopPropagation();
-                            togglePanel(item);
-                        };
-                        icon.addEventListener('click', handlers.iconHandler);
-                    }
-                }
-                
-                // 保存处理器引用
-                headerHandlers.set(header, handlers);
-            });
+        const isExpanded = computed({
+          get() {
+            return props.modelValue !== undefined ? props.modelValue : innerExpanded.value
+          },
+          set(value) {
+            innerExpanded.value = value
+            emit('update:modelValue', value)
+          }
+        })
+
+        const toggle = () => {
+          const newValue = !isExpanded.value
+          isExpanded.value = newValue
+          emit('change', newValue)
+          if (newValue) {
+            emit('expand')
+          } else {
+            emit('collapse')
+          }
         }
 
-        // 切换面板状态
-        function togglePanel(item) {
-            const isActive = item.classList.contains('is-active');
-            
-            // 手风琴模式：关闭其他同级面板
-            if (isAccordionMode && !isActive) {
-                const parent = item.parentElement;
-                const siblings = Array.from(parent.children).filter(child => 
-                    child.classList.contains('t-collapse-item')
-                );
-                
-                siblings.forEach(sibling => {
-                    if (sibling !== item) {
-                        sibling.classList.remove('is-active');
-                    }
-                });
-            }
-            
-            // 切换当前面板
-            item.classList.toggle('is-active');
+        return {
+          isExpanded,
+          toggle
+        }
+      }
+    }
+
+    // 主应用
+    createApp({
+      components: {
+        CollapsePanel
+      },
+      setup() {
+        const panel1Expanded = ref(false)
+        const panel2Expanded = ref(false)
+
+        const expandAll = () => {
+          panel1Expanded.value = true
+          panel2Expanded.value = true
         }
 
-        // 切换手风琴模式
-        function toggleAccordionMode(enabled) {
-            isAccordionMode = enabled;
-            
-            if (enabled) {
-                // 开启手风琴模式时，每个容器保留第一个展开的面板
-                document.querySelectorAll('.demo-container, .t-collapse-nested-container').forEach(container => {
-                    const activeItems = container.querySelectorAll(':scope > .t-collapse-item.is-active');
-                    if (activeItems.length > 1) {
-                        activeItems.forEach((item, index) => {
-                            if (index > 0) {
-                                item.classList.remove('is-active');
-                            }
-                        });
-                    }
-                });
-            }
+        const collapseAll = () => {
+          panel1Expanded.value = false
+          panel2Expanded.value = false
         }
 
-        // 改变触发区域
-        function changeTriggerArea(area) {
-            currentTriggerArea = area;
-            document.querySelectorAll('.t-collapse-header').forEach(header => {
-                header.setAttribute('data-trigger', area);
-            });
-            // 重新初始化事件监听器
-            initCollapse();
+        const onPanel1Change = (expanded) => {
+          console.log('面板1状态变化:', expanded)
         }
 
-        // 改变标题位置
-        function changeTitlePosition(position) {
-            document.querySelectorAll('.t-collapse-header').forEach(header => {
-                header.setAttribute('data-title-position', position);
-            });
+        return {
+          panel1Expanded,
+          panel2Expanded,
+          expandAll,
+          collapseAll,
+          onPanel1Change
         }
-
-        // 改变图标位置
-        function changeIconPosition(position) {
-            document.querySelectorAll('.t-collapse-header').forEach(header => {
-                header.setAttribute('data-icon-position', position);
-            });
-        }
-
-        // 切换图标显示
-        function toggleIconVisibility(show) {
-            document.querySelectorAll('.t-collapse-item').forEach(item => {
-                item.setAttribute('data-show-icon', show);
-            });
-        }
-
-        // 页面加载完成后初始化
-        initCollapse();
-    </script>
+      }
+    }).mount('#app')
+  </script>
 </body>
 </html>

@@ -27,18 +27,18 @@ const shouldRender = ref(false)
 
 // 计算实际内容尺寸
 const contentSize = computed(() => {
-  const { gridCols, gridRows, gridGapX, gridGapY, iconConfig } = props.snapshot.data.settings
+  const { layoutGridCols, layoutGridRows, layoutGridGapX, layoutGridGapY, iconConfig } = props.snapshot.data.settings
   // 必须与 ShortcutGrid 中的计算逻辑保持一致
   // containerWidthStyle logic:
   // cols * boxSize + (cols - 1) * gapX + contentPadding (40)
   const paddingX = 40
-  const width = gridCols * iconConfig.boxSize + (gridCols - 1) * gridGapX + paddingX
-  
+  const width = layoutGridCols * iconConfig.boxSize + (layoutGridCols - 1) * layoutGridGapX + paddingX
+
   // containerHeightStyle logic:
   // rows * boxSize + (rows - 1) * gapY + paddingY (20)
   const paddingY = 20
-  const height = gridRows * iconConfig.boxSize + (gridRows - 1) * gridGapY + paddingY
-  
+  const height = layoutGridRows * iconConfig.boxSize + (layoutGridRows - 1) * layoutGridGapY + paddingY
+
   return { width, height }
 })
 

@@ -35,7 +35,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-show="settings.showClock" class="header-section">
+  <div v-show="settings.clockShow" class="header-section">
     <div class="clock-line">
       <span id="clock-time">{{ timeStr }}</span>
     </div>

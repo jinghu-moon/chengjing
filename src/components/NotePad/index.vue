@@ -162,14 +162,14 @@ const exportNote = async () => {
   <div class="notepad-container" v-bind="$attrs">
     <!-- 图标触发器 -->
     <NotePadTrigger
-      :visible="settings.showNotePad && !isMiniOpen && !isExpanded"
+      :visible="settings.notePadShow && !isMiniOpen && !isExpanded"
       @open="openMini"
     />
 
     <!-- 迷你模式 -->
     <MiniNotePad
       v-model="miniContent"
-      :visible="settings.showNotePad && isMiniOpen && !isExpanded"
+      :visible="settings.notePadShow && isMiniOpen && !isExpanded"
       @expand="expandNote"
       @close="closeMini"
     />
@@ -177,7 +177,7 @@ const exportNote = async () => {
     <!-- 展开模式 -->
     <Transition name="fade">
       <div
-        v-if="settings.showNotePad && isExpanded"
+        v-if="settings.notePadShow && isExpanded"
         class="note-overlay"
         @click.self="collapseNote"
       >

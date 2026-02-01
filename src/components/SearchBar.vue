@@ -62,7 +62,7 @@ const performSearch = () => {
   if (!searchQuery.value.trim()) return
   const targetUrl = currentEngine.value.url + encodeURIComponent(searchQuery.value)
 
-  if (settings.openNewTab) {
+  if (settings.generalOpenInNewTab) {
     window.open(targetUrl, '_blank')
   } else {
     window.location.href = targetUrl
@@ -114,7 +114,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
         v-model="searchQuery"
         type="text"
         class="search-input"
-        :class="{ 'no-icon': !settings.showSearchIcon }"
+        :class="{ 'no-icon': !settings.searchBarShowIcon }"
         placeholder="Search..."
         autocomplete="off"
         @keydown.enter="performSearch"
@@ -123,7 +123,7 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
       />
 
       <div
-        v-if="settings.showSearchIcon"
+        v-if="settings.searchBarShowIcon"
         class="engine-trigger right"
         :style="triggerStyle"
         @click="handleSearchClick"

@@ -30,11 +30,11 @@ const folderStyle = computed(() => {
     return { '--brand-color': props.item.color || '#888' }
   }
 
-  const mode = props.item.folderMode || settings.defaultFolderMode || settings.folderPreviewMode
+  const mode = props.item.folderMode || settings.folderDefaultMode || settings.folderPreviewMode
   const vars = calculateModeVars(mode)
 
   // 1x8 扁平化适配
-  if (settings.gridRows === 1) {
+  if (settings.layoutGridRows === 1) {
     const [, c] = mode.split('x').map(Number)
     vars['--f-rows'] = 1
     // 重新计算内部网格
@@ -51,7 +51,7 @@ const folderStyle = computed(() => {
 
 // 文件夹容量
 const capacity = computed(() => {
-  const mode = props.item.folderMode || settings.defaultFolderMode || settings.folderPreviewMode
+  const mode = props.item.folderMode || settings.folderDefaultMode || settings.folderPreviewMode
   return getCapacity(mode)
 })
 

@@ -16,14 +16,14 @@ const { settings } = useSettings()
 const isCustomExpanded = ref(true)
 
 const updateDesktopLayout = (layout: { rows: number; cols: number }) => {
-  settings.gridRows = layout.rows
-  settings.gridCols = layout.cols
+  settings.layoutGridRows = layout.rows
+  settings.layoutGridCols = layout.cols
 }
 
 const handleToggleCustom = (shouldExpand: boolean) => {
   isCustomExpanded.value = shouldExpand
   if (shouldExpand) {
-    settings.desktopPreset = 'custom'
+    settings.layoutPreset = 'custom'
   }
 }
 
@@ -48,8 +48,8 @@ const close = () => {
           <div class="setting-group">
             <div class="group-label">网格大小</div>
             <LayoutSelector
-              :rows="settings.gridRows"
-              :cols="settings.gridCols"
+              :rows="settings.layoutGridRows"
+              :cols="settings.layoutGridCols"
               :is-custom-expanded="isCustomExpanded"
               @update:layout="updateDesktopLayout"
               @toggle-custom="handleToggleCustom"
@@ -62,14 +62,14 @@ const close = () => {
                 <div class="divider"></div>
                 <div class="control-group">
                   <SettingSlider
-                    v-model="settings.gridRows"
+                    v-model="settings.layoutGridRows"
                     label="行数"
                     :min="1"
                     :max="10"
                     unit="行"
                   />
                   <SettingSlider
-                    v-model="settings.gridCols"
+                    v-model="settings.layoutGridCols"
                     label="列数"
                     :min="2"
                     :max="12"
@@ -78,7 +78,7 @@ const close = () => {
                 </div>
                 <div class="control-group mt-2">
                   <SettingSlider
-                    v-model="settings.gridGapX"
+                    v-model="settings.layoutGridGapX"
                     label="列间距"
                     :min="0"
                     :max="100"
@@ -86,7 +86,7 @@ const close = () => {
                     unit="px"
                   />
                   <SettingSlider
-                    v-model="settings.gridGapY"
+                    v-model="settings.layoutGridGapY"
                     label="行间距"
                     :min="0"
                     :max="100"
@@ -112,8 +112,8 @@ const close = () => {
             <div class="strategy-cards">
               <div
                 class="strategy-card"
-                :class="{ active: settings.compressLargeFolders }"
-                @click="settings.compressLargeFolders = true"
+                :class="{ active: settings.folderCompressLarge }"
+                @click="settings.folderCompressLarge = true"
               >
                 <div class="radio-circle">
                   <div class="inner-dot"></div>
@@ -129,8 +129,8 @@ const close = () => {
 
               <div
                 class="strategy-card"
-                :class="{ active: !settings.compressLargeFolders }"
-                @click="settings.compressLargeFolders = false"
+                :class="{ active: !settings.folderCompressLarge }"
+                @click="settings.folderCompressLarge = false"
               >
                 <div class="radio-circle">
                   <div class="inner-dot"></div>

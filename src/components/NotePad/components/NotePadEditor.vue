@@ -246,12 +246,12 @@ const displayStats = computed(() => {
           <div v-if="showSettings" class="settings-panel">
             <div class="setting-row">
               <label>开启图片压缩</label>
-              <input v-model="settings.compressImages" type="checkbox" />
+              <input v-model="settings.notePadImageCompress" type="checkbox" />
             </div>
-            <template v-if="settings.compressImages">
+            <template v-if="settings.notePadImageCompress">
               <div class="setting-row">
                 <label>最大体积</label>
-                <select v-model.number="settings.maxImageSizeMB">
+                <select v-model.number="settings.notePadImageMaxSizeMB">
                   <option :value="0.5">0.5MB</option>
                   <option :value="1">1MB</option>
                   <option :value="2">2MB</option>
@@ -260,7 +260,7 @@ const displayStats = computed(() => {
               </div>
               <div class="setting-row">
                 <label>最大宽度</label>
-                <select v-model.number="settings.maxImageWidth">
+                <select v-model.number="settings.notePadImageMaxWidth">
                   <option :value="800">800px</option>
                   <option :value="1200">1200px</option>
                   <option :value="1600">1600px</option>
