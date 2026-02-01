@@ -1,0 +1,382 @@
+❯ npx vitest run src/components/QRSync/utils/qr-codec.test.ts
+[Vite Config] Mode: test
+[Vite Config] using @crxjs/vite-plugin
+[settings-labels] Parsed 46 settings, 6 icon labels
+
+ RUN  v4.0.18 D:/100_Projects/110_Daily/ChengJing
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode full mode correctly
+[QR Encode] 开始编码
+  模式: full
+  原始 settings 字段数: 5
+  原始 iconConfig 字段数: 3
+  压缩后 settings: { ont: true, st: true, tw: 300, wb: 10, gr: 4 }
+  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
+  编码结果大小: 126 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134518,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode theme mode correctly (filtering)
+[QR Encode] 开始编码
+  模式: theme
+  原始 settings 字段数: 5
+  原始 iconConfig 字段数: 3
+  主题模式筛选后字段数: 2
+  压缩后 settings: { wb: 10, gr: 4 }
+  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
+  编码结果大小: 97 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134520,"m":"theme","d":{"s":{"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode custom mode correctly
+[QR Encode] 开始编码
+  模式: custom
+  原始 settings 字段数: 2
+  原始 iconConfig 字段数: 1
+  压缩后 settings: { wb: 15, gr: 3 }
+  压缩后 iconConfig: { bs: 90 }
+  编码结果大小: 79 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134520,"m":"custom","d":{"s":{"wb":15,"gr":3},"i":{"bs":90}}}
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should detect over limit correctly
+[QR Encode] 开始编码
+  模式: full
+  原始 settings 字段数: 100
+  原始 iconConfig 字段数: 3
+  压缩后 settings: {
+    field_0: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_1: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_2: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_3: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_4: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_5: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_6: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_7: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_8: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_9: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_10: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_11: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_12: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_13: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_14: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_15: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_16: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_17: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_18: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_19: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_20: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_21: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_22: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_23: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_24: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_25: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_26: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_27: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_28: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_29: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_30: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_31: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_32: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_33: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_34: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_35: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_36: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_37: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_38: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_39: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_40: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_41: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_42: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_43: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_44: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_45: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_46: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_47: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_48: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_49: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_50: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_51: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_52: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_53: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_54: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_55: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_56: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_57: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_58: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_59: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_60: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_61: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_62: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_63: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_64: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_65: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_66: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_67: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_68: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_69: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_70: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_71: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_72: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_73: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_74: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_75: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_76: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_77: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_78: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_79: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_80: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_81: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_82: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_83: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_84: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_85: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_86: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_87: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_88: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_89: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_90: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_91: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_92: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_93: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_94: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_95: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_96: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_97: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_98: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    field_99: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+  }
+  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
+  编码结果大小: 6471 字符
+  是否超限: true (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134521,"m":"full","d":{"s":{"field_0":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_1":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_2":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_3":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_4":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_5":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_6":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_7":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_8":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_9":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_10":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_11":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_12":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_13":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_14":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_15":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_16":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_17":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_18":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_19":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_20":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_21":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_22":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_23":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_24":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_25":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_26":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_27":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_28":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_29":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_30":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_31":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_32":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_33":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_34":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_35":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_36":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_37":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_38":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_39":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_40":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_41":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_42":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_43":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_44":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_45":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_46":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_47":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_48":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_49":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_50":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_51":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_52":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_53":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_54":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_55":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_56":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_57":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_58":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_59":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_60":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_61":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_62":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_63":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_64":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_65":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_66":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_67":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_68":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_69":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_70":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_71":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_72":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_73":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_74":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_75":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_76":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_77":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_78":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_79":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_80":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_81":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_82":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_83":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_84":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_85":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_86":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_87":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_88":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_89":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_90":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_91":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_92":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_93":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_94":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_95":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_96":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_97":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_98":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_99":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},"i":{"hl":false,"bs":80,"is":60}}}
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should handle empty data
+[QR Encode] 开始编码
+  模式: full
+  原始 settings 字段数: 0
+  原始 iconConfig 字段数: 0
+  压缩后 settings: {}
+  压缩后 iconConfig: {}
+  编码结果大小: 56 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134522,"m":"full","d":{"s":{},"i":{}}}
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should decode valid payload correctly
+[QR Encode] 开始编码
+  模式: full
+  原始 settings 字段数: 5
+  原始 iconConfig 字段数: 3
+  压缩后 settings: { ont: true, st: true, tw: 300, wb: 10, gr: 4 }
+  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
+  编码结果大小: 126 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134523,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}        
+[QR Decode] 开始解码
+  输入字符串长度: 126
+  输入内容前100字符: {"v":1,"t":1769946134523,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134523 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 5
+  压缩数据 i 字段数: 3
+  解压后 settings: {
+    generalOpenInNewTab: true,
+    todoShow: true,
+    todoWidth: 300,
+    wallpaperBlur: 10,
+    layoutGridRows: 4
+  }
+  解压后 iconConfig: { hideLabel: false, boxSize: 80, iconScale: 60 }
+  净化后 settings 字段数: 5
+  净化后 iconConfig 字段数: 3
+  解码成功
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should handle invalid JSON
+[QR Decode] 开始解码
+  输入字符串长度: 16
+  输入内容前100字符: { invalid json }
+
+stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should handle invalid JSON
+  解码异常: Expected property name or '}' in JSON at position 2 (line 1 column 3)
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should sanitize invalid fields
+[QR Decode] 开始解码
+  输入字符串长度: 110
+  输入内容前100字符: {"v":1,"t":1769946134535,"m":"full","d":{"s":{"ont":"should be boolean","unknown_key":123,"tw":99999
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134535 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 3
+  压缩数据 i 字段数: 0
+  解压后 settings: {
+    generalOpenInNewTab: 'should be boolean',
+    unknown_key: 123,
+    todoWidth: 99999
+  }
+  解压后 iconConfig: {}
+  净化后 settings 字段数: 0
+  净化后 iconConfig 字段数: 0
+  解码成功
+
+stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should sanitize invalid fields
+  已丢弃不安全字段: [
+    'generalOpenInNewTab (校验失败)',
+    'unknown_key (未知字段)',
+    'todoWidth (校验失败)'
+  ]
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should accept boundary values
+[QR Decode] 开始解码
+  输入字符串长度: 95
+  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"tw":100,"wb":50,"gr":1},"i":{"bs":40,"op":100}}}
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134536 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 3
+  压缩数据 i 字段数: 2
+  解压后 settings: { todoWidth: 100, wallpaperBlur: 50, layoutGridRows: 1 }
+  解压后 iconConfig: { boxSize: 40, opacity: 100 }
+  净化后 settings 字段数: 3
+  净化后 iconConfig 字段数: 2
+  解码成功
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should reject out-of-boundary values
+[QR Decode] 开始解码
+  输入字符串长度: 78
+  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"tw":99,"wb":51},"i":{"bs":39}}}
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134536 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 2
+  压缩数据 i 字段数: 1
+  解压后 settings: { todoWidth: 99, wallpaperBlur: 51 }
+  解压后 iconConfig: { boxSize: 39 }
+  净化后 settings 字段数: 0
+  净化后 iconConfig 字段数: 0
+  解码成功
+
+stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should reject out-of-boundary values
+  已丢弃不安全字段: [ 'todoWidth (校验失败)', 'wallpaperBlur (校验失败)', 'boxSize (校验失败)' ]
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should validate enum values
+[QR Decode] 开始解码
+  输入字符串长度: 104
+  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"dp":"compact","fpm":"invalid","npem":"markdown"},"i":
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134536 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 3
+  压缩数据 i 字段数: 0
+  解压后 settings: {
+    layoutPreset: 'compact',
+    folderPreviewMode: 'invalid',
+    notePadEditorMode: 'markdown'
+  }
+  解压后 iconConfig: {}
+  净化后 settings 字段数: 2
+  净化后 iconConfig 字段数: 0
+  解码成功
+
+stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should validate enum values
+  已丢弃不安全字段: [ 'folderPreviewMode (校验失败)' ]
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > round-trip > should preserve data through encode → decode cycle
+[QR Encode] 开始编码
+  模式: full
+  原始 settings 字段数: 6
+  原始 iconConfig 字段数: 4
+  压缩后 settings: { ont: true, st: false, tw: 350, wb: 25, dp: 'spacious', wc: '北京' }
+  压缩后 iconConfig: { hl: true, bs: 100, is: 75, op: 80 }
+  编码结果大小: 154 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134537,"m":"full","d":{"s":{"ont":true,"st":false,"tw":350,"wb":25,"dp":"spacious","wc":"北京"},"i":{"hl":true,"bs":100,"is":75,"op":80}}}
+[QR Decode] 开始解码
+  输入字符串长度: 154
+  输入内容前100字符: {"v":1,"t":1769946134537,"m":"full","d":{"s":{"ont":true,"st":false,"tw":350,"wb":25,"dp":"spacious"
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134537 2026/2/1 19:42:14
+  模式: full
+  基础校验通过
+  压缩数据 s 字段数: 6
+  压缩数据 i 字段数: 4
+  解压后 settings: {
+    generalOpenInNewTab: true,
+    todoShow: false,
+    todoWidth: 350,
+    wallpaperBlur: 25,
+    layoutPreset: 'spacious',
+    weatherCity: '北京'
+  }
+  解压后 iconConfig: { hideLabel: true, boxSize: 100, iconScale: 75, opacity: 80 }
+  净化后 settings 字段数: 6
+  净化后 iconConfig 字段数: 4
+  解码成功
+
+stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > round-trip > should preserve data in theme mode
+[QR Encode] 开始编码
+  模式: theme
+  原始 settings 字段数: 4
+  原始 iconConfig 字段数: 0
+  主题模式筛选后字段数: 3
+  压缩后 settings: { wb: 30, gr: 5, sbw: 60 }
+  压缩后 iconConfig: {}
+  编码结果大小: 80 字符
+  是否超限: false (阈值: 2000)
+  完整 payload: {"v":1,"t":1769946134538,"m":"theme","d":{"s":{"wb":30,"gr":5,"sbw":60},"i":{}}}
+[QR Decode] 开始解码
+  输入字符串长度: 80
+  输入内容前100字符: {"v":1,"t":1769946134538,"m":"theme","d":{"s":{"wb":30,"gr":5,"sbw":60},"i":{}}}
+  JSON 解析成功
+  协议版本: 1
+  时间戳: 1769946134538 2026/2/1 19:42:14
+  模式: theme
+  基础校验通过
+  压缩数据 s 字段数: 3
+  压缩数据 i 字段数: 0
+  解压后 settings: { wallpaperBlur: 30, layoutGridRows: 5, searchBarWidth: 60 }
+  解压后 iconConfig: {}
+  净化后 settings 字段数: 3
+  净化后 iconConfig 字段数: 0
+  解码成功
+
+ ✓ src/components/QRSync/utils/qr-codec.test.ts (18 tests) 22ms
+   ✓ QR Codec (18)
+     ✓ encode (5)
+       ✓ should encode full mode correctly 2ms
+       ✓ should encode theme mode correctly (filtering) 1ms
+       ✓ should encode custom mode correctly 1ms
+       ✓ should detect over limit correctly 1ms
+       ✓ should handle empty data 1ms
+     ✓ decode (6)
+       ✓ should decode valid payload correctly 11ms
+       ✓ should handle invalid JSON 0ms
+       ✓ should sanitize invalid fields 1ms
+       ✓ should accept boundary values 0ms
+       ✓ should reject out-of-boundary values 0ms
+       ✓ should validate enum values 0ms
+     ✓ validate (5)
+       ✓ should fail on missing timestamp 0ms
+       ✓ should fail on invalid version 0ms
+       ✓ should fail on invalid mode 0ms
+       ✓ should accept custom mode 0ms
+       ✓ should fail on missing data object 0ms
+     ✓ round-trip (2)
+       ✓ should preserve data through encode → decode cycle 0ms
+       ✓ should preserve data in theme mode 0ms
+
+ Test Files  1 passed (1)
+      Tests  18 passed (18)
+   Start at  19:42:14
+   Duration  213ms (transform 47ms, setup 0ms, import 59ms, tests 22ms, environment 0ms)

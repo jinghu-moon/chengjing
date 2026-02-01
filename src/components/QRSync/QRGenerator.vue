@@ -2,10 +2,13 @@
 /**
  * QR 二维码生成器组件
  * 支持模式选择、二维码渲染、下载/复制功能、SVG 导出、样式自定义
+ *
+ * 使用 Web Worker 进行 QR 矩阵生成，保持 UI 流畅
  */
 import { ref, computed, watch, onMounted } from 'vue'
 import { encode as encodeQR } from 'uqr'
 import { useQRSync } from './composables/useQRSync'
+import { useQRWorker } from './composables/useQRWorker'
 import { useToast } from '@/components/Toast/composables/useToast'
 import { useDialog } from '@/components/Dialog/composables/useDialog'
 import { useSettings } from '@/composables/useSettings'
@@ -13,17 +16,17 @@ import { useQRRenderer } from './composables/useQRRenderer'
 import { encode } from './utils/qr-codec'
 import Button from '@/components/Button/Button.vue'
 import ExportSelector from './components/ExportSelector.vue'
-import { IconDownload, IconCopy, IconQrcode, IconAlertTriangle, IconSettings } from '@tabler/icons-vue'
+import { IconDownload, IconCopy, IconQrcode, IconAlertTriangle, IconSettings, IconFileExport, IconLock } from '@tabler/icons-vue'
 
 const { showToast } = useToast()
 const { open: openDialog } = useDialog()
 const { settings, iconConfig } = useSettings()
+const { generateQRAsync } = useQRWorker()
 
 const {
   exportMode,
+  encryptionPassword,
   encodeResult,
-  isOverLimit,
-  payloadSizeKB,
   getPayload,
   generateFileName,
   MAX_QR_CHARS
@@ -32,7 +35,6 @@ const {
 const {
   renderFormat,
   styleConfig,
-  moduleStyleOptions,
   formatOptions,
   renderQRToSVG,
   downloadSVG
@@ -66,8 +68,11 @@ const customExportData = ref<{
   iconConfig: Record<string, any>
 } | null>(null)
 
-// 渲染二维码
-function renderQR() {
+// 渲染状态
+const isRendering = ref(false)
+
+// 渲染二维码 (异步 Worker)
+async function renderQR() {
   const canvas = canvasRef.value
   if (!canvas) return
 
@@ -89,56 +94,67 @@ function renderQR() {
     return
   }
 
-  // 生成二维码矩阵（Logo 模式使用高纠错级别）
-  const ecc = styleConfig.value.showLogo ? 'H' : 'L'
-  const qr = encodeQR(payload, { ecc })
-  const moduleCount = qr.size
+  isRendering.value = true
 
-  // 使用离屏 Canvas 进行 1:1 渲染
-  if (!offCanvas) {
-    offCanvas = document.createElement('canvas')
-  }
-  if (offCanvas.width !== moduleCount) {
-    offCanvas.width = moduleCount
-    offCanvas.height = moduleCount
-  }
+  try {
+    // 生成二维码矩阵（Worker 异步处理）
+    const ecc = styleConfig.value.showLogo ? 'H' : 'L'
+    const qr = await generateQRAsync(payload, ecc)
+    const moduleCount = qr.size
 
-  const offCtx = offCanvas.getContext('2d')!
+    // 使用离屏 Canvas 进行 1:1 渲染
+    if (!offCanvas) {
+      offCanvas = document.createElement('canvas')
+    }
+    if (offCanvas.width !== moduleCount) {
+      offCanvas.width = moduleCount
+      offCanvas.height = moduleCount
+    }
 
-  if (offCtx) {
-    // 清空离屏画布
-    offCtx.clearRect(0, 0, moduleCount, moduleCount)
-    // 使用配置的前景色
-    offCtx.fillStyle = styleConfig.value.foregroundColor
+    const offCtx = offCanvas.getContext('2d')!
 
-    for (let row = 0; row < moduleCount; row++) {
-      for (let col = 0; col < moduleCount; col++) {
-        if (!qr.data[row][col]) continue
+    if (offCtx) {
+      // 清空离屏画布
+      offCtx.clearRect(0, 0, moduleCount, moduleCount)
+      // 使用配置的前景色
+      offCtx.fillStyle = styleConfig.value.foregroundColor
 
-        // 跳过 Logo 区域
-        if (styleConfig.value.showLogo && isInLogoArea(row, col, moduleCount)) {
-          continue
+      for (let row = 0; row < moduleCount; row++) {
+        for (let col = 0; col < moduleCount; col++) {
+          if (!qr.data[row][col]) continue
+
+          // 跳过 Logo 区域
+          if (styleConfig.value.showLogo && isInLogoArea(row, col, moduleCount)) {
+            continue
+          }
+
+          offCtx.fillRect(col, row, 1, 1)
         }
-
-        offCtx.fillRect(col, row, 1, 1)
       }
-    }
 
-    // 绘制放大后的图像
-    ctx.imageSmoothingEnabled = false
-    ctx.drawImage(offCanvas, QUIET_ZONE, QUIET_ZONE, QR_SIZE, QR_SIZE)
+      // 绘制放大后的图像
+      ctx.imageSmoothingEnabled = false
+      ctx.drawImage(offCanvas, QUIET_ZONE, QUIET_ZONE, QR_SIZE, QR_SIZE)
 
-    // 绘制 Logo
-    if (styleConfig.value.showLogo) {
-      drawLogo(ctx)
-    }
-
-    // 计算生成图片的大小
-    canvas.toBlob((blob) => {
-      if (blob) {
-         imageSize.value = (blob.size / 1024).toFixed(2) + ' KB'
+      // 绘制 Logo
+      if (styleConfig.value.showLogo) {
+        drawLogo(ctx)
       }
-    }, 'image/png')
+
+      // 计算生成图片的大小
+      canvas.toBlob((blob) => {
+        if (blob) {
+           imageSize.value = (blob.size / 1024).toFixed(2) + ' KB'
+        }
+      }, 'image/png')
+    }
+  } catch (e) {
+    console.error('[QR Render] Worker 生成失败:', e)
+    // 降级：使用同步方式
+    const ecc = styleConfig.value.showLogo ? 'H' : 'L'
+    renderQRSync(payload, ecc, ctx)
+  } finally {
+    isRendering.value = false
   }
 }
 
@@ -168,6 +184,37 @@ function drawLogo(ctx: CanvasRenderingContext2D) {
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText('澄', x + logoSize / 2, y + logoSize / 2)
+}
+
+// 同步渲染 QR（Worker 失败时的降级方案）
+function renderQRSync(payload: string, ecc: 'L' | 'H', ctx: CanvasRenderingContext2D) {
+  const qr = encodeQR(payload, { ecc })
+  const moduleCount = qr.size
+
+  if (!offCanvas) {
+    offCanvas = document.createElement('canvas')
+  }
+  offCanvas.width = moduleCount
+  offCanvas.height = moduleCount
+
+  const offCtx = offCanvas.getContext('2d')!
+  offCtx.clearRect(0, 0, moduleCount, moduleCount)
+  offCtx.fillStyle = styleConfig.value.foregroundColor
+
+  for (let row = 0; row < moduleCount; row++) {
+    for (let col = 0; col < moduleCount; col++) {
+      if (!qr.data[row][col]) continue
+      if (styleConfig.value.showLogo && isInLogoArea(row, col, moduleCount)) continue
+      offCtx.fillRect(col, row, 1, 1)
+    }
+  }
+
+  ctx.imageSmoothingEnabled = false
+  ctx.drawImage(offCanvas, QUIET_ZONE, QUIET_ZONE, QR_SIZE, QR_SIZE)
+
+  if (styleConfig.value.showLogo) {
+    drawLogo(ctx)
+  }
 }
 
 // 打开自定义导出选择器
@@ -233,6 +280,39 @@ watch([encodeResult, exportMode, styleConfig, customExportData], () => {
 
 onMounted(() => {
   renderQR()
+})
+
+// 加密逻辑
+const showPasswordInput = ref(false)
+
+function toggleEncryption(e: Event) {
+  const checked = (e.target as HTMLInputElement).checked
+  if (checked) {
+    showPasswordInput.value = true
+    // Auto focus logic if needed
+  } else {
+    encryptionPassword.value = ''
+    showPasswordInput.value = false
+  }
+}
+
+const passwordStrength = computed(() => {
+  const pwd = encryptionPassword.value
+  if (!pwd) return 0
+  // Simple check: length based + char variety could be added
+  let score = Math.min(pwd.length * 10, 60)
+  if (/[A-Z]/.test(pwd)) score += 10
+  if (/[a-z]/.test(pwd)) score += 10
+  if (/[0-9]/.test(pwd)) score += 10
+  if (/[^A-Za-z0-9]/.test(pwd)) score += 10
+  return Math.min(score, 100)
+})
+
+const strengthColor = computed(() => {
+  const score = passwordStrength.value
+  if (score < 40) return 'var(--color-danger)'
+  if (score < 80) return 'var(--color-warning)'
+  return 'var(--color-success)'
 })
 
 // 下载图片
@@ -304,6 +384,19 @@ async function copyText() {
   }
 }
 
+// 导出 JSON 文件
+function exportJSON() {
+  const payload = getActivePayload()
+  const blob = new Blob([payload], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = generateFileName().replace(/\.(png|svg)$/, '.json')
+  a.click()
+  URL.revokeObjectURL(url)
+  showToast({ type: 'success', message: 'JSON 已导出' })
+}
+
 // 容量百分比
 const capacityPercent = computed(() => {
   return Math.min(100, Math.round((activeEncodeResult.value.size / MAX_QR_CHARS) * 100))
@@ -331,6 +424,32 @@ const capacityPercent = computed(() => {
         <span class="mode-label">{{ opt.label }}</span>
         <span class="mode-desc">{{ opt.desc }}</span>
       </label>
+    </div>
+
+    <!-- 加密设置 -->
+    <div class="style-panel" style="margin-top: 0">
+      <div class="style-row">
+        <span class="style-label">
+          <IconLock :size="14" style="margin-right: 4px; vertical-align: middle" />
+          加密保护
+        </span>
+        <label class="switch">
+          <input type="checkbox" :checked="!!encryptionPassword" @change="toggleEncryption">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div v-if="!!encryptionPassword || showPasswordInput" class="password-container">
+        <input 
+          type="password" 
+          v-model="encryptionPassword" 
+          placeholder="请输入导出密码"
+          class="password-input"
+        >
+        <div class="password-strength" v-if="encryptionPassword">
+          <div class="strength-bar" :style="{ width: passwordStrength + '%', background: strengthColor }"></div>
+        </div>
+      </div>
     </div>
 
     <!-- 样式设置切换 -->
@@ -430,6 +549,15 @@ const capacityPercent = computed(() => {
         <IconQrcode :size="16" />
         复制文本
       </Button>
+
+      <Button
+        variant="text"
+        @click="exportJSON"
+        title="导出为 JSON 文件（无容量限制）"
+      >
+        <IconFileExport :size="16" />
+        导出 JSON
+      </Button>
     </div>
 
     <!-- 超限提示 -->
@@ -515,6 +643,45 @@ const capacityPercent = computed(() => {
   padding: 12px;
   background: var(--bg-input);
   border-radius: 8px;
+}
+
+.password-container {
+  margin-top: 8px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.password-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.password-input:focus {
+  border-color: var(--color-primary);
+}
+
+.password-strength {
+  margin-top: 6px;
+  height: 3px;
+  background: var(--bg-modifier-hover);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .style-row {

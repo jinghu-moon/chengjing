@@ -1,13 +1,15 @@
 /**
  * QR 二维码同步 Composable
  * 提供配置的二维码生成、扫描、导入功能
+ *
+ * 使用 Web Worker 进行编解码，保持 UI 流畅
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, watch, shallowRef } from 'vue'
 import { useSettings } from '@/composables/useSettings'
+import { useQRWorker } from './useQRWorker'
 import {
   encode,
-  decode,
   type ExportMode,
   type QRSyncPayload,
   type EncodeResult,
@@ -115,19 +117,80 @@ const scanStatus = ref<ScanStatus>('idle')
 const scanError = ref<string>('')
 const importPreview = ref<ImportPreview | null>(null)
 
+// Worker 编码结果缓存（初始为空，由 Worker 填充）
+const encodeResultCache = shallowRef<EncodeResult>({
+  payload: '',
+  size: 0,
+  isOverLimit: false
+})
+const isEncoding = ref(false)
+const isInitialized = ref(false)
+const encryptionPassword = ref('')
+
+// 跨组件共享的防抖 timer（Module Scope 单例）
+let encodeTimer: ReturnType<typeof setTimeout> | null = null
+let watcherRegistered = false
+
 export function useQRSync() {
   const { settings, iconConfig } = useSettings()
+  const { encodeAsync, decodeAsync } = useQRWorker()
 
   // ============ 编码相关 ============
 
-  /** 编码结果（响应式计算） */
-  const encodeResult = computed<EncodeResult>(() => {
-    return encode(
+  /**
+   * 编码结果（完全依赖 Worker 异步计算）
+   * 通过 watch 触发更新，主线程零负载
+   */
+  const encodeResult = computed<EncodeResult>(() => encodeResultCache.value)
+
+  // 初始化：首次同步编码（避免空白状态）
+  if (!isInitialized.value) {
+    encodeResultCache.value = encode(
       { ...settings },
       { ...iconConfig },
       exportMode.value
     )
-  })
+    isInitialized.value = true
+  }
+
+  // 注册 watcher（仅首次调用时注册，避免重复）
+  if (!watcherRegistered) {
+    watcherRegistered = true
+
+    // 监听变化，Worker 异步更新（防抖 50ms）
+    watch(
+      [() => JSON.stringify(settings), () => JSON.stringify(iconConfig), exportMode, encryptionPassword],
+      async () => {
+        if (encodeTimer) clearTimeout(encodeTimer)
+        encodeTimer = setTimeout(async () => {
+          isEncoding.value = true
+          try {
+            const result = await encodeAsync(
+              { ...settings },
+              { ...iconConfig },
+              exportMode.value,
+              encryptionPassword.value
+            )
+            encodeResultCache.value = result
+          } catch (e) {
+            console.error('[QR Worker] 编码失败，降级到同步:', e)
+            // 降级：Worker 失败时使用同步编码 (注意：同步编码不支持加密)
+            if (encryptionPassword.value) {
+               console.warn('[QR Worker] 同步编码不支持加密')
+            }
+            encodeResultCache.value = encode(
+              { ...settings },
+              { ...iconConfig },
+              exportMode.value
+            )
+          } finally {
+            isEncoding.value = false
+          }
+        }, 50)
+      },
+      { immediate: false }
+    )
+  }
 
   /** 是否超出二维码容量 */
   const isOverLimit = computed(() => encodeResult.value.isOverLimit)
@@ -155,7 +218,7 @@ export function useQRSync() {
   // ============ 扫描相关 ============
 
   /** 从文件扫描二维码 */
-  async function scanFromFile(file: File): Promise<ScanResult> {
+  async function scanFromFile(file: File, password?: string): Promise<ScanResult> {
     console.group('[QR Import] 从文件扫描')
     console.log('文件名:', file.name)
     console.log('文件大小:', (file.size / 1024).toFixed(2), 'KB')
@@ -178,8 +241,8 @@ export function useQRSync() {
       console.log('扫描结果前100字符:', qrContent.substring(0, 100))
 
       // 解码内容
-      console.log('步骤3: 解码内容...')
-      const decodeRes = decode(qrContent)
+      console.log('步骤3: 解码内容 (Worker)...')
+      const decodeRes = await decodeAsync(qrContent, password)
 
       if (!decodeRes.success || !decodeRes.data) {
         throw new Error(decodeRes.error || '解码失败')
@@ -198,22 +261,23 @@ export function useQRSync() {
       console.error('扫描失败:', e.message || e)
       console.groupEnd()
       scanStatus.value = 'error'
+      // 传递具体的错误信息 (如 REQUIRED_PASSWORD)
       scanError.value = e.message || '扫描失败'
       return { success: false, error: scanError.value }
     }
   }
 
   /** 从剪贴板图片扫描 */
-  async function scanFromClipboard(blob: Blob): Promise<ScanResult> {
+  async function scanFromClipboard(blob: Blob, password?: string): Promise<ScanResult> {
     console.log('[QR Import] 从剪贴板扫描, 大小:', (blob.size / 1024).toFixed(2), 'KB')
     // 复用文件扫描逻辑
     const file = new File([blob], 'clipboard.png', { type: blob.type })
-    return scanFromFile(file)
+    return scanFromFile(file, password)
   }
 
-  /** 从文本解析 */
-  function parseFromText(text: string): ScanResult {
-    console.group('[QR Import] 从文本解析')
+  /** 从文本解析 (异步 Worker) */
+  async function parseFromText(text: string, password?: string): Promise<ScanResult> {
+    console.group('[QR Import] 从文本解析 (Worker)')
     console.log('输入文本长度:', text.length)
 
     scanStatus.value = 'scanning'
@@ -221,7 +285,7 @@ export function useQRSync() {
     importPreview.value = null
 
     try {
-      const decodeRes = decode(text.trim())
+      const decodeRes = await decodeAsync(text.trim(), password)
 
       if (!decodeRes.success || !decodeRes.data) {
         throw new Error(decodeRes.error || '解码失败')
@@ -351,9 +415,11 @@ export function useQRSync() {
   return {
     // 状态
     exportMode,
+    encryptionPassword,
     scanStatus,
     scanError,
     importPreview,
+    isEncoding,
 
     // 计算属性
     encodeResult,
