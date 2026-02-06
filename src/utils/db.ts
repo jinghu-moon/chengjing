@@ -111,3 +111,46 @@ export const deleteImage = async (key: string): Promise<void> => {
 export const getAllKeys = getAllImageIds
 export const removeImage = deleteImage
 export const getImageKeys = getAllImageIds
+
+// Get raw image Blob (for export/sync)
+export const getImageBlob = async (key: string): Promise<Blob | null> => {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly')
+    const store = transaction.objectStore(STORE_NAME)
+    const request = store.get(key)
+
+    request.onsuccess = () => {
+      const result = request.result
+      console.log('[DB] getImageBlob result type:', typeof result, result instanceof Blob ? 'Blob' : 'not Blob')
+
+      if (!result) {
+        resolve(null)
+        return
+      }
+
+      if (result instanceof Blob) {
+        resolve(result)
+      } else if (typeof result === 'string' && result.startsWith('data:')) {
+        // Base64 Data URL -> Blob
+        try {
+          const [header, base64] = result.split(',')
+          const mimeMatch = header.match(/data:([^;]+)/)
+          const mime = mimeMatch ? mimeMatch[1] : 'image/png'
+          const binary = atob(base64)
+          const bytes = new Uint8Array(binary.length)
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i)
+          }
+          resolve(new Blob([bytes], { type: mime }))
+        } catch (e) {
+          console.error('[DB] Base64 to Blob failed:', e)
+          resolve(null)
+        }
+      } else {
+        resolve(null)
+      }
+    }
+    request.onerror = () => reject(request.error)
+  })
+}

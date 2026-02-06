@@ -1,5 +1,5 @@
 /**
- * QRSync 加密工具库
+ * DataSync 加密工具库
  * 提供基于 Web Crypto API 的 AES-256-GCM 加密和 PBKDF2 密钥派生
  * 包含 Gzip 压缩支持以优化 Payload 体积
  */

@@ -21,7 +21,7 @@ const SYSTEM_PRESETS: AppPreset[] = [
     id: 'system_minimal',
     name: '极简模式',
     description: '专注内容，减少干扰',
-    icon: '🎯',
+    icon: 'IconTarget',
     isSystem: true,
     createdAt: 0,
     data: {
@@ -44,7 +44,7 @@ const SYSTEM_PRESETS: AppPreset[] = [
     id: 'system_standard',
     name: '标准模式',
     description: '平衡功能与简洁',
-    icon: '⚖️',
+    icon: 'IconScale',
     isSystem: true,
     createdAt: 0,
     data: {
@@ -67,7 +67,7 @@ const SYSTEM_PRESETS: AppPreset[] = [
     id: 'system_focus',
     name: '专注模式',
     description: '番茄钟 + 待办，高效工作',
-    icon: '🍅',
+    icon: 'IconFocus2',
     isSystem: true,
     createdAt: 0,
     data: {
@@ -139,7 +139,7 @@ export function usePresets() {
   /**
    * 保存当前配置为新预设
    */
-  const saveCurrentAsPreset = (name: string, icon: string = '📦', description?: string): AppPreset => {
+  const saveCurrentAsPreset = (name: string, icon: string = 'IconPackage', description?: string): AppPreset => {
     const newPreset: AppPreset = {
       id: generateId(),
       name,
