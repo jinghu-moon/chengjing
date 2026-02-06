@@ -93,7 +93,7 @@ Chrome Bookmarks API
 
 ```ts
 interface BookmarkPanelProps {
-  isOpen: boolean  // 面板开关状态 (v-model:isOpen)
+  open: boolean  // 面板开关状态 (v-model:open)
 }
 ```
 
@@ -101,7 +101,7 @@ interface BookmarkPanelProps {
 
 | 事件 | 参数 | 说明 |
 |---|---|---|
-| `update:isOpen` | `boolean` | 面板开关状态变更 |
+| `update:open` | `boolean` | 面板开关状态变更 |
 
 ## 快捷键
 

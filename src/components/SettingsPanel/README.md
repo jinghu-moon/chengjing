@@ -20,24 +20,17 @@ SettingsPanel/
 
 ## 面板架构
 
-### 抽屉式布局
+### 抽屉容器
 
-- **定位**：`fixed` 右侧，距四边 `var(--space-4)`，宽度 360px
-- **进出动画**：`translateX(120%)` ↔ `translateX(0)`，400ms ease-smooth
-- **遮罩层**：半透明背景 + 轻度模糊，点击关闭面板
-- **内容滚动**：`panel-content` 区域 `overflow-y: auto`，4px 细滚动条
+基于 `@/components/Container` 的 `Drawer` 组件实现：
 
-### 折叠卡片（手风琴）
+- **宽度**：360px，右侧滑入
+- **Teleport**：禁用（`:teleport="false"`），直接渲染在父组件内
+- **遮罩/动画/ESC 关闭/滚动锁定**：由 Drawer 组件统一管理
 
-每个设置分组为一个 `section-card`，通过 JS 动画实现高度过渡：
+### 折叠面板
 
-| 钩子 | 逻辑 |
-|------|------|
-| `onEnter` | 临时 `position:absolute + visibility:hidden` 测量真实高度 → `height:0` → rAF → `height:目标值` |
-| `onAfterEnter` | 恢复 `height:auto`（允许内容动态变化） |
-| `onLeave` | 读取当前高度 → 强制重绘 → rAF → `height:0` |
-
-折叠状态通过 `sectionState` reactive 对象管理，`toggleSection(key)` 切换。
+每个设置分组使用 `Collapse` 组件（`@/components/Container`），统一 `size="sm"` + `:show-collapse-icon="true"`。
 
 ## 设置分组
 
@@ -175,8 +168,8 @@ SettingsPanel/
 
 | 动画名称 | 效果 | 用途 |
 |----------|------|------|
-| 面板滑入 | `translateX(120%)` → `translateX(0)`，400ms | 设置面板开关 |
-| `accordion` | JS 驱动高度过渡，300ms ease-smooth | 折叠卡片展开/收起 |
+| Drawer 滑入 | 由 Drawer 组件管理（`translateX(120%)` → `0`，400ms） | 设置面板开关 |
+| Collapse 折叠 | 由 Collapse 组件管理（CSS Grid 高度过渡） | 设置分组展开/收起 |
 | `slide-fade` | `max-height` + `opacity`，300ms | 子设置项条件显隐 |
 | `expand` | `max-height` + `opacity` + `margin`，300ms | API 配置区域展开 |
 | `modal-slide` | 右移 30px + 缩放 0.95 + 淡入，300ms | 布局弹窗进出 |
@@ -185,6 +178,7 @@ SettingsPanel/
 
 | 依赖 | 用途 |
 |------|------|
+| `Drawer` / `Collapse` | `@/components/Container` 容器组件 |
 | `@tabler/icons-vue` | 分组图标、关闭按钮、±按钮、布局策略图标 |
 | `useSettings` | 全局设置读写（自动导入） |
 | `useDailyPoem` | 每日诗词设置管理 |
