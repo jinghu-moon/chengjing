@@ -1,382 +1,350 @@
-❯ npx vitest run src/components/QRSync/utils/qr-codec.test.ts
-[Vite Config] Mode: test
-[Vite Config] using @crxjs/vite-plugin
-[settings-labels] Parsed 46 settings, 6 icon labels
-
- RUN  v4.0.18 D:/100_Projects/110_Daily/ChengJing
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode full mode correctly
-[QR Encode] 开始编码
-  模式: full
-  原始 settings 字段数: 5
-  原始 iconConfig 字段数: 3
-  压缩后 settings: { ont: true, st: true, tw: 300, wb: 10, gr: 4 }
-  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
-  编码结果大小: 126 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134518,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode theme mode correctly (filtering)
-[QR Encode] 开始编码
-  模式: theme
-  原始 settings 字段数: 5
-  原始 iconConfig 字段数: 3
-  主题模式筛选后字段数: 2
-  压缩后 settings: { wb: 10, gr: 4 }
-  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
-  编码结果大小: 97 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134520,"m":"theme","d":{"s":{"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should encode custom mode correctly
-[QR Encode] 开始编码
-  模式: custom
-  原始 settings 字段数: 2
-  原始 iconConfig 字段数: 1
-  压缩后 settings: { wb: 15, gr: 3 }
-  压缩后 iconConfig: { bs: 90 }
-  编码结果大小: 79 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134520,"m":"custom","d":{"s":{"wb":15,"gr":3},"i":{"bs":90}}}
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should detect over limit correctly
-[QR Encode] 开始编码
-  模式: full
-  原始 settings 字段数: 100
-  原始 iconConfig 字段数: 3
-  压缩后 settings: {
-    field_0: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_1: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_2: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_3: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_4: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_5: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_6: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_7: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_8: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_9: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_10: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_11: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_12: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_13: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_14: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_15: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_16: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_17: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_18: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_19: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_20: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_21: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_22: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_23: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_24: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_25: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_26: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_27: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_28: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_29: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_30: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_31: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_32: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_33: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_34: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_35: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_36: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_37: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_38: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_39: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_40: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_41: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_42: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_43: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_44: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_45: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_46: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_47: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_48: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_49: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_50: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_51: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_52: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_53: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_54: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_55: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_56: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_57: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_58: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_59: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_60: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_61: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_62: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_63: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_64: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_65: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_66: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_67: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_68: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_69: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_70: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_71: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_72: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_73: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_74: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_75: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_76: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_77: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_78: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_79: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_80: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_81: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_82: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_83: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_84: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_85: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_86: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_87: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_88: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_89: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_90: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_91: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_92: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_93: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_94: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_95: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_96: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_97: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_98: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    field_99: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-  }
-  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
-  编码结果大小: 6471 字符
-  是否超限: true (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134521,"m":"full","d":{"s":{"field_0":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_1":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_2":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_3":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_4":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_5":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_6":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_7":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_8":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_9":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_10":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_11":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_12":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_13":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_14":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_15":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_16":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_17":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_18":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_19":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_20":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_21":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_22":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_23":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_24":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_25":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_26":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_27":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_28":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_29":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_30":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_31":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_32":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_33":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_34":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_35":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_36":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_37":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_38":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_39":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_40":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_41":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_42":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_43":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_44":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_45":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_46":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_47":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_48":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_49":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_50":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_51":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_52":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_53":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_54":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_55":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_56":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_57":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_58":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_59":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_60":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_61":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_62":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_63":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_64":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_65":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_66":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_67":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_68":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_69":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_70":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_71":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_72":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_73":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_74":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_75":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_76":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_77":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_78":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_79":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_80":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_81":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_82":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_83":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_84":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_85":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_86":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_87":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_88":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_89":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_90":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_91":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_92":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_93":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_94":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_95":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_96":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_97":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_98":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx","field_99":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},"i":{"hl":false,"bs":80,"is":60}}}
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > encode > should handle empty data
-[QR Encode] 开始编码
-  模式: full
-  原始 settings 字段数: 0
-  原始 iconConfig 字段数: 0
-  压缩后 settings: {}
-  压缩后 iconConfig: {}
-  编码结果大小: 56 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134522,"m":"full","d":{"s":{},"i":{}}}
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should decode valid payload correctly
-[QR Encode] 开始编码
-  模式: full
-  原始 settings 字段数: 5
-  原始 iconConfig 字段数: 3
-  压缩后 settings: { ont: true, st: true, tw: 300, wb: 10, gr: 4 }
-  压缩后 iconConfig: { hl: false, bs: 80, is: 60 }
-  编码结果大小: 126 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134523,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl":false,"bs":80,"is":60}}}        
-[QR Decode] 开始解码
-  输入字符串长度: 126
-  输入内容前100字符: {"v":1,"t":1769946134523,"m":"full","d":{"s":{"ont":true,"st":true,"tw":300,"wb":10,"gr":4},"i":{"hl
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134523 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 5
-  压缩数据 i 字段数: 3
-  解压后 settings: {
-    generalOpenInNewTab: true,
-    todoShow: true,
-    todoWidth: 300,
-    wallpaperBlur: 10,
-    layoutGridRows: 4
-  }
-  解压后 iconConfig: { hideLabel: false, boxSize: 80, iconScale: 60 }
-  净化后 settings 字段数: 5
-  净化后 iconConfig 字段数: 3
-  解码成功
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should handle invalid JSON
-[QR Decode] 开始解码
-  输入字符串长度: 16
-  输入内容前100字符: { invalid json }
-
-stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should handle invalid JSON
-  解码异常: Expected property name or '}' in JSON at position 2 (line 1 column 3)
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should sanitize invalid fields
-[QR Decode] 开始解码
-  输入字符串长度: 110
-  输入内容前100字符: {"v":1,"t":1769946134535,"m":"full","d":{"s":{"ont":"should be boolean","unknown_key":123,"tw":99999
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134535 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 3
-  压缩数据 i 字段数: 0
-  解压后 settings: {
-    generalOpenInNewTab: 'should be boolean',
-    unknown_key: 123,
-    todoWidth: 99999
-  }
-  解压后 iconConfig: {}
-  净化后 settings 字段数: 0
-  净化后 iconConfig 字段数: 0
-  解码成功
-
-stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should sanitize invalid fields
-  已丢弃不安全字段: [
-    'generalOpenInNewTab (校验失败)',
-    'unknown_key (未知字段)',
-    'todoWidth (校验失败)'
-  ]
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should accept boundary values
-[QR Decode] 开始解码
-  输入字符串长度: 95
-  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"tw":100,"wb":50,"gr":1},"i":{"bs":40,"op":100}}}
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134536 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 3
-  压缩数据 i 字段数: 2
-  解压后 settings: { todoWidth: 100, wallpaperBlur: 50, layoutGridRows: 1 }
-  解压后 iconConfig: { boxSize: 40, opacity: 100 }
-  净化后 settings 字段数: 3
-  净化后 iconConfig 字段数: 2
-  解码成功
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should reject out-of-boundary values
-[QR Decode] 开始解码
-  输入字符串长度: 78
-  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"tw":99,"wb":51},"i":{"bs":39}}}
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134536 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 2
-  压缩数据 i 字段数: 1
-  解压后 settings: { todoWidth: 99, wallpaperBlur: 51 }
-  解压后 iconConfig: { boxSize: 39 }
-  净化后 settings 字段数: 0
-  净化后 iconConfig 字段数: 0
-  解码成功
-
-stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should reject out-of-boundary values
-  已丢弃不安全字段: [ 'todoWidth (校验失败)', 'wallpaperBlur (校验失败)', 'boxSize (校验失败)' ]
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should validate enum values
-[QR Decode] 开始解码
-  输入字符串长度: 104
-  输入内容前100字符: {"v":1,"t":1769946134536,"m":"full","d":{"s":{"dp":"compact","fpm":"invalid","npem":"markdown"},"i":
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134536 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 3
-  压缩数据 i 字段数: 0
-  解压后 settings: {
-    layoutPreset: 'compact',
-    folderPreviewMode: 'invalid',
-    notePadEditorMode: 'markdown'
-  }
-  解压后 iconConfig: {}
-  净化后 settings 字段数: 2
-  净化后 iconConfig 字段数: 0
-  解码成功
-
-stderr | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > decode > should validate enum values
-  已丢弃不安全字段: [ 'folderPreviewMode (校验失败)' ]
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > round-trip > should preserve data through encode → decode cycle
-[QR Encode] 开始编码
-  模式: full
-  原始 settings 字段数: 6
-  原始 iconConfig 字段数: 4
-  压缩后 settings: { ont: true, st: false, tw: 350, wb: 25, dp: 'spacious', wc: '北京' }
-  压缩后 iconConfig: { hl: true, bs: 100, is: 75, op: 80 }
-  编码结果大小: 154 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134537,"m":"full","d":{"s":{"ont":true,"st":false,"tw":350,"wb":25,"dp":"spacious","wc":"北京"},"i":{"hl":true,"bs":100,"is":75,"op":80}}}
-[QR Decode] 开始解码
-  输入字符串长度: 154
-  输入内容前100字符: {"v":1,"t":1769946134537,"m":"full","d":{"s":{"ont":true,"st":false,"tw":350,"wb":25,"dp":"spacious"
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134537 2026/2/1 19:42:14
-  模式: full
-  基础校验通过
-  压缩数据 s 字段数: 6
-  压缩数据 i 字段数: 4
-  解压后 settings: {
-    generalOpenInNewTab: true,
-    todoShow: false,
-    todoWidth: 350,
-    wallpaperBlur: 25,
-    layoutPreset: 'spacious',
-    weatherCity: '北京'
-  }
-  解压后 iconConfig: { hideLabel: true, boxSize: 100, iconScale: 75, opacity: 80 }
-  净化后 settings 字段数: 6
-  净化后 iconConfig 字段数: 4
-  解码成功
-
-stdout | src/components/QRSync/utils/qr-codec.test.ts > QR Codec > round-trip > should preserve data in theme mode
-[QR Encode] 开始编码
-  模式: theme
-  原始 settings 字段数: 4
-  原始 iconConfig 字段数: 0
-  主题模式筛选后字段数: 3
-  压缩后 settings: { wb: 30, gr: 5, sbw: 60 }
-  压缩后 iconConfig: {}
-  编码结果大小: 80 字符
-  是否超限: false (阈值: 2000)
-  完整 payload: {"v":1,"t":1769946134538,"m":"theme","d":{"s":{"wb":30,"gr":5,"sbw":60},"i":{}}}
-[QR Decode] 开始解码
-  输入字符串长度: 80
-  输入内容前100字符: {"v":1,"t":1769946134538,"m":"theme","d":{"s":{"wb":30,"gr":5,"sbw":60},"i":{}}}
-  JSON 解析成功
-  协议版本: 1
-  时间戳: 1769946134538 2026/2/1 19:42:14
-  模式: theme
-  基础校验通过
-  压缩数据 s 字段数: 3
-  压缩数据 i 字段数: 0
-  解压后 settings: { wallpaperBlur: 30, layoutGridRows: 5, searchBarWidth: 60 }
-  解压后 iconConfig: {}
-  净化后 settings 字段数: 3
-  净化后 iconConfig 字段数: 0
-  解码成功
-
- ✓ src/components/QRSync/utils/qr-codec.test.ts (18 tests) 22ms
-   ✓ QR Codec (18)
-     ✓ encode (5)
-       ✓ should encode full mode correctly 2ms
-       ✓ should encode theme mode correctly (filtering) 1ms
-       ✓ should encode custom mode correctly 1ms
-       ✓ should detect over limit correctly 1ms
-       ✓ should handle empty data 1ms
-     ✓ decode (6)
-       ✓ should decode valid payload correctly 11ms
-       ✓ should handle invalid JSON 0ms
-       ✓ should sanitize invalid fields 1ms
-       ✓ should accept boundary values 0ms
-       ✓ should reject out-of-boundary values 0ms
-       ✓ should validate enum values 0ms
-     ✓ validate (5)
-       ✓ should fail on missing timestamp 0ms
-       ✓ should fail on invalid version 0ms
-       ✓ should fail on invalid mode 0ms
-       ✓ should accept custom mode 0ms
-       ✓ should fail on missing data object 0ms
-     ✓ round-trip (2)
-       ✓ should preserve data through encode → decode cycle 0ms
-       ✓ should preserve data in theme mode 0ms
-
- Test Files  1 passed (1)
-      Tests  18 passed (18)
-   Start at  19:42:14
-   Duration  213ms (transform 47ms, setup 0ms, import 59ms, tests 22ms, environment 0ms)
+client:733 [vite] connecting...
+client:827 [vite] connected.
+userscript.html?name=AC-baidu-%25E9%2587%258D%25E5%25AE%259A%25E5%2590%2591%25E4%25BC%2598%25E5%258C%2596%25E7%2599%25BE%25E5%25BA%25A6%25E6%2590%259C%25E7%258B%2597%25E8%25B0%25B7%25E6%25AD%258C%25E5%25BF%2585%25E5%25BA%2594%25E6%2590%259C%25E7%25B4%25A2_favicon_%25E5%258F%258C%25E5%2588%2597.user.js&id=f842728d-f70e-4202-86ba-1bbd91efeff6:11 Less has finished and no sheets were loaded.
+useBookmarks.ts:237 [useBookmarks] Mock 数据加载完成 {count: 46, memory: '0.01 MB'}
+data.worker.ts:66 [DataWorker] 已启动，等待任务...
+qr-codec.ts:346 [QR Encode] 开始编码
+qr-codec.ts:347 模式: full
+qr-codec.ts:348 原始 settings 字段数: 46
+qr-codec.ts:349 原始 iconConfig 字段数: 6
+qr-codec.ts:363 压缩后 settings: {ont: false, sc: true, ss: true, st: true, tdc: true, …}
+qr-codec.ts:364 压缩后 iconConfig: {hl: false, bs: 84, is: 70, rd: 25, op: 43, …}
+qr-codec.ts:386 编码结果大小: 568 字符
+qr-codec.ts:387 是否超限: false (阈值: 2000)
+qr-codec.ts:388 完整 payload: {"v":1,"t":1770041636223,"m":"full","d":{"s":{"ont":false,"sc":true,"ss":true,"st":true,"tdc":true,"tw":320,"tlmh":320,"dw":false,"wb":0,"wm":20,"sn":true,"npw":320,"nph":280,"npem":"rich","ci":true,"mis":1,"miw":1200,"def":true,"fpm":"2x2","fis":8,"clf":true,"dfm":"2x2","esfs":true,"dp":"standard","gr":2,"gc":6,"gx":32,"gy":40,"lpt":22,"lg":48,"sb":true,"si":true,"sbw":40,"sbh":64,"sbr":32,"sbo":15,"wal":true,"wc":"","pwm":25,"pbm":5,"pab":false,"paw":false,"pi":"","sca":true,"sdp":true,"dpo":false},"i":{"hl":false,"bs":84,"is":70,"rd":25,"op":43,"shw":false}}}
+QRGenerator.vue:551 [DEBUG] onMounted, useBinaryMode: true
+QRGenerator.vue:478 [DEBUG] encodeBinary
+QRGenerator.vue:480 1. Payload 长度: 568
+QRGenerator.vue:481 2. Payload 前100字符: {"v":1,"t":1770041636223,"m":"full","d":{"s":{"ont":false,"sc":true,"ss":true,"st":true,"tdc":true,"
+QRGenerator.vue:484 3. 调用 encodeBinaryAsync...
+qr-codec.worker.ts:174 [Worker DEBUG] handleEncodeBinary
+qr-codec.worker.ts:175 1. JSON 长度: 568
+qr-codec.worker.ts:176 2. 有密码: false
+qr-codec.worker.ts:183 3. 编码后大小: 301
+qr-codec.worker.ts:184 4. 是否 Uint8Array: true
+qr-codec.worker.ts:185 5. SINGLE_FRAME_LIMIT: 2650
+qr-codec.worker.ts:191 6. 是否多帧: false
+qr-codec.worker.ts:206 8. 返回结果: {dataType: '[object Uint8Array]', dataLength: 301, framesCount: undefined}
+QRGenerator.vue:487 4. Worker 返回结果: {size: 301, isMultipart: false, frameCount: 1, dataType: '[object Uint8Array]', dataLength: 301, …}
+QRGenerator.vue:509 5. 单帧模式
+QRGenerator.vue:519 6. 编码完成
+QRGenerator.vue:207 [DEBUG] renderBinaryQR
+QRGenerator.vue:208 1. 输入数据类型: [object Uint8Array]
+QRGenerator.vue:209 2. 是否 Uint8Array: true
+QRGenerator.vue:210 3. 数据长度: 301
+QRGenerator.vue:211 4. 前10字节: Uint8Array(10) [1, 31, 139, 8, 0, 0, 0, 0, 0, 0, buffer: ArrayBuffer(10), byteLength: 10, byteOffset: 0, length: 10, Symbol(Symbol.toStringTag): 'Uint8Array']
+QRGenerator.vue:233 6. 最终数据长度: 301
+QRGenerator.vue:243 7. ECC 级别: H
+QRGenerator.vue:247 7.5 rawData 类型: [object Uint8Array]
+QRGenerator.vue:250 8. QR 生成成功, size: 91
+QRGenerator.vue:286 10. 渲染完成!
+QRGenerator.vue:282 9. 图片大小: 21.95 KB
+QRGenerator.vue:531 [DEBUG] watch 触发, useBinaryMode: true mode: wallpaper
+QRGenerator.vue:357 [QRGenerator] collectExportData
+QRGenerator.vue:358 1. 模式: wallpaper
+QRGenerator.vue:363 2. 调用 collectWallpaperData...
+useExportData.ts:264 [ExportData] 收集壁纸数据
+useExportData.ts:265 压缩配置: {maxWidth: 800, quality: 0.6, compress: true}
+useExportData.ts:140 [getWallpaperBlob] 开始获取壁纸
+useExportData.ts:143 1. 尝试打开 IndexedDB: LimeTabDB, version: 2
+useExportData.ts:157 2. IndexedDB 打开成功
+useExportData.ts:159 3. 数据库对象: LimeTabDB version: 2
+useExportData.ts:160 4. ObjectStore 列表: ['images']
+useExportData.ts:170 5. 创建 transaction...
+useExportData.ts:174 6. 获取 key: custom-bg
+useExportData.ts:179 7. 获取结果: 类型: string, 是否Blob: false
+useExportData.ts:187 8. 获取到 Base64 字符串, 长度: 633534
+useExportData.ts:38 [base64ToBlob] 输入长度: 633534
+useExportData.ts:39 [base64ToBlob] 前50字符: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACgAA
+useExportData.ts:49 [base64ToBlob] MIME: image/png Base64长度: 633512
+useExportData.ts:190 9. 转换为 Blob 成功, size: 475134 type: image/png
+useExportData.ts:276 原始壁纸大小: 464.00 KB
+useExportData.ts:277 壁纸 MIME 类型: image/png
+useExportData.ts:282 开始压缩图片...
+useExportData.ts:72 [compressImage] 开始压缩
+useExportData.ts:73 原始大小: 464.00 KB
+useExportData.ts:74 目标宽度: 800 质量: 0.6
+useExportData.ts:84 原始尺寸: 2560 x 1600
+useExportData.ts:94 目标尺寸: 800 x 500
+useExportData.ts:108 压缩后大小: 11.90 KB
+useExportData.ts:109 压缩率: 97.4 %
+useExportData.ts:284 压缩后大小: 11.90 KB
+qr-codec.ts:346 [QR Encode] 开始编码
+qr-codec.ts:347 模式: wallpaper
+qr-codec.ts:348 原始 settings 字段数: 46
+qr-codec.ts:349 原始 iconConfig 字段数: 6
+qr-codec.ts:363 压缩后 settings: {ont: false, sc: true, ss: true, st: true, tdc: true, …}
+qr-codec.ts:364 压缩后 iconConfig: {hl: false, bs: 84, is: 70, rd: 25, op: 43, …}
+qr-codec.ts:386 编码结果大小: 573 字符
+qr-codec.ts:387 是否超限: false (阈值: 2000)
+useExportData.ts:290 Base64 长度: 16244
+qr-codec.ts:388 完整 payload: {"v":1,"t":1770041641800,"m":"wallpaper","d":{"s":{"ont":false,"sc":true,"ss":true,"st":true,"tdc":true,"tw":320,"tlmh":320,"dw":false,"wb":0,"wm":20,"sn":true,"npw":320,"nph":280,"npem":"rich","ci":true,"mis":1,"miw":1200,"def":true,"fpm":"2x2","fis":8,"clf":true,"dfm":"2x2","esfs":true,"dp":"standard","gr":2,"gc":6,"gx":32,"gy":40,"lpt":22,"lg":48,"sb":true,"si":true,"sbw":40,"sbh":64,"sbr":32,"sbo":15,"wal":true,"wc":"","pwm":25,"pbm":5,"pab":false,"paw":false,"pi":"","sca":true,"sdp":true,"dpo":false},"i":{"hl":false,"bs":84,"is":70,"rd":25,"op":43,"shw":false}}}
+useExportData.ts:291 预估原始大小: 11.90 KB
+QRGenerator.vue:365 3. 收集结果: Proxy(Object) {base64: '/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQ…AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/9k=', mime: 'image/jpeg', sizeKB: 11.8974609375, originalSizeKB: 463.998046875}
+QRGenerator.vue:371 4. 壁纸数据收集成功, 大小: 11.90 KB
+QRGenerator.vue:478 [DEBUG] encodeBinary
+QRGenerator.vue:480 1. Payload 长度: 16316
+QRGenerator.vue:481 2. Payload 前100字符: {"v":1,"t":1770041641800,"m":"wallpaper","d":{"w":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAA
+QRGenerator.vue:484 3. 调用 encodeBinaryAsync...
+qr-codec.worker.ts:174 [Worker DEBUG] handleEncodeBinary
+qr-codec.worker.ts:175 1. JSON 长度: 16316
+qr-codec.worker.ts:176 2. 有密码: false
+QRGenerator.vue:531 [DEBUG] watch 触发, useBinaryMode: true mode: wallpaper
+QRGenerator.vue:357 [QRGenerator] collectExportData
+QRGenerator.vue:358 1. 模式: wallpaper
+QRGenerator.vue:363 2. 调用 collectWallpaperData...
+useExportData.ts:264 [ExportData] 收集壁纸数据
+useExportData.ts:265 压缩配置: {maxWidth: 800, quality: 0.6, compress: true}
+useExportData.ts:140 [getWallpaperBlob] 开始获取壁纸
+useExportData.ts:143 1. 尝试打开 IndexedDB: LimeTabDB, version: 2
+qr-codec.worker.ts:183 3. 编码后大小: 10474
+qr-codec.worker.ts:184 4. 是否 Uint8Array: true
+qr-codec.worker.ts:185 5. SINGLE_FRAME_LIMIT: 2650
+qr-codec.worker.ts:191 6. 是否多帧: true
+qr-codec.worker.ts:195 7. 分帧数: 4
+qr-codec.worker.ts:206 8. 返回结果: {dataType: 'null', dataLength: undefined, framesCount: 4}
+useExportData.ts:157 2. IndexedDB 打开成功
+useExportData.ts:159 3. 数据库对象: LimeTabDB version: 2
+useExportData.ts:160 4. ObjectStore 列表: ['images']
+useExportData.ts:170 5. 创建 transaction...
+useExportData.ts:174 6. 获取 key: custom-bg
+QRGenerator.vue:487 4. Worker 返回结果: {size: 10474, isMultipart: true, frameCount: 4, dataType: 'null', dataLength: undefined, …}
+QRGenerator.vue:500 5. 多帧模式
+QRGenerator.vue:519 6. 编码完成
+QRGenerator.vue:207 [DEBUG] renderBinaryQR
+QRGenerator.vue:208 1. 输入数据类型: [object Uint8Array]
+QRGenerator.vue:209 2. 是否 Uint8Array: true
+QRGenerator.vue:210 3. 数据长度: 2650
+QRGenerator.vue:211 4. 前10字节: Uint8Array(10) [255, 1, 4, 63, 207, 109, 107, 1, 31, 139, buffer: ArrayBuffer(10), byteLength: 10, byteOffset: 0, length: 10, Symbol(Symbol.toStringTag): 'Uint8Array']
+QRGenerator.vue:233 6. 最终数据长度: 2650
+QRGenerator.vue:243 7. ECC 级别: L
+QRGenerator.vue:247 7.5 rawData 类型: [object Uint8Array]
+QRGenerator.vue:250 8. QR 生成成功, size: 171
+QRGenerator.vue:286 10. 渲染完成!
+useExportData.ts:179 7. 获取结果: 类型: string, 是否Blob: false
+useExportData.ts:187 8. 获取到 Base64 字符串, 长度: 633534
+useExportData.ts:38 [base64ToBlob] 输入长度: 633534
+useExportData.ts:39 [base64ToBlob] 前50字符: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACgAA
+useExportData.ts:49 [base64ToBlob] MIME: image/png Base64长度: 633512
+useExportData.ts:190 9. 转换为 Blob 成功, size: 475134 type: image/png
+useExportData.ts:276 原始壁纸大小: 464.00 KB
+useExportData.ts:277 壁纸 MIME 类型: image/png
+useExportData.ts:282 开始压缩图片...
+useExportData.ts:72 [compressImage] 开始压缩
+useExportData.ts:73 原始大小: 464.00 KB
+useExportData.ts:74 目标宽度: 800 质量: 0.6
+useExportData.ts:84 原始尺寸: 2560 x 1600
+useExportData.ts:94 目标尺寸: 800 x 500
+QRGenerator.vue:282 9. 图片大小: 38.98 KB
+useExportData.ts:108 压缩后大小: 11.90 KB
+useExportData.ts:109 压缩率: 97.4 %
+useExportData.ts:284 压缩后大小: 11.90 KB
+useExportData.ts:290 Base64 长度: 16244
+useExportData.ts:291 预估原始大小: 11.90 KB
+QRGenerator.vue:365 3. 收集结果: Proxy(Object) {base64: '/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQ…AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf/9k=', mime: 'image/jpeg', sizeKB: 11.8974609375, originalSizeKB: 463.998046875}
+QRGenerator.vue:371 4. 壁纸数据收集成功, 大小: 11.90 KB
+QRGenerator.vue:478 [DEBUG] encodeBinary
+QRGenerator.vue:480 1. Payload 长度: 16316
+QRGenerator.vue:481 2. Payload 前100字符: {"v":1,"t":1770041641906,"m":"wallpaper","d":{"w":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAA
+QRGenerator.vue:484 3. 调用 encodeBinaryAsync...
+qr-codec.worker.ts:174 [Worker DEBUG] handleEncodeBinary
+qr-codec.worker.ts:175 1. JSON 长度: 16316
+qr-codec.worker.ts:176 2. 有密码: false
+qr-codec.worker.ts:183 3. 编码后大小: 10474
+qr-codec.worker.ts:184 4. 是否 Uint8Array: true
+qr-codec.worker.ts:185 5. SINGLE_FRAME_LIMIT: 2650
+qr-codec.worker.ts:191 6. 是否多帧: true
+qr-codec.worker.ts:195 7. 分帧数: 4
+qr-codec.worker.ts:206 8. 返回结果: {dataType: 'null', dataLength: undefined, framesCount: 4}
+QRGenerator.vue:487 4. Worker 返回结果: {size: 10474, isMultipart: true, frameCount: 4, dataType: 'null', dataLength: undefined, …}
+QRGenerator.vue:500 5. 多帧模式
+QRGenerator.vue:519 6. 编码完成
+QRGenerator.vue:207 [DEBUG] renderBinaryQR
+QRGenerator.vue:208 1. 输入数据类型: [object Uint8Array]
+QRGenerator.vue:209 2. 是否 Uint8Array: true
+QRGenerator.vue:210 3. 数据长度: 2650
+QRGenerator.vue:211 4. 前10字节: Uint8Array(10) [255, 1, 4, 3, 224, 98, 35, 1, 31, 139, buffer: ArrayBuffer(10), byteLength: 10, byteOffset: 0, length: 10, Symbol(Symbol.toStringTag): 'Uint8Array']
+QRGenerator.vue:233 6. 最终数据长度: 2650
+QRGenerator.vue:243 7. ECC 级别: L
+QRGenerator.vue:247 7.5 rawData 类型: [object Uint8Array]
+QRGenerator.vue:250 8. QR 生成成功, size: 171
+QRGenerator.vue:286 10. 渲染完成!
+QRGenerator.vue:282 9. 图片大小: 38.95 KB
+QRGenerator.vue:551 [DEBUG] onMounted, useBinaryMode: true
+QRGenerator.vue:478 [DEBUG] encodeBinary
+QRGenerator.vue:480 1. Payload 长度: 48
+QRGenerator.vue:481 2. Payload 前100字符: {"v":1,"t":1770041662411,"m":"wallpaper","d":{}}
+QRGenerator.vue:484 3. 调用 encodeBinaryAsync...
+qr-codec.worker.ts:174 [Worker DEBUG] handleEncodeBinary
+qr-codec.worker.ts:175 1. JSON 长度: 48
+qr-codec.worker.ts:176 2. 有密码: false
+qr-codec.worker.ts:183 3. 编码后大小: 69
+qr-codec.worker.ts:184 4. 是否 Uint8Array: true
+qr-codec.worker.ts:185 5. SINGLE_FRAME_LIMIT: 2650
+qr-codec.worker.ts:191 6. 是否多帧: false
+qr-codec.worker.ts:206 8. 返回结果: {dataType: '[object Uint8Array]', dataLength: 69, framesCount: undefined}
+QRGenerator.vue:487 4. Worker 返回结果: {size: 69, isMultipart: false, frameCount: 1, dataType: '[object Uint8Array]', dataLength: 69, …}
+QRGenerator.vue:509 5. 单帧模式
+QRGenerator.vue:519 6. 编码完成
+QRGenerator.vue:207 [DEBUG] renderBinaryQR
+QRGenerator.vue:208 1. 输入数据类型: [object Uint8Array]
+QRGenerator.vue:209 2. 是否 Uint8Array: true
+QRGenerator.vue:210 3. 数据长度: 69
+QRGenerator.vue:211 4. 前10字节: Uint8Array(10) [1, 31, 139, 8, 0, 0, 0, 0, 0, 0, buffer: ArrayBuffer(10), byteLength: 10, byteOffset: 0, length: 10, Symbol(Symbol.toStringTag): 'Uint8Array']
+QRGenerator.vue:233 6. 最终数据长度: 69
+QRGenerator.vue:243 7. ECC 级别: H
+QRGenerator.vue:247 7.5 rawData 类型: [object Uint8Array]
+QRGenerator.vue:250 8. QR 生成成功, size: 51
+QRGenerator.vue:286 10. 渲染完成!
+QRGenerator.vue:282 9. 图片大小: 12.22 KB
+useQRSync.ts:420 [QR Import] 从文件扫描
+useQRSync.ts:421 文件名: ChengJing_壁纸_20260202.png
+useQRSync.ts:422 文件大小: 471.36 KB
+useQRSync.ts:423 文件类型: image/png
+useQRSync.ts:431 步骤1: 创建图片对象...
+useQRSync.ts:650 [QR Import] 创建图片对象, 文件: ChengJing_壁纸_20260202.png
+useQRSync.ts:654 [QR Import] 图片加载成功, 尺寸: 1352 x 488
+useQRSync.ts:433 图片尺寸: 1352 x 488
+useQRSync.ts:437 步骤2: 检测到 Grid 图片，启用多二维码扫描...
+useQRSync.ts:475 [QR Grid Import] 扫描 Grid 图片
+useQRSync.ts:181 [QR Grid Scan] 开始扫描 Grid 图片
+useQRSync.ts:182 图片尺寸: 1352 x 488
+useQRSync.ts:123 [Grid Metadata] 尝试提取元数据 QR...
+useQRSync.ts:47 [QR Scan] Starting scan... <canvas width=​"400" height=​"400">​
+useQRSync.ts:65 [QR Scan] BarcodeDetector not supported in this browser
+useQRSync.ts:69 [QR Scan] Fallback to qr-scanner
+useQRSync.ts:74 [QR Scan] Image source type: [object HTMLCanvasElement]
+useQRSync.ts:109  [QR Scan] qr-scanner failed: No QR code found
+scanImageForQR @ useQRSync.ts:109
+await in scanImageForQR
+tryExtractMetadata @ useQRSync.ts:148
+scanGridImage @ useQRSync.ts:189
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:171 [Grid Metadata] 提取失败: No QR code found
+useQRSync.ts:193 未找到元数据 QR，使用估算布局
+useQRSync.ts:284 [detectGridLayout] 计算结果: {contentWidth: 1272, contentHeight: 348, cols: 4, rows: 1, qrSize: 300}
+useQRSync.ts:197 使用布局: {cols: 4, rows: 1, qrSize: 300, startX: 40, startY: 80, …}
+useQRSync.ts:209 扫描第 1/4 个 QR, 位置: (40, 80)
+useQRSync.ts:47 [QR Scan] Starting scan... <canvas width=​"400" height=​"400">​
+useQRSync.ts:65 [QR Scan] BarcodeDetector not supported in this browser
+useQRSync.ts:69 [QR Scan] Fallback to qr-scanner
+useQRSync.ts:74 [QR Scan] Image source type: [object HTMLCanvasElement]
+useQRSync.ts:109  [QR Scan] qr-scanner failed: No QR code found
+scanImageForQR @ useQRSync.ts:109
+await in scanImageForQR
+scanGridImage @ useQRSync.ts:237
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:248    ✗ 扫描失败: No QR code found
+scanGridImage @ useQRSync.ts:248
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:209 扫描第 2/4 个 QR, 位置: (364, 80)
+useQRSync.ts:47 [QR Scan] Starting scan... <canvas width=​"400" height=​"400">​
+useQRSync.ts:65 [QR Scan] BarcodeDetector not supported in this browser
+useQRSync.ts:69 [QR Scan] Fallback to qr-scanner
+useQRSync.ts:74 [QR Scan] Image source type: [object HTMLCanvasElement]
+useQRSync.ts:109  [QR Scan] qr-scanner failed: No QR code found
+scanImageForQR @ useQRSync.ts:109
+await in scanImageForQR
+scanGridImage @ useQRSync.ts:237
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:248    ✗ 扫描失败: No QR code found
+scanGridImage @ useQRSync.ts:248
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:209 扫描第 3/4 个 QR, 位置: (688, 80)
+useQRSync.ts:47 [QR Scan] Starting scan... <canvas width=​"400" height=​"400">​
+useQRSync.ts:65 [QR Scan] BarcodeDetector not supported in this browser
+useQRSync.ts:69 [QR Scan] Fallback to qr-scanner
+useQRSync.ts:74 [QR Scan] Image source type: [object HTMLCanvasElement]
+useQRSync.ts:109  [QR Scan] qr-scanner failed: No QR code found
+scanImageForQR @ useQRSync.ts:109
+await in scanImageForQR
+scanGridImage @ useQRSync.ts:237
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:248    ✗ 扫描失败: No QR code found
+scanGridImage @ useQRSync.ts:248
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:209 扫描第 4/4 个 QR, 位置: (1012, 80)
+useQRSync.ts:47 [QR Scan] Starting scan... <canvas width=​"400" height=​"400">​
+useQRSync.ts:65 [QR Scan] BarcodeDetector not supported in this browser
+useQRSync.ts:69 [QR Scan] Fallback to qr-scanner
+useQRSync.ts:74 [QR Scan] Image source type: [object HTMLCanvasElement]
+useQRSync.ts:109  [QR Scan] qr-scanner failed: No QR code found
+scanImageForQR @ useQRSync.ts:109
+await in scanImageForQR
+scanGridImage @ useQRSync.ts:237
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:248    ✗ 扫描失败: No QR code found
+scanGridImage @ useQRSync.ts:248
+await in scanGridImage
+scanGridFile @ useQRSync.ts:479
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730
+useQRSync.ts:252 扫描完成: 0/4 个成功
+useQRSync.ts:547  Grid 扫描失败: 未能识别任何二维码
+scanGridFile @ useQRSync.ts:547
+await in scanGridFile
+scanFromFile @ useQRSync.ts:438
+await in scanFromFile
+onDrop @ QRImporter.vue:127
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:730

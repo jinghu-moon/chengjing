@@ -1,270 +1,210 @@
-# Dialog 对话框组件
+# Dialog 对话框
 
-参考主流组件库 API 设计的现代化对话框组件，支持标准对话框模式和 Popover 跟随模式。
+## 概述
 
-## 基础用法
+现代化对话框组件，支持组件式调用和函数式调用两种模式。提供标准对话框和 Follow Trigger（Popover 风格）两种定位方式，内置鼠标位置动画原点、beforeClose 拦截、body 滚动锁定、高度自适应动画等特性。通过 `useDialog` composable 实现全局函数式调用，`DialogProvider` 渲染函数式实例。
+
+## 目录结构
+
+```
+Dialog/
+├── index.ts                           # 统一导出
+├── types.ts                           # 类型定义（DialogProps / DialogOptions / DialogInstance）
+├── config.ts                          # 预设配置（confirm / alert / danger / success / form / large）
+├── Dialog.vue                         # 核心对话框组件（Teleport + 动画 + 定位）
+├── DialogItem.vue                     # 函数式实例包装器（provide dialogClose）
+├── DialogProvider.vue                 # 函数式实例渲染容器
+└── composables/
+    ├── useDialog.ts                   # 函数式调用管理（全局 dialogs 数组 + Promise）
+    └── useDialogPosition.ts           # Follow 模式定位（候选位置 + 自动翻转）
+```
+
+## 双模式架构
+
+### 组件式调用
+
+直接在模板中使用 `<Dialog>` 组件，通过 `v-model` 控制显隐：
 
 ```vue
-<template>
-  <Dialog
-    v-model="visible"
-    title="提示"
-    content="这是一个对话框"
-    @positive-click="handleConfirm"
-  />
-</template>
+<Dialog v-model="visible" title="提示" content="内容" />
+```
 
-<script setup>
-import { ref } from 'vue'
-import { Dialog } from '@/components/Dialog'
+### 函数式调用
 
-const visible = ref(false)
+通过 `useDialog()` 返回的方法命令式创建对话框，返回 `Promise<boolean>`：
 
-const handleConfirm = () => {
-  console.log('确认')
-}
-</script>
+```ts
+const dialog = useDialog()
+const confirmed = await dialog.confirm({ title: '确认删除？' })
+```
+
+**函数式调用链路**：
+
+```
+useDialog.open(options)
+  → 创建 DialogInstance (id + visible + resolve/reject)
+  → push 到全局 dialogs 数组
+  → nextTick 设置 visible = true (触发进入动画)
+  → DialogProvider 渲染 DialogItem
+  → DialogItem 包装 Dialog 组件 + provide('dialogClose')
+  → 用户操作 → close(id, result) → resolve(Promise) → 动画结束 → remove
 ```
 
 ## Props
 
 ### 基础属性
 
-| 属性 | 类型 | 默认值 | 说明 |
+| Prop | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| modelValue | `boolean` | `false` | 是否显示对话框 |
-| title | `string` | - | 对话框标题 |
-| content | `string` | - | 对话框内容 |
-| type | `'info' \| 'success' \| 'warning' \| 'error' \| 'confirm'` | `'info'` | 对话框类型 |
-| width | `string \| number` | `'480px'` | 对话框宽度 |
+| `modelValue` | `boolean` | `false` | 显隐状态 (v-model) |
+| `title` | `string` | — | 标题 |
+| `content` | `string` | — | 内容文本 |
+| `type` | `DialogType` | `'info'` | 类型：info / success / warning / error / confirm |
+| `size` | `DialogSize` | `'medium'` | 尺寸预设：small(400) / medium(600) / large(800) |
+| `width` | `string \| number` | — | 自定义宽度（优先于 size） |
 
-### 布局定位
+### 定位与动画
 
-| 属性 | 类型 | 默认值 | 说明 |
+| Prop | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| placement | `'top' \| 'center' \| 'bottom'` | `'center'` | 对话框位置 |
-| top | `string \| number` | - | 距离顶部距离，优先级高于 placement |
-| fullscreen | `boolean` | `false` | 全屏模式 |
-| centered | `boolean` | `false` | 垂直水平居中（等同于 placement="center"） |
-
-### Follow Trigger 模式（Popover 风格）
-
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| triggerRect | `DOMRect \| VirtualRect` | - | 触发器位置信息 |
-| popoverPlacement | `'top' \| 'bottom' \| 'left' \| 'right' \| 'topLeft' \| 'topRight' \| 'bottomLeft' \| 'bottomRight'` | - | Follow 模式下的弹出位置 |
-
-### 样式配置
-
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| bordered | `boolean` | `false` | 是否显示边框 |
-| showIcon | `boolean` | `true` | 是否显示类型图标 |
-| icon | `() => VNode` | - | 自定义图标 |
-| class | `string` | - | 自定义类名 |
-| style | `string \| Record<string, any>` | - | 自定义样式 |
-
-### 遮罩配置
-
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| modal | `boolean` | `true` | 是否显示遮罩 |
-| maskClosable | `boolean` | `true` | 点击遮罩是否关闭 |
+| `placement` | `DialogPlacement` | `'center'` | 位置：center / top / bottom / left / right / topLeft 等 |
+| `triggerRect` | `DOMRect \| VirtualRect` | — | 提供后进入 Follow Trigger 模式 |
+| `transformOrigin` | `'mouse' \| 'center'` | `'mouse'` | 动画原点模式 |
+| `mousePosition` | `{ x, y }` | — | 鼠标位置（用于动画原点计算） |
 
 ### 交互配置
 
-| 属性 | 类型 | 默认值 | 说明 |
+| Prop | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| closable | `boolean` | `true` | 是否显示关闭按钮 |
-| closeOnEsc | `boolean` | `true` | 按 ESC 键是否关闭 |
-| draggable | `boolean` | `false` | 是否可拖拽（待实现） |
-| destroyOnClose | `boolean` | `false` | 关闭时是否销毁内容 |
+| `mask` | `boolean` | `true` | 显示遮罩层 |
+| `maskClosable` | `boolean` | `true` | 点击遮罩关闭 |
+| `closable` | `boolean` | `true` | 显示关闭按钮 |
+| `closeOnEsc` | `boolean` | `true` | ESC 键关闭 |
+| `confirmOnEnter` | `boolean` | `true` | Enter 键确认 |
+| `destroyOnClose` | `boolean` | `false` | 关闭时销毁内容 |
+| `lockScroll` | `boolean` | `true` | 锁定 body 滚动 |
+| `beforeClose` | `(action) => boolean \| Promise` | — | 关闭前拦截钩子 |
 
 ### 按钮配置
 
-| 属性 | 类型 | 默认值 | 说明 |
+| Prop | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
-| positiveText | `string` | `'确定'` | 确认按钮文字 |
-| negativeText | `string` | `'取消'` | 取消按钮文字 |
-| positiveButtonProps | `Record<string, any>` | - | 确认按钮属性 |
-| negativeButtonProps | `Record<string, any>` | - | 取消按钮属性 |
-| showPositiveButton | `boolean` | `true` | 是否显示确认按钮 |
-| showNegativeButton | `boolean` | `false` | 是否显示取消按钮 |
-| loading | `boolean` | `false` | 确认按钮加载状态 |
+| `okText` | `string` | `'确定'` | 确认按钮文字 |
+| `cancelText` | `string` | `'取消'` | 取消按钮文字 |
+| `showConfirmBtn` | `boolean` | `true` | 显示确认按钮 |
+| `showCancelBtn` | `boolean` | `false` | 显示取消按钮 |
+| `okButtonProps` | `ButtonProps` | — | 确认按钮属性透传 |
+| `cancelButtonProps` | `ButtonProps` | — | 取消按钮属性透传 |
+| `loading` | `boolean` | `false` | 确认按钮加载状态 |
 
-### 其他
+## 事件
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| zIndex | `number` | `2000` | 对话框层级 |
-| transformOrigin | `'mouse' \| 'center'` | `'mouse'` | 动画原点 |
-| mousePosition | `{ x: number; y: number }` | - | 鼠标位置（用于动画） |
-
-## Events
-
-| 事件名 | 参数 | 说明 |
-|--------|------|------|
-| open | - | 对话框打开时触发 |
-| opened | - | 对话框打开动画结束时触发 |
-| close | - | 对话框关闭时触发 |
-| closed | - | 对话框关闭动画结束时触发 |
-| positive-click | `(e: MouseEvent)` | 点击确认按钮时触发 |
-| negative-click | `(e: MouseEvent)` | 点击取消按钮时触发 |
-| mask-click | - | 点击遮罩时触发 |
-| esc | - | 按下 ESC 键时触发 |
-
-## Callbacks
-
-| 回调 | 类型 | 说明 |
+| 事件 | 参数 | 说明 |
 |------|------|------|
-| onOpen | `() => void` | 对话框打开时回调 |
-| onOpened | `() => void` | 对话框打开动画结束时回调 |
-| onClose | `() => void \| boolean \| Promise<boolean>` | 对话框关闭时回调，返回 `false` 可阻止关闭 |
-| onClosed | `() => void` | 对话框关闭动画结束时回调 |
-| onPositiveClick | `(e: MouseEvent) => void \| boolean \| Promise<boolean>` | 点击确认按钮回调，返回 `false` 可阻止关闭 |
-| onNegativeClick | `(e: MouseEvent) => void \| boolean \| Promise<boolean>` | 点击取消按钮回调，返回 `false` 可阻止关闭 |
-| onMaskClick | `() => void` | 点击遮罩回调 |
-| onEsc | `() => void` | 按下 ESC 键回调 |
-| beforeClose | `() => boolean \| Promise<boolean>` | 关闭前回调，返回 `false` 可阻止关闭 |
+| `before-open` | — | 打开动画开始前 |
+| `open` / `opened` | — | 打开动画结束 |
+| `before-close` | — | 关闭动画开始前 |
+| `close` | — | 关闭时触发 |
+| `closed` | — | 关闭动画结束（destroyOnClose 在此时销毁） |
+| `positive-click` | — | 点击确认按钮 |
+| `negative-click` | — | 点击取消/关闭按钮 |
+| `mask-click` | — | 点击遮罩层 |
+| `esc` | — | 按下 ESC 键 |
 
 ## Slots
 
-| 插槽名 | 说明 |
-|--------|------|
-| default | 对话框内容 |
-| header | 对话框标题 |
-| footer | 对话框底部 |
-| icon | 自定义图标 |
-| close | 自定义关闭按钮 |
+| 插槽 | 说明 |
+|------|------|
+| `default` | 对话框内容（覆盖 content prop） |
+| `header` | 自定义标题区域 |
+| `footer` | 自定义底部按钮区域 |
 
-## 使用示例
+## 核心 Composables
 
-### 基础对话框
+### useDialog
 
-```vue
-<Dialog
-  v-model="visible"
-  title="提示"
-  content="这是一个提示对话框"
-  type="info"
-/>
-```
+全局函数式调用管理器，维护模块级 `dialogs` 数组：
 
-### 确认对话框
+| 返回值 | 类型 | 说明 |
+|--------|------|------|
+| `dialogs` | `Ref<DialogInstance[]>` | 当前活跃的对话框实例列表 |
+| `open(options)` | `(DialogOptions) => Promise<boolean>` | 核心方法，创建实例并返回 Promise |
+| `close(id, result)` | — | 关闭指定实例，resolve Promise |
+| `remove(id)` | — | 动画结束后移除实例 |
+| `confirm(options)` | 快捷方法 | type=confirm + showCancelBtn |
+| `info(options)` | 快捷方法 | type=info |
+| `success(options)` | 快捷方法 | type=success |
+| `warning(options)` | 快捷方法 | type=warning |
+| `error(options)` | 快捷方法 | type=error |
 
-```vue
-<Dialog
-  v-model="visible"
-  title="确认删除"
-  content="确定要删除这条记录吗？"
-  type="warning"
-  :show-negative-button="true"
-  @positive-click="handleDelete"
-/>
-```
+### useDialogPosition
 
-### 自定义内容
+Follow Trigger 模式的定位引擎，基于 `@/utils/positioning` 工具：
 
-```vue
-<Dialog v-model="visible" title="自定义内容">
-  <div class="custom-content">
-    <p>这是自定义的内容</p>
-    <input type="text" placeholder="请输入..." />
-  </div>
-</Dialog>
-```
+- **候选位置**：8 个方向（bottomLeft / topLeft / bottomRight / topRight / bottom / top / left / right）
+- **自动翻转**：按用户偏好排序候选位置，逐一检测 `checkFit`，选择首个可容纳的方向
+- **垂直回退**：所有候选均不适配时，比较上下空间选择较大一侧
+- **RAF 节流**：`throttledUpdatePosition` 用于高频更新场景
 
-### 阻止关闭
+## 预设配置 (config.ts)
 
-```vue
-<Dialog
-  v-model="visible"
-  title="表单提交"
-  :before-close="handleBeforeClose"
->
-  <form>...</form>
-</Dialog>
+| 预设 | type | size | showCancelBtn | confirmOnEnter | 说明 |
+|------|------|------|---------------|----------------|------|
+| `confirm` | warning | small | ✅ | ✅ | 确认对话框 |
+| `alert` | info | small | ❌ | ✅ | 提示对话框 |
+| `danger` | error | small | ✅ | ❌ | 危险操作（不允许 Enter 快速确认） |
+| `success` | success | small | ❌ | ✅ | 成功提示 |
+| `form` | info | medium | ✅ | ❌ | 表单对话框（避免多行输入误触） |
+| `large` | info | large | ✅ | ❌ | 大内容对话框 |
 
-<script setup>
-const handleBeforeClose = async () => {
-  const confirmed = await confirm('确定要关闭吗？')
-  return confirmed
-}
-</script>
-```
+## 动画系统
 
-### 全屏模式
+### 标准模式动画 (`dialog`)
 
-```vue
-<Dialog
-  v-model="visible"
-  title="全屏对话框"
-  fullscreen
->
-  <div class="fullscreen-content">...</div>
-</Dialog>
-```
+从鼠标点击位置展开/收起，通过 CSS 变量 `--dialog-origin-x/y` 动态设置 `transform-origin`：
 
-### Follow Trigger 模式（Popover 风格）
+- **进入**：scale(0) → scale(1)，400ms ease-out
+- **离开**：scale(1) → scale(0)，300ms ease-in
 
-```vue
-<template>
-  <button ref="triggerRef" @click="handleClick">
-    点击我
-  </button>
+### Follow 模式动画 (`zoom-fade`)
 
-  <Dialog
-    v-model="visible"
-    :trigger-rect="triggerRect"
-    popover-placement="bottom"
-    content="这是一个跟随按钮的对话框"
-  />
-</template>
+从触发元素方向滑入，通过 `--dialog-slide-direction` 控制方向：
 
-<script setup>
-import { ref } from 'vue'
+- **进入/离开**：translateY(±12px) + scale(0.95) + opacity，200ms
 
-const triggerRef = ref()
-const visible = ref(false)
-const triggerRect = ref()
+### 其他动画
 
-const handleClick = () => {
-  triggerRect.value = triggerRef.value.getBoundingClientRect()
-  visible.value = true
-}
-</script>
-```
+- **遮罩层**：`fade` 纯透明度过渡，300ms
+- **高度自适应**：`ResizeObserver` 监听内容高度变化，CSS `transition: height 0.3s`
 
-## 特色功能
+## 组件说明
 
-### 1. 鼠标位置动画
-对话框会从鼠标点击位置展开，提供更自然的交互体验。
+### Dialog.vue 核心组件
 
-### 2. Follow Trigger 模式
-支持跟随触发器定位，类似 Popover 组件，适合上下文菜单等场景。
+通过 `<Teleport to="body">` 渲染，内部结构：遮罩层 → 布局容器 → 对话框面板（header + body + footer）。
 
-### 3. 完整的生命周期
-提供 `open`、`opened`、`close`、`closed` 等完整的生命周期事件。
+关键机制：
+- **shouldRender / visible 双状态**：shouldRender 控制 DOM 存在，visible 控制动画进出
+- **body 滚动锁定**：打开时计算滚动条宽度补偿 `paddingRight`，避免页面抖动
+- **ResizeObserver**：监听 `dialog-panel-inner` 高度变化，驱动面板高度平滑过渡
 
-### 4. 灵活的关闭控制
-通过 `beforeClose`、`onClose` 等回调，可以灵活控制对话框的关闭行为。
+### DialogItem.vue 函数式实例包装器
 
-## 与主流组件库的对比
+将 `DialogInstance` 映射为 `<Dialog>` 组件 props，处理函数式调用的事件桥接：
 
-| 功能 | Naive UI | Element Plus | Ant Design | TDesign | 本组件 |
-|------|----------|--------------|------------|---------|--------|
-| 基础对话框 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 类型图标 | ✅ | ❌ | ✅ | ✅ | ✅ |
-| ESC 关闭 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 销毁内容 | ❌ | ✅ | ✅ | ✅ | ✅ |
-| 全屏模式 | ❌ | ✅ | ❌ | ✅ | ✅ |
-| 拖拽 | ✅ | ✅ | ❌ | ✅ | 🚧 |
-| 鼠标动画 | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Follow Mode | ❌ | ❌ | ❌ | ❌ | ✅ |
+- **provide('dialogClose')**：允许自定义组件内容通过 `inject` 主动关闭对话框并传递结果
+- **loading 管理**：`onOk` 为异步时自动设置 `instance.loading = true`，完成后恢复
+- **动画结束清理**：`@after-close` 时调用 `remove(id)` 从全局数组移除实例
 
-## 注意事项
+### DialogProvider.vue 渲染容器
 
-1. `destroyOnClose` 为 `true` 时，关闭对话框会销毁内部内容，下次打开会重新渲染
-2. `beforeClose` 和 `onClose` 返回 `false` 可以阻止对话框关闭
-3. Follow Mode 下会自动隐藏遮罩，点击外部区域会关闭对话框
-4. 鼠标位置动画需要传入 `mousePosition` 属性
+遍历 `useDialog().dialogs` 数组，为每个实例渲染 `<DialogItem>`。需在应用根组件中挂载一次。
+
+## 外部依赖
+
+| 依赖 | 用途 |
+|------|------|
+| `@tabler/icons-vue` | 类型图标（info/success/warning/error/confirm）+ 关闭按钮 |
+| `@/components/Button` | 底部确认/取消按钮 + buttonPresets |
+| `@/utils/positioning` | Follow 模式坐标计算（checkFit / calculateCoords） |
+| `@/utils/throttle` | RAF 节流（throttleRaf） |

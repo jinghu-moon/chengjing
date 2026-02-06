@@ -6,52 +6,8 @@
     </div>
 
     <div class="demo-grid">
-      <!-- ==================== 卡片1: Toast 基础 ==================== -->
-      <section class="demo-section">
-        <h2>Toast 消息基础</h2>
-        <div class="demo-group">
-          <h3>消息类型</h3>
-          <div class="demo-row">
-            <button @click="toast.success('操作成功')">Success</button>
-            <button @click="toast.error('操作失败')">Error</button>
-            <button @click="toast.warning('注意')">Warning</button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>高级交互</h3>
-          <div class="demo-row">
-            <button @click="toast.info('有新消息', { title: '通知' })">带标题</button>
-            <button @click="testUndo">撤回测试</button>
-            <button @click="testStack">堆叠测试</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片2: Toast 进阶 ==================== -->
-      <section class="demo-section">
-        <h2>Toast 状态与位置</h2>
-        <div class="demo-group">
-          <h3>Promise 追踪</h3>
-          <div class="demo-row">
-            <button @click="testSaveData">保存(2s)</button>
-            <button @click="testUploadFail">上传(失败)</button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>九宫格位置</h3>
-          <div class="positions-grid">
-            <button title="左上" @click="toast.setPosition('top-left')">↖</button>
-            <button title="上中" @click="toast.setPosition('top-center')">↑</button>
-            <button title="右上" @click="toast.setPosition('top-right')">↗</button>
-            <button title="左中" @click="toast.setPosition('left-center')">←</button>
-            <div class="grid-empty"></div>
-            <button title="右中" @click="toast.setPosition('right-center')">→</button>
-            <button title="左下" @click="toast.setPosition('bottom-left')">↙</button>
-            <button title="下中" @click="toast.setPosition('bottom-center')">↓</button>
-            <button title="右下" @click="toast.setPosition('bottom-right')">↘</button>
-          </div>
-        </div>
-      </section>
+      <!-- ==================== 卡片1-2: Toast 已注释 ==================== -->
+      <!-- Toast 示例已隐藏 -->
 
       <!-- ==================== 卡片3: Dialog ==================== -->
       <section class="demo-section">
@@ -125,239 +81,472 @@
         </div>
       </section>
 
-      <!-- ==================== 卡片4: Button 完整主题 ==================== -->
+      <!-- ==================== 卡片4-12: Card 基础卡片 ==================== -->
       <section class="demo-section">
-        <h2>Button 完整主题色</h2>
+        <h2>Card 基础卡片</h2>
         <div class="demo-group">
-          <h3>Base 变体</h3>
-          <div class="demo-row">
-            <Button theme="default">Default</Button>
-            <Button theme="primary">Primary</Button>
-            <Button theme="success">Success</Button>
-            <Button theme="warning">Warning</Button>
-            <Button theme="danger">Danger</Button>
-          </div>
+          <h3>基础用法</h3>
+          <Card title="基础卡片">
+            <template #icon><IconFolder :size="18" /></template>
+            <p>这是一个基础卡片，支持标题、图标和内容。</p>
+          </Card>
         </div>
         <div class="demo-group">
-          <h3>Outline 变体</h3>
-          <div class="demo-row">
-            <Button theme="default" variant="outline">Default</Button>
-            <Button theme="primary" variant="outline">Primary</Button>
-            <Button theme="success" variant="outline">Success</Button>
-            <Button theme="warning" variant="outline">Warning</Button>
-            <Button theme="danger" variant="outline">Danger</Button>
-          </div>
+          <h3>带操作按钮</h3>
+          <Card title="项目设置" :badge="3" badge-type="primary">
+            <template #icon><IconSettings :size="18" /></template>
+            <template #actions>
+              <button class="action-btn" title="编辑"><IconEdit :size="16" /></button>
+              <button class="action-btn" title="删除"><IconTrash :size="16" /></button>
+            </template>
+            <p>卡片支持徽章、操作按钮等功能。</p>
+          </Card>
         </div>
-        <div class="demo-group">
-          <h3>Text 变体</h3>
-          <div class="demo-row">
-            <Button theme="default" variant="text">Default</Button>
-            <Button theme="primary" variant="text">Primary</Button>
-            <Button theme="success" variant="text">Success</Button>
-            <Button theme="warning" variant="text">Warning</Button>
-            <Button theme="danger" variant="text">Danger</Button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片5: Button 尺寸形状 ==================== -->
-      <section class="demo-section">
-        <h2>Button 尺寸与形状</h2>
         <div class="demo-group">
           <h3>三种尺寸</h3>
-          <div class="demo-row">
-            <Button theme="primary" size="small">Small</Button>
-            <Button theme="primary" size="medium">Medium</Button>
-            <Button theme="primary" size="large">Large</Button>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <Card title="Small 尺寸" size="sm">
+              <p>紧凑布局，适合列表项。</p>
+            </Card>
+            <Card title="Medium 尺寸" size="md">
+              <p>默认尺寸，适合大多数场景。</p>
+            </Card>
+            <Card title="Large 尺寸" size="lg">
+              <p>宽松布局，适合重要内容。</p>
+            </Card>
           </div>
         </div>
+
         <div class="demo-group">
-          <h3>四种形状</h3>
-          <div class="demo-row">
-            <Button theme="primary" shape="rectangle">Rectangle</Button>
-            <Button theme="primary" shape="round">Round</Button>
-            <Button theme="primary" shape="square" :icon="IconSearch" />
-            <Button theme="primary" shape="circle" :icon="IconEdit" />
+          <h3>带页签的卡片 (紧凑模式)</h3>
+          <Card 
+            :tabs="demoTabs" 
+            v-model:activeTab="activeTab"
+          >
+            
+            <template #tab0>
+              <div style="padding: 4px 0;">
+                <div>Content 0</div>
+                <div>Content 0</div>
+                <div>Content 0</div>
+              </div>
+            </template>
+
+            <template #tab1>
+              <div style="padding: 4px 0;">
+                <div>Content 1 - Analysis</div>
+                <div>Data Visualization</div>
+                <div>Chart Area</div>
+                <div>Metrics</div>
+                <div>(This tab is taller)</div>
+              </div>
+            </template>
+
+            <template #tab2>
+              <div style="padding: 4px 0;">
+                <div>Content 2 - Settings</div>
+                <div>Configuration</div>
+              </div>
+            </template>
+
+            <template #tab3>
+              <div style="padding: 4px 0;">
+                <div>Content 3 - Logs</div>
+              </div>
+            </template>
+          </Card>
+        </div>
+
+        <div class="demo-group">
+          <h3>配置预设 (Option Cards)</h3>
+          <div style="background: var(--bg-panel-secondary); padding: 24px; border-radius: 12px; width: 400px; max-width: 100%;">
+            <div style="margin-bottom: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 500;">
+              <span style="display: flex; align-items: center; gap: 6px;">
+                 📦 配置预设
+              </span>
+            </div>
+            
+            <ContainerGroup :columns="1" v-model="selectedCards" gap="12px">
+
+              <List
+                size="md"
+                selectable
+                :value="1"
+                title="极简模式"
+                subtitle="专注内容，减少干扰"
+              >
+                <template #extra>
+                  <IconTag :size="16" style="color: var(--text-tertiary)" />
+                </template>
+              </List>
+
+              <List
+                size="md"
+                selectable
+                :value="2"
+                title="标准模式"
+                subtitle="平衡功能与简洁"
+              >
+                <template #extra>
+                  <IconTag :size="16" style="color: var(--text-tertiary)" />
+                </template>
+              </List>
+
+              <List
+                size="md"
+                selectable
+                :value="3"
+                title="专注模式"
+                subtitle="番茄钟 + 待办，高效工作"
+              >
+                <template #extra>
+                  <IconTag :size="16" style="color: var(--text-tertiary)" />
+                </template>
+              </List>
+
+              <List
+                size="md"
+                selectable
+                :value="4"
+                title="层次"
+                subtitle="探索更多层级结构"
+              >
+                <template #extra>
+                  <IconTag :size="16" style="color: var(--text-tertiary)" />
+                </template>
+              </List>
+
+              <Card
+                dashed
+                clickable
+                hoverable
+                size="md"
+                @click="console.log('Add new preset')"
+              >
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; color: var(--text-secondary);">
+                  <component :is="IconPlus" size="18" stroke-width="2" />
+                  <span style="font-size: 14px; font-weight: 500;">新建预设</span>
+                </div>
+              </Card>
+
+
+
+            </ContainerGroup>
+
+            <div style="margin-top: 16px; font-size: 13px; color: var(--text-tertiary); text-align: center;">
+              当前选择: 模式 {{ selectedCards }}
+            </div>
           </div>
+
+          <!-- Advanced Features -->
+          <div class="demo-group" style="margin-top: 32px;">
+            <h3>高级特性 (Contextual)</h3>
+            
+            <div class="demo-row" style="align-items: flex-start; gap: 24px;">
+              <!-- 1. Cover Card -->
+              <div style="flex: 1; min-width: 240px;">
+                <h4 style="margin: 0 0 12px 0;">基础交互 (Clickable)</h4>
+                <Card 
+                  title="每日推荐" 
+                  clickable
+                  hoverable
+                >
+                  <template #extra>
+                    <IconStar :size="16" />
+                  </template>
+                  <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+                    探索山川湖海，感受自然之美。点击卡片查看详情。
+                  </div>
+                </Card>
+              </div>
+
+
+            </div>
+
+              <!-- List Layout usage -->
+              <div style="margin-top: 24px;">
+                <h4 style="margin: 0 0 12px 0;">列表模式 (List)</h4>
+                <ContainerGroup :columns="2" gap="12px">
+                   <List v-bind="listPresets.default" title="GitHub" subtitle="github.com" :icon="IconFolder" />
+                   <List v-bind="listPresets.default" title="GitLab" subtitle="gitlab.com" :icon="IconSettings" />
+                   <List v-bind="listPresets.default" title="Stack Overflow" subtitle="stackoverflow.com" :icon="IconShare" />
+                   <List v-bind="listPresets.default" title="MDN Web Docs" subtitle="developer.mozilla.org" :icon="IconMail" />
+                </ContainerGroup>
+              </div>
+
+              <!-- Row Layout (Standard) -->
+              <p style="margin: 24px 0 8px; color: var(--text-secondary);">Row 横向布局 (layout="row")</p>
+              <Card layout="row" title="Row Layout" :icon="IconSettings" bordered hoverable>
+                <div style="color: var(--text-secondary); font-size: 14px;">
+                  Row 布局将 Header（图标+标题）置于左侧，Body 内容置于右侧。适合较宽的卡片展示。
+                </div>
+              </Card>
+
+              <!-- Compact Row Layout -->
+              <p style="margin: 12px 0 8px; color: var(--text-secondary);">Compact Row (layout="row" size="sm")</p>
+              <ContainerGroup :columns="2" gap="12px">
+                 <Card layout="row" size="sm" clickable hoverable title="标准 Row" :icon="IconSettings" />
+                 <List v-bind="listPresets.default" title="List 预设" subtitle="Boxed Icon | Text Stack" :icon="IconFolder" />
+              </ContainerGroup>
+              
+              <!-- Grid Layout (Internal) -->
+              <p style="margin: 16px 0 8px; color: var(--text-secondary);">Grid 网格布局 (Internal Grid)</p>
+              <Card layout="grid" :grid-columns="3" bordered>
+                <div style="background: var(--bg-input); padding: 16px; border-radius: 8px;">Cell 1</div>
+                <div style="background: var(--bg-input); padding: 16px; border-radius: 8px;">Cell 2</div>
+                <div style="background: var(--bg-input); padding: 16px; border-radius: 8px;">Cell 3</div>
+              </Card>
+
+              <!-- Responsive CardGroup -->
+              <p style="margin: 16px 0 8px; color: var(--text-secondary);">Responsive Group (min-width="180px")</p>
+              <div style="resize: horizontal; overflow: hidden; border: 1px dashed var(--border-color); padding: 12px; width: 100%;">
+                <ContainerGroup :min-width="150" gap="12px">
+                  <Card
+                    v-for="i in 5"
+                    :key="i"
+                    :title="`Card ${i}`"
+                    hoverable
+                    style="background: var(--bg-surface-soft);" 
+                  >
+                    <div style="height: 40px; display: flex; align-items: center; color: var(--text-tertiary);">Content...</div>
+                  </Card>
+                </ContainerGroup>
+              </div>
+              <p style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">* 拖拽浏览器窗口可查看自适应效果</p>
+
+            </div>
+          </div>
+      </section>
+
+
+      <!-- ==================== 卡片13: Collapse 折叠面板 ==================== -->
+      <section class="demo-section">
+        <h2>Collapse 折叠面板</h2>
+        
+        <!-- v-model 双向绑定 + 控制面板示例 -->
+        <div class="demo-group">
+          <h3>v-model 双向绑定 + 控制面板</h3>
+          <div class="control-bar">
+            <button class="demo-btn demo-btn--primary" @click="expandAllPanels">全部展开</button>
+            <button class="demo-btn demo-btn--primary" @click="collapseAllPanels">全部收起</button>
+            <span class="status-tag" :class="panel1Expanded ? 'is-expanded' : 'is-collapsed'">
+              待办: {{ panel1Expanded ? '已展开' : '已收起' }}
+            </span>
+            <span class="status-tag" :class="panel2Expanded ? 'is-expanded' : 'is-collapsed'">
+              高级: {{ panel2Expanded ? '已展开' : '已收起' }}
+            </span>
+          </div>
+          <ContainerGroup :columns="1">
+            <Collapse 
+              v-model:expanded="panel1Expanded"
+              title="待办清单设置"
+              @change="(v: boolean) => console.log('待办清单:', v)"
+            >
+              <template #icon><IconChecklist :size="18" /></template>
+              <div class="feature-list">
+                <div class="feature-item">✓ 开启待办清单功能</div>
+                <div class="feature-item">✓ 默认折叠清单</div>
+                <div class="feature-item">✓ 自动保存到本地存储</div>
+                <div class="feature-item">✓ 支持标签分类</div>
+              </div>
+            </Collapse>
+            <Collapse 
+              v-model:expanded="panel2Expanded"
+              title="高级功能"
+            >
+              <template #icon><IconSettings :size="18" /></template>
+              <div class="feature-list">
+                <div class="feature-item">✓ 启用快捷键支持</div>
+                <div class="feature-item">✓ 自动备份数据</div>
+                <div class="feature-item">✓ 番茄钟集成</div>
+                <div class="feature-item">✓ 导出为 Markdown</div>
+              </div>
+            </Collapse>
+            <Collapse 
+              title="默认展开示例"
+              :default-expanded="true"
+            >
+              <template #icon><IconPalette :size="18" /></template>
+              <p style="margin-bottom: 12px;">这个面板默认是展开状态。</p>
+              <p>通过设置 <code>:default-expanded="true"</code> 实现。</p>
+            </Collapse>
+          </ContainerGroup>
+        </div>
+
+        <div class="demo-group">
+          <h3>基础用法 + 徽章</h3>
+          <ContainerGroup :columns="1">
+            <Collapse title="未读消息" :badge="5" badge-type="danger">
+              <template #icon><IconMail :size="18" /></template>
+              <p>您有 5 条未读消息，点击查看详情。</p>
+            </Collapse>
+            <Collapse title="已完成任务" :badge="12" badge-type="success">
+              <template #icon><IconCheck :size="18" /></template>
+              <p>本周完成 12 个任务，完成率 94%。</p>
+            </Collapse>
+          </ContainerGroup>
         </div>
         <div class="demo-group">
-          <h3>Ghost 模式</h3>
-          <div class="demo-row" style="background: #667eea; padding: 8px; border-radius: 4px;">
-            <Button theme="primary" ghost>Ghost</Button>
-            <Button theme="success" ghost variant="outline">Outline</Button>
-            <Button theme="danger" ghost variant="dashed">Dashed</Button>
-          </div>
+          <h3>手风琴模式</h3>
+          <ContainerGroup :columns="1" :accordion="true">
+            <Collapse title="选项 A" panel-id="acc-1">
+              <p>选项 A 的内容，同时只能展开一个面板。</p>
+            </Collapse>
+            <Collapse title="选项 B" panel-id="acc-2">
+              <p>选项 B 的内容。</p>
+            </Collapse>
+            <Collapse title="选项 C" panel-id="acc-3">
+              <p>选项 C 的内容。</p>
+            </Collapse>
+          </ContainerGroup>
         </div>
       </section>
 
-      <!-- ==================== 卡片6: Button 动效 Hover ==================== -->
+      <!-- ==================== 卡片14: Collapse 尺寸与动画 ==================== -->
       <section class="demo-section">
-        <h2>Button 动效 - Hover</h2>
+        <h2>Collapse 尺寸与动画</h2>
         <div class="demo-group">
-          <h3>Icon Slide (图标滑入)</h3>
-          <div class="demo-row">
-            <Button theme="primary" effect="icon-slide" :suffix="ArrowRightIcon">下一步</Button>
-            <Button theme="success" effect="icon-slide" :suffix="ArrowRightIcon">继续</Button>
-          </div>
+          <h3>三种尺寸</h3>
+          <ContainerGroup :columns="1">
+            <Collapse title="Small 尺寸" size="sm" :show-switch="false">
+              <p>紧凑布局，适合侧边栏。</p>
+            </Collapse>
+            <Collapse title="Medium 尺寸（默认）" size="md" :show-switch="false">
+              <p>标准尺寸，适合大多数场景。</p>
+            </Collapse>
+            <Collapse title="Large 尺寸" size="lg" :show-switch="false">
+              <p>宽松布局，适合重要内容。</p>
+            </Collapse>
+          </ContainerGroup>
+        </div>
+        <div class="demo-group">
+          <h3>动画效果</h3>
+          <ContainerGroup :columns="1">
+            <Collapse title="Smooth 平滑" collapse-animation="smooth" :show-switch="false">
+              <p>流畅自然的过渡效果 ✨</p>
+            </Collapse>
+            <Collapse title="Bounce 弹跳" collapse-animation="bounce" :show-switch="false">
+              <p>有趣的弹跳效果 🎾</p>
+            </Collapse>
+            <Collapse title="Elastic 弹性" collapse-animation="elastic" :show-switch="false">
+              <p>橡皮筋般的弹性效果 🎪</p>
+            </Collapse>
+          </ContainerGroup>
         </div>
       </section>
 
-      <!-- ==================== 卡片7: Button 动效 Click ==================== -->
+      <!-- ==================== 卡片16: Collapse 布局预设 ==================== -->
       <section class="demo-section">
-        <h2>Button 动效 - Click</h2>
+        <h2>Collapse 布局预设</h2>
         <div class="demo-group">
-          <h3>Ripple (水波纹)</h3>
-          <div class="demo-row">
-            <Button theme="primary" effect="ripple">Ripple</Button>
-            <Button theme="success" effect="ripple">点击我</Button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>Sweep (斜向填充)</h3>
-          <div class="demo-row">
-            <Button theme="primary" effect="sweep">Sweep</Button>
-            <Button theme="success" effect="sweep">确认</Button>
-          </div>
+          <h3>5 种标题栏布局</h3>
+          <ContainerGroup :columns="1">
+            <Collapse
+              title="default: 图标(左) | 标题 | 操作(右) | 开关"
+              layout="default"
+            >
+              <template #actions>
+                <button class="action-btn" title="编辑"><IconEdit :size="16" /></button>
+                <button class="action-btn" title="删除"><IconTrash :size="16" /></button>
+              </template>
+              <p>默认布局，图标在左侧，操作按钮在右侧。</p>
+            </Collapse>
+            <Collapse
+              title="icon-right: 标题 | 操作(右) | 图标(右) | 开关"
+              layout="icon-right"
+            >
+              <template #actions>
+                <button class="action-btn" title="设置"><IconSettings :size="16" /></button>
+              </template>
+              <p>图标移至右侧，更突出标题内容。</p>
+            </Collapse>
+            <Collapse
+              title="compact: 图标(左) | 标题 | 开关"
+              layout="compact"
+            >
+              <template #actions>
+                <button class="action-btn">这个不会显示</button>
+              </template>
+              <p>紧凑布局，隐藏操作区，适合简洁场景。</p>
+            </Collapse>
+            <Collapse
+              title="actions-left: 图标(左) | 操作 | 标题 | 开关"
+              layout="actions-left"
+            >
+              <template #actions>
+                <button class="action-btn" title="收藏"><IconStar :size="16" /></button>
+                <button class="action-btn" title="分享"><IconShare :size="16" /></button>
+              </template>
+              <p>操作按钮在标题前，适合快捷操作场景。</p>
+            </Collapse>
+            <Collapse
+              title="minimal: 标题 | 开关（无图标无操作）"
+              layout="minimal"
+            >
+              <p>极简布局，仅保留标题和开关。</p>
+            </Collapse>
+          </ContainerGroup>
         </div>
       </section>
 
-      <!-- ==================== 卡片8: Button 动效 Active ==================== -->
+      <!-- ==================== 卡片15: Collapse 嵌套面板 ==================== -->
       <section class="demo-section">
-        <h2>Button 动效 - Active</h2>
+        <h2>Collapse 嵌套面板</h2>
         <div class="demo-group">
-          <h3>Scale (按压缩放)</h3>
-          <div class="demo-row">
-            <Button theme="primary" effect="scale">Scale</Button>
-            <Button theme="danger" effect="scale">删除</Button>
-            <Button theme="success" effect="scale">确认</Button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片9: Button 图标组合 ==================== -->
-      <section class="demo-section">
-        <h2>Button 图标组合</h2>
-        <div class="demo-group">
-          <h3>前置图标</h3>
-          <div class="demo-row">
-            <Button theme="primary" :icon="IconDeviceFloppy">保存</Button>
-            <Button theme="success" :icon="IconSearch">搜索</Button>
-            <Button theme="danger" :icon="IconTrash">删除</Button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>后置图标</h3>
-          <div class="demo-row">
-            <Button theme="primary" :suffix="ArrowRightIcon">下一步</Button>
-            <Button theme="default" :suffix="ArrowRightIcon">继续</Button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>纯图标按钮</h3>
-          <div class="demo-row">
-            <Button theme="primary" shape="circle" :icon="IconSearch" />
-            <Button theme="success" shape="circle" :icon="IconEdit" />
-            <Button theme="danger" shape="circle" :icon="IconTrash" />
-            <Button theme="default" shape="square" :icon="IconDeviceFloppy" />
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片10: Button 状态 ==================== -->
-      <section class="demo-section">
-        <h2>Button 状态</h2>
-        <div class="demo-group">
-          <h3>Loading 加载</h3>
-          <div class="demo-row">
-            <Button theme="primary" :loading="loading" @click="handleSubmit">
-              {{ loading ? '提交中...' : '提交' }}
-            </Button>
-            <Button theme="success" :loading="true">加载中</Button>
-          </div>
+          <h3>文件目录结构</h3>
+          <Collapse title="项目根目录" :default-expanded="true" :show-switch="false">
+            <template #icon><IconFolder :size="18" /></template>
+            <div class="cj-collapse-nested-container">
+              <Collapse title="src" size="sm" :show-switch="false">
+                <template #icon><IconFolderOpen :size="16" /></template>
+                <div class="cj-collapse-nested-container">
+                  <Collapse title="components" size="sm" :show-switch="false">
+                    <template #icon><IconFolderOpen :size="16" /></template>
+                    <div class="file-list">
+                      <div class="file-item">CollapsePanel.vue</div>
+                      <div class="file-item">CollapseGroup.vue</div>
+                    </div>
+                  </Collapse>
+                  <Collapse title="styles" size="sm" :show-switch="false">
+                    <template #icon><IconFolderOpen :size="16" /></template>
+                    <div class="file-list">
+                      <div class="file-item">variables.css</div>
+                      <div class="file-item">global.css</div>
+                    </div>
+                  </Collapse>
+                </div>
+              </Collapse>
+              <Collapse title="public" size="sm" :show-switch="false">
+                <template #icon><IconFolderOpen :size="16" /></template>
+                <div class="file-list">
+                  <div class="file-item">favicon.ico</div>
+                  <div class="file-item">logo.png</div>
+                </div>
+              </Collapse>
+            </div>
+          </Collapse>
         </div>
         <div class="demo-group">
-          <h3>Disabled 禁用</h3>
-          <div class="demo-row">
-            <Button theme="primary" disabled>Primary</Button>
-            <Button theme="success" disabled>Success</Button>
-            <Button theme="danger" disabled>Danger</Button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>Block 块级</h3>
-          <div style="margin-top: 8px;">
-            <Button theme="primary" block>块级按钮 (100% 宽度)</Button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片11: Button 链接 ==================== -->
-      <section class="demo-section">
-        <h2>Button 链接与标签</h2>
-        <div class="demo-group">
-          <h3>链接按钮 (href)</h3>
-          <div class="demo-row">
-            <Button theme="primary" href="https://github.com" target="_blank">GitHub</Button>
-            <Button theme="success" href="#demo" variant="outline">锚点链接</Button>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>自定义标签</h3>
-          <div class="demo-row">
-            <Button theme="primary" tag="div">Div 标签</Button>
-            <Button theme="default" tag="span">Span 标签</Button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ==================== 卡片12: ButtonGroup ==================== -->
-      <section class="demo-section">
-        <h2>ButtonGroup 按钮组</h2>
-        <div class="demo-group">
-          <h3>水平按钮组</h3>
-          <div class="demo-row">
-            <ButtonGroup>
-              <Button>Left</Button>
-              <Button>Middle</Button>
-              <Button>Right</Button>
-            </ButtonGroup>
-          </div>
-          <div class="demo-row" style="margin-top: 8px;">
-            <ButtonGroup theme="primary">
-              <Button>选项 1</Button>
-              <Button>选项 2</Button>
-              <Button>选项 3</Button>
-            </ButtonGroup>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>垂直按钮组</h3>
-          <div class="demo-row">
-            <ButtonGroup vertical theme="primary">
-              <Button :icon="IconEdit">编辑</Button>
-              <Button :icon="IconTrash">删除</Button>
-              <Button :icon="IconDeviceFloppy">保存</Button>
-            </ButtonGroup>
-            <ButtonGroup vertical>
-              <Button :icon="IconEdit"></Button>
-              <Button :icon="IconTrash"></Button>
-              <Button :icon="IconDeviceFloppy"></Button>
-            </ButtonGroup>
-          </div>
-        </div>
-        <div class="demo-group">
-          <h3>不同尺寸</h3>
-          <div class="demo-row">
-            <ButtonGroup size="small">
-              <Button>S1</Button>
-              <Button>S2</Button>
-              <Button>S3</Button>
-            </ButtonGroup>
-            <ButtonGroup size="large" theme="success">
-              <Button>L1</Button>
-              <Button>L2</Button>
-            </ButtonGroup>
-          </div>
+          <h3>邮箱管理器</h3>
+          <ContainerGroup :columns="1">
+            <Collapse title="收件箱" :badge="15" badge-type="danger" :default-expanded="true" :show-switch="false">
+              <template #icon><IconMail :size="18" /></template>
+              <div class="cj-collapse-nested-container">
+                <Collapse title="星标邮件" :badge="3" badge-type="warning" size="sm" :show-switch="false">
+                  <template #icon><IconStar :size="16" /></template>
+                  <p>重要会议通知、项目 deadline 提醒...</p>
+                </Collapse>
+                <Collapse title="团队邮件" :badge="8" badge-type="info" size="sm" :show-switch="false">
+                  <template #icon><IconUsers :size="16" /></template>
+                  <p>项目进度更新、代码 Review 请求...</p>
+                </Collapse>
+              </div>
+            </Collapse>
+            <Collapse title="已发送" :badge="42" badge-type="success" :show-switch="false">
+              <template #icon><IconSend :size="18" /></template>
+              <p>本月已发送 42 封邮件</p>
+            </Collapse>
+          </ContainerGroup>
         </div>
       </section>
 
@@ -401,24 +590,63 @@
 </template>
 
 <script setup lang="ts">
-import { ref, h } from 'vue'
+import { ref } from 'vue'
 import {
-  IconDeviceFloppy,
-  IconTrash,
   IconEdit,
-  IconSearch,
+  IconTrash,
+  IconSettings,
+  IconStar,
+  IconShare,
+  IconFolder,
+  IconFolderOpen,
+  IconMail,
+  IconSend,
+  IconUsers,
+  IconChecklist,
+  IconCheck,
+  IconPalette,
+  IconPlus,
+  IconTag,
 } from '@tabler/icons-vue'
 import ToastProvider from './components/Toast/index.vue'
 import { useToast } from './components/Toast/composables/useToast'
 import { DialogProvider, useDialog, Dialog, dialogPresets } from './components/Dialog'
-import { Button, ButtonGroup } from './components/Button'
+// import { Button, ButtonGroup } from './components/Button'
+import { Card, Collapse, List, ContainerGroup, cardPresets, listPresets } from './components/Container'
 
 const toast = useToast()
 const dialog = useDialog()
-const loading = ref(false)
+// const loading = ref(false)
 const customDialogVisible = ref(false)
 const formData = ref({ name: '', email: '' })
 
+// Collapse v-model 双向绑定示例
+const panel1Expanded = ref(false)
+const panel2Expanded = ref(false)
+
+const expandAllPanels = () => {
+  panel1Expanded.value = true
+  panel2Expanded.value = true
+}
+
+const collapseAllPanels = () => {
+  panel1Expanded.value = false
+  panel2Expanded.value = false
+}
+
+// Card Tabs 示例
+import type { CardTab } from './components/Container'
+const demoTabs = ref<CardTab[]>([
+  { label: 'Tab 0', value: 'tab0' },
+  { label: 'Tab 1', value: 'tab1' },
+  { label: 'Tab 2', value: 'tab2' },
+  { label: 'Tab 3', value: 'tab3' },
+])
+const activeTab = ref('tab0')
+const selectedCards = ref([2])
+
+// 已注释 Toast/Button 相关测试函数
+/*
 // 箭头图标组件
 const ArrowRightIcon = () =>
   h(
@@ -481,7 +709,7 @@ const testUploadFail = async () => {
       }
     )
   } catch (e) {
-    /* ignore */
+    // ignore
   }
 }
 
@@ -491,6 +719,7 @@ const handleSubmit = () => {
     loading.value = false
   }, 2000)
 }
+*/
 </script>
 
 <style scoped>
@@ -499,11 +728,6 @@ const handleSubmit = () => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 40px 0; /* 减少左右padding，交给grid处理 */
   font-family: var(--font-family-base, system-ui, -apple-system, sans-serif);
-
-  --text-primary: #2e3440;
-  --text-secondary: #4c566a;
-  --color-divider: rgba(0, 0, 0, 0.08);
-  --bg-hover: rgba(0, 0, 0, 0.04);
 }
 
 .demo-header {
@@ -539,11 +763,12 @@ const handleSubmit = () => {
 }
 
 .demo-section {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
+  background: var(--bg-panel);
+  backdrop-filter: var(--glass-sm);
+  border: var(--border-glass);
+  border-radius: var(--radius-lg);
   padding: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-md);
   
   /* 防止卡片被列断开 */
   break-inside: avoid;
@@ -691,6 +916,114 @@ const handleSubmit = () => {
   .demo-header h1 {
     font-size: 32px;
   }
+}
+
+/* ================== Collapse 示例专用样式 ================== */
+.control-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background: var(--bg-panel);
+  border-radius: var(--radius-md);
+  border: var(--border-glass);
+}
+
+.demo-btn {
+  padding: var(--comp-padding-md);
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  transition: var(--transition-base);
+}
+
+.demo-btn--primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.demo-btn--primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.status-tag {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.status-tag.is-expanded {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-tag.is-collapsed {
+  background-color: var(--bg-input);
+  color: var(--text-tertiary);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.feature-item {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.file-item {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  padding: var(--space-1) 0;
+}
+
+code {
+  background: var(--bg-input);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-family-mono);
+  font-size: var(--text-sm);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-base);
+  font-size: 14px;
+}
+
+.action-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+/* 嵌套容器 */
+.cj-collapse-nested-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
 }
 </style>
 

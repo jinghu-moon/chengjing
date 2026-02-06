@@ -10,11 +10,17 @@ declare global {
   const COMMON_DICT: typeof import('./utils/pinyinDict').COMMON_DICT
   const CURRENT_BACKUP_VERSION: typeof import('./utils/backup-validator').CURRENT_BACKUP_VERSION
   const DESKTOP_PRESETS: typeof import('./composables/useSettings').DESKTOP_PRESETS
+  const ERROR_DECRYPTION_FAILED: typeof import('./utils/crypto').ERROR_DECRYPTION_FAILED
+  const ERROR_INVALID_PASSWORD: typeof import('./utils/crypto').ERROR_INVALID_PASSWORD
   const EffectScope: typeof import('vue').EffectScope
   const ICON_CONFIG_META: typeof import('./utils/settings-meta').ICON_CONFIG_META
   const ICON_LABELS: typeof import('./utils/qr-codec').ICON_LABELS
+  const IV_LENGTH: typeof import('./utils/crypto').IV_LENGTH
+  const KEY_LENGTH: typeof import('./utils/crypto').KEY_LENGTH
   const MAX_QR_CHARS: typeof import('./utils/qr-codec').MAX_QR_CHARS
+  const PBKDF2_ITERATIONS: typeof import('./utils/crypto').PBKDF2_ITERATIONS
   const PROTOCOL_VERSION: typeof import('./utils/qr-codec').PROTOCOL_VERSION
+  const SALT_LENGTH: typeof import('./utils/crypto').SALT_LENGTH
   const SETTINGS_LABELS: typeof import('./utils/qr-codec').SETTINGS_LABELS
   const SETTINGS_META: typeof import('./utils/settings-meta').SETTINGS_META
   const SETTINGS_MIGRATION_MAP: typeof import('./composables/useSettings').SETTINGS_MIGRATION_MAP
@@ -24,12 +30,15 @@ declare global {
   const calculateCoords: typeof import('./utils/positioning').calculateCoords
   const checkFit: typeof import('./utils/positioning').checkFit
   const cleanupOldSnapshots: typeof import('./utils/snapshot-storage').cleanupOldSnapshots
+  const compressData: typeof import('./utils/crypto').compressData
   const computed: typeof import('vue').computed
   const converterCategories: typeof import('./composables/useConverter').converterCategories
   const createApp: typeof import('vue').createApp
   const customRef: typeof import('vue').customRef
   const debounce: typeof import('./utils/debounce').debounce
   const decode: typeof import('./utils/qr-codec').decode
+  const decompressData: typeof import('./utils/crypto').decompressData
+  const decrypt: typeof import('./utils/crypto').decrypt
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const deleteImage: typeof import('./utils/db').deleteImage
@@ -37,9 +46,12 @@ declare global {
   const downloadFile: typeof import('./utils/file').downloadFile
   const effectScope: typeof import('vue').effectScope
   const encode: typeof import('./utils/qr-codec').encode
+  const encrypt: typeof import('./utils/crypto').encrypt
   const extractFolders: typeof import('./utils/bookmarksApi').extractFolders
   const flattenBookmarks: typeof import('./utils/bookmarksApi').flattenBookmarks
   const formatSettingValue: typeof import('./utils/settings-meta').formatSettingValue
+  const generateIV: typeof import('./utils/crypto').generateIV
+  const generateSalt: typeof import('./utils/crypto').generateSalt
   const getAllImageIds: typeof import('./utils/db').getAllImageIds
   const getAllKeys: typeof import('./utils/db').getAllKeys
   const getAllSnapshotMetas: typeof import('./utils/snapshot-storage').getAllSnapshotMetas
@@ -51,6 +63,7 @@ declare global {
   const getDetailedSettingsDiff: typeof import('./utils/backup-diff').getDetailedSettingsDiff
   const getFirstLetter: typeof import('./utils/pinyin').getFirstLetter
   const getFolderPathFromMap: typeof import('./utils/bookmarksApi').getFolderPathFromMap
+  const getImageBlob: typeof import('./utils/db').getImageBlob
   const getImageKeys: typeof import('./utils/db').getImageKeys
   const getImageUrl: typeof import('./utils/db').getImageUrl
   const getPinyinFirstLetters: typeof import('./utils/pinyin').getPinyinFirstLetters
@@ -84,6 +97,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const packEncryptedData: typeof import('./utils/crypto').packEncryptedData
   const processImageWithWorker: typeof import('./utils/imageProcessor').processImageWithWorker
   const processMarkdownForExport: typeof import('./utils/export').processMarkdownForExport
   const provide: typeof import('vue').provide
@@ -108,6 +122,7 @@ declare global {
   const toValue: typeof import('vue').toValue
   const toggleSnapshotLock: typeof import('./utils/snapshot-storage').toggleSnapshotLock
   const triggerRef: typeof import('vue').triggerRef
+  const unpackEncryptedData: typeof import('./utils/crypto').unpackEncryptedData
   const unref: typeof import('vue').unref
   const useAsyncWordCount: typeof import('./composables/useAsyncWordCount').useAsyncWordCount
   const useAttrs: typeof import('vue').useAttrs
@@ -127,7 +142,6 @@ declare global {
   const useModel: typeof import('vue').useModel
   const useNotes: typeof import('./composables/useNotes').useNotes
   const usePresets: typeof import('./composables/usePresets').usePresets
-  const useQRSync: typeof import('./composables/useQRSync').useQRSync
   const useSettings: typeof import('./composables/useSettings').useSettings
   const useShortcutDrag: typeof import('./composables/useShortcutDrag').useShortcutDrag
   const useSimpleDrag: typeof import('./composables/useSimpleDrag').useSimpleDrag
@@ -135,7 +149,6 @@ declare global {
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTodoDrag: typeof import('./composables/useTodoDrag').useTodoDrag
   const useTodos: typeof import('./composables/useTodos').useTodos
-  const validate: typeof import('./utils/qr-codec').validate
   const validateBackup: typeof import('./utils/backup-validator').validateBackup
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
@@ -178,6 +191,9 @@ declare global {
   export type { ChromeBookmarkNode } from './utils/bookmarksApi'
   import('./utils/bookmarksApi')
   // @ts-ignore
+  export type { EncryptedData } from './utils/crypto'
+  import('./utils/crypto')
+  // @ts-ignore
   export type { ImageProcessResult, CompressionOptions } from './utils/imageProcessor'
   import('./utils/imageProcessor')
   // @ts-ignore
@@ -200,8 +216,14 @@ declare module 'vue' {
     readonly COMMON_DICT: UnwrapRef<typeof import('./utils/pinyinDict')['COMMON_DICT']>
     readonly CURRENT_BACKUP_VERSION: UnwrapRef<typeof import('./utils/backup-validator')['CURRENT_BACKUP_VERSION']>
     readonly DESKTOP_PRESETS: UnwrapRef<typeof import('./composables/useSettings')['DESKTOP_PRESETS']>
+    readonly ERROR_DECRYPTION_FAILED: UnwrapRef<typeof import('./utils/crypto')['ERROR_DECRYPTION_FAILED']>
+    readonly ERROR_INVALID_PASSWORD: UnwrapRef<typeof import('./utils/crypto')['ERROR_INVALID_PASSWORD']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly ICON_CONFIG_META: UnwrapRef<typeof import('./utils/settings-meta')['ICON_CONFIG_META']>
+    readonly IV_LENGTH: UnwrapRef<typeof import('./utils/crypto')['IV_LENGTH']>
+    readonly KEY_LENGTH: UnwrapRef<typeof import('./utils/crypto')['KEY_LENGTH']>
+    readonly PBKDF2_ITERATIONS: UnwrapRef<typeof import('./utils/crypto')['PBKDF2_ITERATIONS']>
+    readonly SALT_LENGTH: UnwrapRef<typeof import('./utils/crypto')['SALT_LENGTH']>
     readonly SETTINGS_META: UnwrapRef<typeof import('./utils/settings-meta')['SETTINGS_META']>
     readonly SETTINGS_MIGRATION_MAP: UnwrapRef<typeof import('./composables/useSettings')['SETTINGS_MIGRATION_MAP']>
     readonly VIP_MAP: UnwrapRef<typeof import('./utils/pinyinDict')['VIP_MAP']>
@@ -210,20 +232,26 @@ declare module 'vue' {
     readonly calculateCoords: UnwrapRef<typeof import('./utils/positioning')['calculateCoords']>
     readonly checkFit: UnwrapRef<typeof import('./utils/positioning')['checkFit']>
     readonly cleanupOldSnapshots: UnwrapRef<typeof import('./utils/snapshot-storage')['cleanupOldSnapshots']>
+    readonly compressData: UnwrapRef<typeof import('./utils/crypto')['compressData']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>
     readonly converterCategories: UnwrapRef<typeof import('./composables/useConverter')['converterCategories']>
     readonly createApp: UnwrapRef<typeof import('vue')['createApp']>
     readonly customRef: UnwrapRef<typeof import('vue')['customRef']>
     readonly debounce: UnwrapRef<typeof import('./utils/debounce')['debounce']>
+    readonly decompressData: UnwrapRef<typeof import('./utils/crypto')['decompressData']>
+    readonly decrypt: UnwrapRef<typeof import('./utils/crypto')['decrypt']>
     readonly defineAsyncComponent: UnwrapRef<typeof import('vue')['defineAsyncComponent']>
     readonly defineComponent: UnwrapRef<typeof import('vue')['defineComponent']>
     readonly deleteImage: UnwrapRef<typeof import('./utils/db')['deleteImage']>
     readonly deleteSnapshot: UnwrapRef<typeof import('./utils/snapshot-storage')['deleteSnapshot']>
     readonly downloadFile: UnwrapRef<typeof import('./utils/file')['downloadFile']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly encrypt: UnwrapRef<typeof import('./utils/crypto')['encrypt']>
     readonly extractFolders: UnwrapRef<typeof import('./utils/bookmarksApi')['extractFolders']>
     readonly flattenBookmarks: UnwrapRef<typeof import('./utils/bookmarksApi')['flattenBookmarks']>
     readonly formatSettingValue: UnwrapRef<typeof import('./utils/settings-meta')['formatSettingValue']>
+    readonly generateIV: UnwrapRef<typeof import('./utils/crypto')['generateIV']>
+    readonly generateSalt: UnwrapRef<typeof import('./utils/crypto')['generateSalt']>
     readonly getAllImageIds: UnwrapRef<typeof import('./utils/db')['getAllImageIds']>
     readonly getAllKeys: UnwrapRef<typeof import('./utils/db')['getAllKeys']>
     readonly getAllSnapshotMetas: UnwrapRef<typeof import('./utils/snapshot-storage')['getAllSnapshotMetas']>
@@ -235,6 +263,7 @@ declare module 'vue' {
     readonly getDetailedSettingsDiff: UnwrapRef<typeof import('./utils/backup-diff')['getDetailedSettingsDiff']>
     readonly getFirstLetter: UnwrapRef<typeof import('./utils/pinyin')['getFirstLetter']>
     readonly getFolderPathFromMap: UnwrapRef<typeof import('./utils/bookmarksApi')['getFolderPathFromMap']>
+    readonly getImageBlob: UnwrapRef<typeof import('./utils/db')['getImageBlob']>
     readonly getImageKeys: UnwrapRef<typeof import('./utils/db')['getImageKeys']>
     readonly getImageUrl: UnwrapRef<typeof import('./utils/db')['getImageUrl']>
     readonly getPinyinFirstLetters: UnwrapRef<typeof import('./utils/pinyin')['getPinyinFirstLetters']>
@@ -268,6 +297,7 @@ declare module 'vue' {
     readonly onUnmounted: UnwrapRef<typeof import('vue')['onUnmounted']>
     readonly onUpdated: UnwrapRef<typeof import('vue')['onUpdated']>
     readonly onWatcherCleanup: UnwrapRef<typeof import('vue')['onWatcherCleanup']>
+    readonly packEncryptedData: UnwrapRef<typeof import('./utils/crypto')['packEncryptedData']>
     readonly processImageWithWorker: UnwrapRef<typeof import('./utils/imageProcessor')['processImageWithWorker']>
     readonly processMarkdownForExport: UnwrapRef<typeof import('./utils/export')['processMarkdownForExport']>
     readonly provide: UnwrapRef<typeof import('vue')['provide']>
@@ -292,6 +322,7 @@ declare module 'vue' {
     readonly toValue: UnwrapRef<typeof import('vue')['toValue']>
     readonly toggleSnapshotLock: UnwrapRef<typeof import('./utils/snapshot-storage')['toggleSnapshotLock']>
     readonly triggerRef: UnwrapRef<typeof import('vue')['triggerRef']>
+    readonly unpackEncryptedData: UnwrapRef<typeof import('./utils/crypto')['unpackEncryptedData']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly useAsyncWordCount: UnwrapRef<typeof import('./composables/useAsyncWordCount')['useAsyncWordCount']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
