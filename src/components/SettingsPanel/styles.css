@@ -1,175 +1,66 @@
 /* src/style/SettingsPanel.css */
 
 /* =================================================================
-   设置面板主容器
+   Drawer 内容区域（外壳已由 Drawer 组件接管）
    ================================================================= */
-.settings-panel {
-  position: fixed;
-  top: var(--space-4);
-  right: var(--space-4);
-  bottom: var(--space-4);
-  width: 360px;
-  background: var(--bg-panel);
-  backdrop-filter: var(--glass-md);
-  -webkit-backdrop-filter: var(--glass-md);
-  border: var(--border-glass);
-  border-radius: var(--radius-xl);
-  z-index: var(--z-dropdown);
-  transform: translateX(120%);
-  transition: transform 0.4s var(--ease-smooth);
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-lg);
-  color: var(--text-primary);
-}
-
-.settings-panel.open {
-  transform: translateX(0);
-}
-
-/* 背景遮罩 */
-.settings-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: var(--glass-xs);
-  z-index: var(--z-float);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.settings-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* =================================================================
-   面板头部
-   ================================================================= */
-.panel-header {
-  padding: var(--space-6) var(--space-6) var(--space-4);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.panel-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  color: var(--text-primary);
-}
-
-.close-btn {
-  width: var(--height-sm);
-  height: var(--height-sm);
-  border-radius: var(--radius-full);
-  background: var(--bg-input);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: var(--text-primary);
-}
-
-.close-btn:hover {
-  background: var(--bg-active);
-  transform: rotate(90deg);
-}
 
 /* =================================================================
    面板内容区域
    ================================================================= */
 .panel-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.panel-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.panel-content::-webkit-scrollbar-thumb {
-  background: var(--mask-light);
-  border-radius: var(--radius-xs);
-}
-
 /* =================================================================
-   折叠卡片组件
+   Collapse 组件覆盖样式（替代原 section-card）
    ================================================================= */
-.section-card {
+.panel-content :deep(.cj-collapse) {
   background: var(--bg-panel-card);
   border: var(--border-glass);
   border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 0 0 0 transparent;
   transition:
     background 0.3s cubic-bezier(0.55, 0, 0.1, 1),
-    border 0.3s cubic-bezier(0.55, 0, 0.1, 1);
-  box-shadow: 0 0 0 0 transparent;
+    border 0.3s cubic-bezier(0.55, 0, 0.1, 1),
+    box-shadow 0.3s cubic-bezier(0.55, 0, 0.1, 1);
 }
 
-.section-card:hover {
+.panel-content :deep(.cj-collapse:hover) {
   background: var(--bg-hover-card);
   border-color: var(--text-tertiary);
   box-shadow: 0 4px 16px rgba(var(--nord10-rgb), 0.12);
 }
 
-.section-card:last-of-type {
-  margin-bottom: 0;
+.panel-content :deep(.cj-collapse.is-expanded) {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 4px 16px rgba(var(--nord10-rgb), 0.12);
 }
 
-/* 卡片头部 */
-.card-header {
-  height: 52px;
-  padding: 0 var(--space-4);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
-
-.header-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+/* Header 标题样式：匹配原 .header-label */
+.panel-content :deep(.cj-collapse .cj-header__title) {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--text-secondary);
 }
 
-.toggle-icon {
-  color: var(--text-tertiary);
-  transition: transform 0.3s var(--ease-smooth);
+.panel-content :deep(.cj-collapse .cj-header__icon) {
+  color: var(--text-secondary);
 }
 
-.section-card.collapsed .toggle-icon {
-  transform: rotate(-90deg);
-}
-
-/* =================================================================
-   折叠动画 - 与 Vue JS 动画配合
-   ================================================================= */
-.accordion-enter-active,
-.accordion-leave-active {
-  transition: height 0.3s var(--ease-smooth);
-  overflow: hidden;
-}
-
-.card-content-inner {
+/* 内容区 padding：匹配原 .card-content-inner */
+.panel-content :deep(.cj-collapse--sm.is-expanded > .cj-collapse__wrapper > .cj-collapse__body > .cj-collapse__content) {
   padding: 0 var(--space-4) var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+/* 禁用 Collapse 默认的展开态高亮 */
+.panel-content :deep(.cj-collapse.is-expanded) {
+  border-color: var(--text-tertiary);
 }
 
 /* =================================================================

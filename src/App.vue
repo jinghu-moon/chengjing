@@ -58,25 +58,16 @@ const handleBlur = () => {
     <TodoList />
     <DailyPoem v-if="settings.poemShow" />
 
-    <SettingsPanel
-      :is-open="isSettingsOpen"
-      @update:is-open="isSettingsOpen = $event"
-    />
+    <SettingsPanel v-model:open="isSettingsOpen" />
 
     <CalendarPanel
       :is-open="isCalendarOpen"
       @update:is-open="isCalendarOpen = $event"
     />
 
-    <BookmarkPanel
-      :is-open="isBookmarkOpen"
-      @update:is-open="isBookmarkOpen = $event"
-    />
+    <BookmarkPanel v-model:open="isBookmarkOpen" />
 
-    <DataBackupPanel
-      :is-open="isDataBackupOpen"
-      @update:is-open="isDataBackupOpen = $event"
-    />
+    <DataBackupPanel v-model:open="isDataBackupOpen" />
 
     <div class="top-actions" :class="{ hidden: isFocusMode }">
       <button class="icon-btn" title="日历" @click="isCalendarOpen = true">
