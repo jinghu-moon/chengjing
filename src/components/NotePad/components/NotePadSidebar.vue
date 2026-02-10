@@ -238,7 +238,7 @@ const handleDelete = (id: string) => {
 
 .add-btn:hover {
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .note-list {

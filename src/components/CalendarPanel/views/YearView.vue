@@ -261,7 +261,7 @@ const handleYearScroll = (e: WheelEvent) => {
 }
 
 .mini-day.type-festival::after {
-  background: var(--nord15);
+  background: var(--color-purple);
 }
 
 .mini-day.type-term::after {

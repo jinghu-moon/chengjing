@@ -38,7 +38,7 @@ body {
 
   /* 颜色 */
   color: var(--text-primary);
-  background-color: var(--nord0); /* 图片加载前的底色 */
+  background-color: var(--bg-page); /* 图片加载前的底色 */
 
   /* 字体平滑 */
   -webkit-font-smoothing: antialiased;

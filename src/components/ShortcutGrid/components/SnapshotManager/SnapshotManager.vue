@@ -410,7 +410,7 @@ const formatSize = (bytes: number): string => {
   height: 20px;
   padding: 0 var(--space-2);
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
   font-size: 11px;
   font-weight: var(--weight-semibold);
   border-radius: var(--radius-full);
@@ -448,7 +448,7 @@ const formatSize = (bytes: number): string => {
   width: 32px;
   height: 32px;
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
   border-radius: var(--radius-md);
   flex-shrink: 0;
 }
@@ -480,7 +480,7 @@ const formatSize = (bytes: number): string => {
   width: 18px;
   height: 18px;
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }
@@ -701,7 +701,7 @@ const formatSize = (bytes: number): string => {
 
 .action-btn.primary {
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .action-btn.primary:hover {
@@ -784,7 +784,7 @@ const formatSize = (bytes: number): string => {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   background: var(--color-primary);
-  color: var(--nord6);
+  color: var(--btn-text-color);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   border-radius: var(--radius-md);
@@ -811,13 +811,13 @@ const formatSize = (bytes: number): string => {
 
 .list-content::-webkit-scrollbar-thumb,
 .snapshot-detail::-webkit-scrollbar-thumb {
-  background: var(--nord3);
+  background: var(--scrollbar-thumb);
   border-radius: var(--radius-sm);
 }
 
 .list-content::-webkit-scrollbar-thumb:hover,
 .snapshot-detail::-webkit-scrollbar-thumb:hover {
-  background: var(--nord2);
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* 响应式 */

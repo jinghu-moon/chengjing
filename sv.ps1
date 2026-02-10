@@ -30,11 +30,12 @@ public class SmartBackup {
     }
 
     private static string FmtSize(long bytes) {
-        if (bytes == 0) return "0 B";
+        if (bytes == 0) return "    +0.0 B";
         string[] suf = { "B", "KB", "MB" };
         int place = Convert.ToInt32(Math.Floor(Math.Log(Math.Abs(bytes), 1024)));
         double num = Math.Round(Math.Abs(bytes) / Math.Pow(1024, place), 1);
-        return string.Format("{0,8:0.0} {1}", Math.Sign(bytes) * num, suf[place]);
+        double val = Math.Sign(bytes) * num;
+        return string.Format("{0,8:+0.0;-0.0;+0.0} {1}", val, suf[place]);
     }
 
     // 新增：分离路径和文件名的着色输出方法
@@ -169,12 +170,12 @@ public class SmartBackup {
                     if (sizeDiff > 0) { 
                         statusSymbol = "↑"; 
                         symbolColor = ConsoleColor.Yellow;
-                        extraInfo = $"+{FmtSize(sizeDiff)}"; 
+                        extraInfo = FmtSize(sizeDiff); 
                     }
                     else if (sizeDiff < 0) { 
                         statusSymbol = "↓"; 
                         symbolColor = ConsoleColor.Blue;
-                        extraInfo = $"{FmtSize(sizeDiff)}"; 
+                        extraInfo = FmtSize(sizeDiff); 
                     }
                     else { 
                         statusSymbol = "•"; 

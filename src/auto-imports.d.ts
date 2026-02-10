@@ -147,6 +147,7 @@ declare global {
   const useSimpleDrag: typeof import('./composables/useSimpleDrag').useSimpleDrag
   const useSlots: typeof import('vue').useSlots
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useTheme: typeof import('./composables/useTheme').useTheme
   const useTodoDrag: typeof import('./composables/useTodoDrag').useTodoDrag
   const useTodos: typeof import('./composables/useTodos').useTodos
   const validateBackup: typeof import('./utils/backup-validator').validateBackup
@@ -345,6 +346,7 @@ declare module 'vue' {
     readonly useSimpleDrag: UnwrapRef<typeof import('./composables/useSimpleDrag')['useSimpleDrag']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
+    readonly useTheme: UnwrapRef<typeof import('./composables/useTheme')['useTheme']>
     readonly useTodoDrag: UnwrapRef<typeof import('./composables/useTodoDrag')['useTodoDrag']>
     readonly useTodos: UnwrapRef<typeof import('./composables/useTodos')['useTodos']>
     readonly validateBackup: UnwrapRef<typeof import('./utils/backup-validator')['validateBackup']>

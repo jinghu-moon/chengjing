@@ -98,6 +98,7 @@ declare module 'vue' {
     TodoList: typeof import('./components/TodoList.vue')['default']
     Tooltip: typeof import('./components/Tooltip/index.vue')['default']
     TooltipProvider: typeof import('./components/Tooltip/TooltipProvider.vue')['default']
+    UserEventPanel: typeof import('./components/CalendarPanel/components/UserEventPanel.vue')['default']
     WeekView: typeof import('./components/CalendarPanel/views/WeekView.vue')['default']
     YearMonthWheel: typeof import('./components/DatePicker/components/YearMonthWheel.vue')['default']
     YearView: typeof import('./components/CalendarPanel/views/YearView.vue')['default']

@@ -426,22 +426,22 @@ const changeMonth = (step: number) => {
 }
 
 .tag-holiday {
-  background: rgb(from var(--nord15) r g b / 0.2);
-  color: var(--nord15);
+  background: var(--color-purple-bg);
+  color: var(--color-purple);
 }
 
 .tag-lieu {
-  background: rgb(from var(--nord12) r g b / 0.2);
-  color: var(--nord12);
+  background: var(--color-orange-bg);
+  color: var(--color-orange);
 }
 
 .tag-work {
-  background: rgb(from var(--nord11) r g b / 0.15);
-  color: var(--nord11);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 .day-cell.is-holiday {
-  background: rgb(from var(--nord8) r g b / 0.1);
+  background: var(--color-relax-bg);
 }
 
 /* Dots */

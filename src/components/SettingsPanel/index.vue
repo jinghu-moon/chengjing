@@ -18,6 +18,7 @@ import {
 } from '@tabler/icons-vue'
 import { saveImage, removeImage } from '@/utils/db'
 import { useDailyPoem } from '@/components/DailyPoem/composables/useDailyPoem'
+import { useTheme } from '@/composables/useTheme'
 // [自动导入] useSettings 无需显式导入
 
 import { Collapse, Drawer } from '@/components/Container'
@@ -32,6 +33,7 @@ import PresetManager from '@/components/DataBackup/PresetManager.vue'
 const isOpen = defineModel<boolean>('open', { default: false })
 
 const { settings, iconConfig, forceWallpaperUpdate, resetSettings } = useSettings()
+const { isDark } = useTheme()
 
 const {
   settings: poemSettings,
@@ -595,6 +597,8 @@ const resetNotePadPos = () => {
           :show-switch="false"
           :show-collapse-icon="true"
         >
+          <SettingSwitch v-model="isDark" label="深色模式" />
+          <div class="divider"></div>
           <SettingSwitch v-model="settings.clockShow" label="时钟与日期" />
           <SettingSwitch v-model="settings.shortcutsShow" label="快捷方式网格" />
           <SettingSwitch v-model="settings.calculatorShow" label="计算器" />

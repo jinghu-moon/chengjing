@@ -1,8 +1,30 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSettings } from '../composables/useSettings'
+import { useUserEvents, getDaysRemaining } from './CalendarPanel/composables/useUserEvents'
 
 const { settings } = useSettings()
+const { nearest } = useUserEvents()
+
+const emit = defineEmits<{
+  'open-calendar': []
+}>()
+
+/** 只读摘要文案 */
+const summaryText = computed(() => {
+  if (!nearest.value) return ''
+  const days = getDaysRemaining(nearest.value.targetDate)
+  if (days > 0) return `距离${nearest.value.title}还有 ${days} 天`
+  if (days === 0) return `${nearest.value.title}就是今天！`
+  if (nearest.value.repeat === 'yearly') {
+    const total = Math.abs(days)
+    const years = Math.floor(total / 365)
+    return years > 0
+      ? `${nearest.value.title} 第 ${years + 1} 年`
+      : `${nearest.value.title} 第 ${total} 天`
+  }
+  return `${nearest.value.title}已过 ${Math.abs(days)} 天`
+})
 
 const timeStr = ref('00:00:00')
 const dateStr = ref('')
@@ -40,6 +62,9 @@ onUnmounted(() => {
       <span id="clock-time">{{ timeStr }}</span>
     </div>
     <div id="clock-date">{{ dateStr }}</div>
+    <div v-if="summaryText" class="countdown-summary" @click="emit('open-calendar')">
+      {{ summaryText }}
+    </div>
   </div>
 </template>
 
@@ -78,5 +103,20 @@ onUnmounted(() => {
   /* 增加字间距，更有质感 */
   font-family: var(--font-family-base);
   /* 尝试用一点等宽字体风格，或者直接用默认 */
+}
+
+.countdown-summary {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.75;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.2s;
+}
+
+.countdown-summary:hover {
+  opacity: 0.95;
 }
 </style>

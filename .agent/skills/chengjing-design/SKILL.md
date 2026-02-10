@@ -2,8 +2,8 @@
 name: chengjing-design
 description: ChengJing Design System Reference. Based on project's src/styles/variables.css. Use when creating components or making styling decisions.
 metadata:
-  version: "4.1.0"
-  updated: "2026-01-29"
+  version: "4.3.0"
+  updated: "2026-02-10"
   source_of_truth: "src/styles/variables.css"
 ---
 
@@ -17,17 +17,36 @@ metadata:
 
 ### Brand & Functional Colors
 
-| Usage | Variable | Source |
-|-------|----------|--------|
-| **Primary** | `--color-primary` | Nord10 `#5e81ac` |
-| Hover | `--color-primary-hover` | Nord9 |
-| Active | `--color-primary-active` | `#4a6a94` |
-| Alpha | `--color-primary-alpha` | 20% |
-| **Success** | `--color-success` | Nord14 |
-| **Warning** | `--color-warning` | Nord13 |
-| **Danger** | `--color-danger` | Nord11 |
-| **Info** | `--color-info` | Nord3 |
-| **Relax** | `--color-relax` | Nord8 |
+Each functional color supports **6 states**: base / hover / active / focus / disabled / light
+
+| Usage | Variable | Description |
+|-------|----------|-------------|
+| **Primary** | `--color-primary` | Brand blue |
+| Hover | `--color-primary-hover` | Hover state |
+| Active | `--color-primary-active` | Press state |
+| Focus | `--color-primary-focus` | Keyboard focus background |
+| Disabled | `--color-primary-disabled` | Disabled state |
+| Light | `--color-primary-light` | Lightest background |
+| Alpha | `--color-primary-alpha` | 20% transparency |
+| **Success** | `--color-success` | Green |
+| **Warning** | `--color-warning` | Orange/Yellow |
+| **Danger** | `--color-danger` | Red |
+| **Info** | `--color-info` | Gray |
+| **Relax** | `--color-relax` | Cyan |
+| **Purple** | `--color-purple` | Festival/celebration |
+| Purple BG | `--color-purple-bg` | 20% |
+| **Orange** | `--color-orange` | Lieu day/makeup work |
+| Orange BG | `--color-orange-bg` | 20% |
+
+> All functional colors (success/warning/danger/info) follow the same 6-state pattern:
+> `--color-{name}`, `-hover`, `-active`, `-focus`, `-disabled`, `-light`, `-bg`
+
+### Interactive Element Colors
+
+| Usage | Variable | Description |
+|-------|----------|-------------|
+| Button text | `--btn-text-color` | Text on colored buttons |
+| Control indicator | `--control-indicator` | Switch dots, slider thumbs |
 
 ### Text Colors
 
@@ -37,6 +56,16 @@ metadata:
 | Secondary | `--text-secondary` | 75% |
 | Tertiary | `--text-tertiary` | 45% |
 | Placeholder | `--text-placeholder` | 30% |
+| Heading | `--text-heading` | Full |
+| Heading sub | `--text-heading-sub` | Slightly muted |
+
+### Semantic Text Colors
+
+| Usage | Variable | Description |
+|-------|----------|-------------|
+| Brand text | `--text-color-brand` | Brand-colored text |
+| Link text | `--text-color-link` | Hyperlink color |
+| Anti text | `--text-color-anti` | Text on colored backgrounds |
 
 ### Background Colors
 
@@ -46,7 +75,39 @@ metadata:
 | Card | `--bg-panel-card` |
 | Hover | `--bg-hover` |
 | Active | `--bg-active` |
+| Select | `--bg-container-select` |
 | Input | `--bg-input` |
+| Page | `--bg-page` |
+| Tag | `--bg-tag` |
+
+### Border Colors
+
+| Usage | Variable |
+|-------|----------|
+| Glass border | `--color-border-glass` |
+| Divider | `--color-divider` |
+| Strong border | `--color-border-strong` |
+
+### Scrollbar
+
+| Usage | Variable |
+|-------|----------|
+| Thumb | `--scrollbar-thumb` |
+| Thumb hover | `--scrollbar-thumb-hover` |
+
+### Code Syntax Highlighting
+
+| Usage | Variable |
+|-------|----------|
+| Foreground | `--code-foreground` |
+| Comment | `--code-comment` |
+| Keyword | `--code-keyword` |
+| Function | `--code-function` |
+| String | `--code-string` |
+| Variable | `--code-variable` |
+| Number | `--code-number` |
+| Attribute | `--code-attribute` |
+| Inline code | `--code-inline` |
 
 ---
 
@@ -174,6 +235,21 @@ metadata:
 | `--letter-spacing-tight` | -0.02em |
 | `--letter-spacing-normal` | 0 |
 | `--letter-spacing-wide` | 0.05em |
+
+### Font Shorthand (Composites)
+
+Usage: `font: var(--font-body-md);`
+
+| Token | Weight | Size | Line Height | Usage |
+|-------|--------|------|-------------|-------|
+| `--font-body-sm` | 400 | 13px | 1.5 | Secondary text |
+| `--font-body-md` | 400 | 14px | 1.5 | **Default body** ✓ |
+| `--font-body-lg` | 400 | 16px | 1.5 | Large body |
+| `--font-title-sm` | 600 | 14px | 1.2 | Small title |
+| `--font-title-md` | 600 | 16px | 1.2 | Medium title |
+| `--font-title-lg` | 600 | 20px | 1.2 | Large title |
+| `--font-headline` | 700 | 24px | 1.2 | Page heading |
+| `--font-display` | 700 | 64px | 1.2 | Display text |
 
 ---
 

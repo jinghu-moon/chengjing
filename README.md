@@ -3,12 +3,14 @@
   <h1>澄镜 Chengjing</h1>
   <p><b>极简 · 高效 · 毛玻璃</b></p>
   <p>专为现代浏览器打造的沉浸式新标签页扩展</p>
-  
+
   <p>
     <a href="#-核心特性">核心特性</a> •
+    <a href="#-组件体系">组件体系</a> •
     <a href="#-技术栈">技术栈</a> •
-    <a href="#-安装使用">安装使用</a> •
-    <a href="#-目录结构">目录结构</a>
+    <a href="#-目录结构">目录结构</a> •
+    <a href="#-安装与开发">安装与开发</a> •
+    <a href="#-开发规范">开发规范</a>
   </p>
 </div>
 
@@ -52,63 +54,204 @@
 - **万年历**：基于 `chinese-days`，精准显示农历、节气、法定节假日及调休信息。
 - **多功能计算器**：支持历时记录的轻量级计算器。
 
-### 6. 🛠️ 现代化架构
+### 6. 🔄 数据管理
+- **配置预设**：一键保存/切换/删除多套个性化配置方案，支持预设导入导出。
+- **数据同步**：三种导出模式（主题风格 / 完整配置 / 含壁纸），支持 **AES-256-GCM** 加密保护。
+- **历史快照**：自动记录设置变更历史，支持回溯到任意时间点。
+
+### 7. 🧩 统一容器组件体系
+- **Container 组件库**：Card、Collapse、List、Drawer、EmptyState、ContainerGroup 六大容器组件，共享设计语言。
+- **Drawer 抽屉**：四方向滑入（left/right/top/bottom），支持遮罩、ESC 关闭、滚动锁定、关闭前拦截。
+- **ContainerGroup**：通过 `provide/inject` 实现选择管理和手风琴模式，支持网格布局。
+
+### 8. 🛠️ 现代化架构
 - **真·热重载 (HMR)**：基于 Vite + CRXJS，修改代码后扩展自动刷新，开发体验如同开发普通 Web App。
 - **TypeScript**: 全项目严格类型定义，拒绝 `any`。
 - **按需加载**: 路由级与组件级 (Async Component) 的代码分割，极大减小首屏体积。
+- **多浏览器支持**：同时支持 Chrome (MV3) 和 Firefox (Gecko) 打包发布。
+
+## 🧱 组件体系
+
+### 业务面板
+
+| 组件 | 说明 | 文档 |
+|------|------|------|
+| `BookmarkPanel` | 书签管理面板，SoA 高性能架构 + Web Worker 异步搜索 + 虚拟滚动 | [README](src/components/BookmarkPanel/README.md) |
+| `SettingsPanel` | 全局设置面板，Collapse 折叠分组，涵盖 9 大设置区域 | [README](src/components/SettingsPanel/README.md) |
+| `DataBackupPanel` | 数据备份面板，预设管理 + 历史回溯 + 文件备份 | [README](src/components/DataBackupPanel/README.md) |
+| `CalendarPanel` | 万年历面板，农历/节气/节假日/调休 | [README](src/components/CalendarPanel/README.md) |
+| `DailyPoem` | 每日诗词，多源 API + 收藏管理 + 卡片分享 | [README](src/components/DailyPoem/README.md) |
+| `NotePad` | 富文本便签，TipTap 引擎 + 图片压缩 + Markdown | [README](src/components/NotePad/README.md) |
+
+### Container 容器组件库
+
+统一的容器组件体系，共享 Glassmorphism 设计语言和 Design Tokens。
+
+| 组件 | 说明 |
+|------|------|
+| `Card` | 通用内容卡片，支持标签页、骨架屏、三种布局方向 |
+| `Collapse` | 折叠面板，CSS Grid 动画、5 种布局预设、手风琴模式 |
+| `List` | 列表项，选择指示器（单选/多选）、图标、副标题 |
+| `Drawer` | 抽屉面板，四方向滑入、遮罩、ESC 关闭、滚动锁定、关闭前拦截 |
+| `EmptyState` | 空状态占位，图标 + 标题 + 描述 + 操作按钮 |
+| `ContainerGroup` | 容器组，网格布局 + 选择管理 + 手风琴控制 |
+
+> 详见 [Container README](src/components/Container/README.md)
+
+### 基础 UI 组件
+
+| 组件 | 说明 | 文档 |
+|------|------|------|
+| `Button` | 通用按钮，多变体/尺寸/图标模式 | [README](src/components/Button/README.md) |
+| `Dialog` | 模态对话框，Teleport + 遮罩 + 动画 | [README](src/components/Dialog/README.md) |
+| `SelectMenu` | 下拉选择菜单，单选/多选/Checkbox | [README](src/components/SelectMenu/README.md) |
+| `Toast` | 轻提示通知，自动消失 + 多类型 | [README](src/components/Toast/README.md) |
+| `Tooltip` | 工具提示，智能定位 + 延迟显隐 | [README](src/components/Tooltip/README.md) |
+| `ColorPicker` | 颜色选择器 | [README](src/components/ColorPicker/README.md) |
+| `DatePicker` | 日期选择器 | [README](src/components/DatePicker/README.md) |
+| `TimePicker` | 时间选择器 | [README](src/components/TimePicker/README.md) |
+| `BaseSearchInput` | 通用搜索输入框，快捷键提示 | — |
+
+### 数据管理组件
+
+| 组件 | 说明 | 文档 |
+|------|------|------|
+| `DataBackup` | 数据备份核心，预设管理 + 历史快照 + 文件导入导出 | [README](src/components/DataBackup/README.md) |
+| `DataSync` | 配置同步，三种导出模式 + AES-256-GCM 加密 | [README](src/components/DataSync/README.md) |
+
+### 独立功能组件
+
+| 组件 | 说明 |
+|------|------|
+| `ShortcutGrid` | 快捷方式网格，拖拽排序 + 文件夹 + 自定义图标 |
+| `SearchBar` | 搜索栏，多引擎切换 |
+| `ClockWeather` | 时钟与天气显示 |
+| `Pomodoro` | 番茄钟计时器 |
+| `TodoList` | 待办清单，拖拽排序 |
+| `Calculator` | 多功能计算器 |
+| `DynamicCalendarIcon` | 动态日历图标（显示当日日期） |
 
 ## 🛠️ 技术栈
 
 | 领域 | 技术方案 | 说明 |
 |------|----------|------|
-| **Core** | **Vue 3.4+** | Composition API, `<script setup>` |
-| **Language** | **TypeScript 5.x** | Strict Mode Enabled |
-| **Build** | **Vite 6.x** | 下一代前端构建工具 |
+| **Core** | **Vue 3.4+** | Composition API, `<script setup>`, `defineModel` |
+| **Language** | **TypeScript 5.9** | Strict Mode Enabled |
+| **Build** | **Vite 7.x** | 下一代前端构建工具 |
 | **Extension** | **CRXJS** | Vite 插件，提供 HMR 和 Manifest 自动生成 |
-| **Styling** | **Vanilla CSS** | CSS Variables, Scoped CSS (无 Tailwind 依赖) |
+| **Styling** | **Vanilla CSS** | CSS Variables, Scoped CSS, Glassmorphism Design Tokens |
 | **Icons** | **Tabler Icons** | `@tabler/icons-vue` |
-| **State** | **Composables** | 基于 VueUse 的逻辑复用，替代庞大的 Vuex/Pinia |
+| **State** | **Composables** | 基于 VueUse 的逻辑复用，替代 Vuex/Pinia |
+| **Lint** | **ESLint 9 + Prettier** | Vue/TS 规则集，统一代码风格 |
+| **Test** | **Vitest** | Vite 原生测试框架 |
 
 ### 关键库 (Dependencies)
 
 - **逻辑复用**: `@vueuse/core` - 实用的 Composition API 工具集
 - **虚拟列表**: `@tanstack/vue-virtual` - 高性能长列表渲染
-- **富文本**: `@tiptap/vue-3` & `tiptap-markdown` -  headless 编辑器框架
+- **富文本**: `@tiptap/vue-3` & `tiptap-markdown` - headless 编辑器框架
 - **日历算法**: `chinese-days` - 专业农历/节假日计算
 - **日期处理**: `dayjs` - 轻量级时间库
 - **拖拽排序**: `vue-draggable-plus` - 基于 Sortablejs 的 Vue 封装
 - **绘图**: `html-to-image` - DOM 转图片
 - **存储**: `idb-keyval` - Promise 风格的 IndexedDB 封装
+- **加密**: `fflate` + `pako` - 压缩/解压，配合 Web Crypto API 实现 AES-256-GCM
+- **差异对比**: `deep-object-diff` - 深层对象差异检测（设置快照对比）
+- **自动导入**: `unplugin-auto-import` + `unplugin-vue-components` - 零 import 开发体验
 
 ## 📂 目录结构
 
 ```bash
 src/
-├── assets/                 # 静态资源 (字体, 图片)
-├── components/             # 业务组件模块
-│   ├── BookmarkPanel/      # 书签面板 (含 Worker 逻辑)
-│   ├── DailyPoem/          # 每日诗词 (含 PoemManager, ShareCard)
-│   ├── NotePad/            # 笔记编辑器 (TipTap 集成)
-│   ├── SettingsPanel/      # 全局设置面板
-│   ├── CalendarPanel/      # 日历组件
-│   ├── TodoList/           # 待办事项
-│   └── ...
-├── composables/            # 全局通用 Hooks (useTheme, useWallPaper 等)
-├── styles/                 # 全局样式
-│   ├── main.css            # 基础重置与通用样式
-│   ├── variables.css       # CSS 变量设计系统 (Design Tokens)
-│   └── transitions.css     # 全局过渡动画定义
-├── utils/                  # 工具函数 (db.ts, storage.ts 等)
-├── App.vue                 # 根组件 (布局入口)
-├── main.ts                 # 入口文件
-└── manifest.json           # Chrome 扩展清单 (V3)
+├── assets/                     # 静态资源
+│   ├── font/                   # 字体文件 (HarmonyOS Sans SC)
+│   └── icons/                  # SVG 图标资源
+├── components/                 # 业务组件模块
+│   ├── Container/              # 容器组件库 (Card/Collapse/Drawer/EmptyState/List/Group)
+│   ├── BookmarkPanel/          # 书签面板 (SoA 架构 + Worker + 虚拟滚动)
+│   ├── SettingsPanel/          # 全局设置面板 (Drawer + Collapse 分组)
+│   ├── DataBackupPanel/        # 数据备份面板 (Drawer 壳层)
+│   ├── DataBackup/             # 数据备份核心 (预设/快照/文件)
+│   ├── DataSync/               # 数据同步 (导出/导入/AES 加密)
+│   ├── DailyPoem/              # 每日诗词 (多源 API + 收藏 + 卡片分享)
+│   ├── NotePad/                # 富文本便签 (TipTap 引擎)
+│   ├── CalendarPanel/          # 万年历 (农历/节气/节假日)
+│   ├── ShortcutGrid/           # 快捷方式网格 (拖拽 + 文件夹)
+│   ├── ColorPicker/            # 颜色选择器
+│   ├── DatePicker/             # 日期选择器
+│   ├── TimePicker/             # 时间选择器
+│   ├── SelectMenu/             # 下拉选择菜单
+│   ├── Dialog/                 # 模态对话框
+│   ├── Button/                 # 通用按钮
+│   ├── Toast/                  # 轻提示通知
+│   ├── Tooltip/                # 工具提示
+│   ├── BaseSearchInput.vue     # 通用搜索输入框
+│   ├── SearchBar.vue           # 搜索栏
+│   ├── ClockWeather.vue        # 时钟与天气
+│   ├── Pomodoro.vue            # 番茄钟
+│   ├── TodoList.vue            # 待办清单
+│   ├── Calculator.vue          # 计算器
+│   ├── DynamicCalendarIcon.vue # 动态日历图标
+│   ├── Background.vue          # 壁纸背景层
+│   └── SvgIcon.vue             # SVG 图标组件
+├── composables/                # 全局 Composables
+│   ├── useSettings.ts          # 全局设置读写
+│   ├── usePresets.ts           # 配置预设管理
+│   ├── useDataBackup.ts        # 数据备份逻辑
+│   ├── useHistory.ts           # 历史快照管理
+│   ├── useCalculator.ts        # 计算器逻辑
+│   ├── useCalendarData.ts      # 日历数据计算
+│   ├── useContextMenu.ts       # 右键菜单
+│   ├── useConverter.ts         # 单位换算
+│   ├── useDraggableCard.ts     # 可拖拽卡片
+│   ├── useSimpleDrag.ts        # 简易拖拽
+│   ├── useTodos.ts             # 待办事项逻辑
+│   ├── useTodoDrag.ts          # 待办拖拽排序
+│   ├── useNotes.ts             # 便签数据管理
+│   ├── useImageUpload.ts       # 图片上传处理
+│   ├── useImageGC.ts           # 图片垃圾回收
+│   └── useAsyncWordCount.ts    # 异步字数统计
+├── constants/                  # 常量定义
+│   └── keys.ts                 # provide/inject Key
+├── data/                       # 静态数据
+├── types/                      # 全局类型定义
+│   ├── backup.ts               # 备份相关类型
+│   ├── env.d.ts                # 环境变量声明
+│   └── index.ts                # 类型统一导出
+├── styles/                     # 全局样式
+│   ├── index.css               # 基础重置与通用样式
+│   ├── variables.css           # CSS 变量设计系统 (Design Tokens)
+│   ├── drag.css                # 拖拽相关样式
+│   └── TodoList.css            # 待办清单样式
+├── utils/                      # 工具函数
+│   ├── db.ts                   # IndexedDB 封装 (idb-keyval)
+│   ├── crypto.ts               # AES-256-GCM 加密/解密
+│   ├── bookmarksApi.ts         # Chrome Bookmarks API 封装
+│   ├── pinyin.ts               # 拼音搜索工具
+│   ├── pinyinDict.ts           # 拼音字典数据
+│   ├── imageProcessor.ts       # 图片处理 (压缩/转换)
+│   ├── positioning.ts          # 元素定位计算
+│   ├── debounce.ts             # 防抖
+│   ├── throttle.ts             # 节流
+│   ├── export.ts               # 导出工具
+│   ├── file.ts                 # 文件操作工具
+│   ├── settings-meta.ts        # 设置元数据
+│   ├── snapshot-storage.ts     # 快照存储
+│   ├── backup-diff.ts          # 备份差异对比
+│   └── backup-validator.ts     # 备份数据校验
+├── App.vue                     # 根组件 (布局入口)
+├── main.ts                     # 应用入口
+├── background.ts               # Service Worker (MV3 后台脚本)
+├── demo.vue                    # 组件演示页
+└── manifest.json               # Chrome 扩展清单 (Manifest V3)
 ```
 
 ## 🚀 安装与开发
 
 ### 环境要求
+
 - Node.js >= 18
-- pnpm / npm
+- npm / pnpm
 
 ### 1. 安装依赖
 
@@ -136,18 +279,72 @@ npm run build
 ```
 
 构建产物将输出到 `dist/` 目录。
-- **优化**: 会自动压缩代码、分离 Vendor Chunk、移除 console (视配置而定)。
+- **优化**: 自动压缩代码 (Terser)、分离 Vendor Chunk。
 - **发布**: 将 `dist/` 目录打包即可发布到 Chrome Web Store。
 
-## 🔧 最佳实践遵循
+### 4. 打包扩展
 
-本项目严格遵循以下开发规范：
-- **组件化**: 所有功能模块解耦，通过 `props`/`emits` 通信。
-- **Lazy Loading**: 
-  - `DailyPoem` 的管理面板和分享卡片仅在需要时加载 (`defineAsyncComponent`)。
-  - 大体积库（如 `html-to-image`）建议动态导入。
-- **Worker Offloading**: 耗时的书签索引构建在 Worker 中进行，保障主线程流畅。
-- **Design Tokens**: 严禁硬编码颜色值，统一定义在 `variables.css` 中，支持一键换肤。
+```bash
+npm run pack              # 同时打包 Chrome + Firefox
+npm run pack:chrome       # 仅打包 Chrome (.zip)
+npm run pack:firefox      # 仅打包 Firefox (.zip)
+```
+
+### 5. 运行测试
+
+```bash
+npm run test              # Vitest 运行测试
+npm run test:ui           # Vitest UI 可视化界面
+```
+
+### 6. 提交发布
+
+```bash
+npm run release "<type>(<scope>): <描述>"
+```
+
+### 全部脚本一览
+
+| 命令 | 说明 |
+|------|------|
+| `npm run dev` | 启动 Vite 开发服务器 (HMR) |
+| `npm run build` | 生产构建 |
+| `npm run preview` | 预览构建产物 |
+| `npm run test` | 运行 Vitest 测试 |
+| `npm run test:ui` | Vitest UI 可视化 |
+| `npm run release` | Git 提交并发布 |
+| `npm run pack` | 打包 Chrome + Firefox 扩展 |
+| `npm run pack:chrome` | 仅打包 Chrome |
+| `npm run pack:firefox` | 仅打包 Firefox |
+
+## 🔧 开发规范
+
+### 代码风格
+
+- 使用 `<script setup lang="ts">` 语法
+- Composables 命名：`use<Feature>.ts`
+- 组件命名：PascalCase
+- CSS：使用 `variables.css` 中的 Design Tokens，禁止硬编码颜色
+
+### 组件目录约定
+
+```
+src/components/<ComponentName>/
+├── index.vue          # 主组件
+├── components/        # 子组件
+├── composables/       # 逻辑复用
+├── types.ts           # 类型定义
+└── workers/           # Web Worker (可选)
+```
+
+### 架构原则
+
+- **组件化**：所有功能模块解耦，通过 `props`/`emits`/`provide`/`inject` 通信
+- **Lazy Loading**：重型组件使用 `defineAsyncComponent`，大体积库动态导入
+- **Worker Offloading**：CPU 密集型任务（书签索引、搜索、数据扁平化）在 Worker 中执行
+- **Design Tokens**：严禁硬编码颜色值，统一定义在 `variables.css`
+- **容器复用**：面板类组件统一使用 Container 组件库（Drawer/Collapse/Card）
+- **自动导入**：`useSettings`、`computed`、`ref` 等通过 unplugin 自动导入，无需显式 import
 
 ---
 

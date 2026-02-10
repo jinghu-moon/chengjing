@@ -412,7 +412,7 @@ defineExpose({
   align-items: center;
   gap: 4px;
   padding: 4px 4px 4px 8px;
-  background: var(--nord);
+  background: var(--bg-tag);
   border-radius: var(--radius-sm);
   font-size: 12px;
   color: var(--text-primary);

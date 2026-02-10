@@ -170,7 +170,7 @@ const handleKeydown = (event: KeyboardEvent, unit: TimeUnit) => {
 }
 
 .single-input-wrapper:hover {
-  border-color: rgba(var(--nord6-rgb), 0.2);
+  border-color: var(--color-divider);
 }
 
 .single-input-wrapper:focus-within {

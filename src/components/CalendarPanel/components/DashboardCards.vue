@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import dayjs from 'dayjs'
+import UserEventPanel from './UserEventPanel.vue'
 
 // Auto-imported hooks
 const { getDayMetadata } = useCalendarData()
+
+// Tab 切换状态
+const activeTab = ref<'upcoming' | 'events'>('upcoming')
 
 // 视图数据准备
 const todayDetail = computed(() => {
@@ -39,34 +43,44 @@ const upcomingEvents = computed(() => {
 
 <template>
   <div class="footer-side-col">
-    <!-- Today Card -->
+    <!-- Today Card（紧凑两行布局） -->
     <div class="footer-card today-card">
-      <div class="card-title">今日</div>
-      <div class="today-flex-wrapper">
-        <div class="today-main">
-          <span class="today-date">{{ todayDetail.date }}</span>
-          <span class="today-weekday">{{ todayDetail.weekDay }}</span>
-        </div>
-        <div class="today-sub-info">
-          <div class="today-lunar">{{ todayDetail.lunarStr }}</div>
-          <div v-if="todayDetail.special" class="today-special">
-            <span
-              class="special-tag"
-              :class="todayDetail.special === todayDetail.lunarStr ? 'festival' : 'term'"
-            >
-              <!-- Note: Simplified logic for tag class, improving original if needed -->
-              <!-- Or just reuse the logic if getDayMetadata provides type -->
-              {{ todayDetail.special }}
-            </span>
-          </div>
-        </div>
+      <div class="today-date">{{ todayDetail.date }}</div>
+      <div class="today-sub">
+        <span class="today-weekday">{{ todayDetail.weekDay }}</span>
+        <span class="today-divider">·</span>
+        <span class="today-lunar">{{ todayDetail.lunarStr }}</span>
+        <span
+          v-if="todayDetail.special"
+          class="special-tag"
+          :class="todayDetail.special === todayDetail.lunarStr ? 'festival' : 'term'"
+        >
+          {{ todayDetail.special }}
+        </span>
       </div>
     </div>
 
-    <!-- Upcoming Card -->
-    <div class="footer-card upcoming-card">
-      <div class="card-title">即将到来</div>
-      <div class="upcoming-list">
+    <!-- 事件卡片（Tab 切换） -->
+    <div class="footer-card events-card">
+      <div class="tab-header">
+        <button
+          class="tab-btn"
+          :class="{ active: activeTab === 'upcoming' }"
+          @click="activeTab = 'upcoming'"
+        >
+          即将到来
+        </button>
+        <button
+          class="tab-btn"
+          :class="{ active: activeTab === 'events' }"
+          @click="activeTab = 'events'"
+        >
+          我的事件
+        </button>
+      </div>
+
+      <!-- 即将到来 -->
+      <div v-if="activeTab === 'upcoming'" class="upcoming-list">
         <div v-for="event in upcomingEvents" :key="event.date + event.name" class="upcoming-item">
           <span :class="['event-dot', event.type]"></span>
           <span class="event-name">{{ event.name }}</span>
@@ -76,6 +90,9 @@ const upcomingEvents = computed(() => {
         </div>
         <div v-if="upcomingEvents.length === 0" class="upcoming-empty">暂无即将到来的节日</div>
       </div>
+
+      <!-- 我的事件 -->
+      <UserEventPanel v-if="activeTab === 'events'" />
     </div>
   </div>
 </template>
@@ -95,58 +112,46 @@ const upcomingEvents = computed(() => {
   padding: 16px;
 }
 
-.today-card,
-.upcoming-card {
-  flex: 1 0 auto;
+.today-card {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+}
+
+.events-card {
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }
 
-.card-title {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-}
-
-.today-flex-wrapper {
+.today-sub {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex: 1;
-}
-
-.today-main {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 4px;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
 }
 
 .today-date {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
+  line-height: 1.2;
 }
 
 .today-weekday {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
-.today-lunar {
-  font-size: 13px;
+.today-divider {
   color: var(--text-tertiary);
-  margin-bottom: 8px;
+  font-size: 12px;
 }
 
-.today-special {
-  display: flex;
-  gap: 6px;
-  margin-top: 8px;
+.today-lunar {
+  font-size: 12px;
+  color: var(--text-tertiary);
 }
 
 .special-tag {
@@ -157,13 +162,13 @@ const upcomingEvents = computed(() => {
 }
 
 .special-tag.term {
-  background: rgb(from var(--nord14) r g b / 0.2);
-  color: var(--nord14);
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .special-tag.festival {
-  background: rgb(from var(--nord11) r g b / 0.15);
-  color: var(--nord11);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 /* Upcoming List */
@@ -188,11 +193,11 @@ const upcomingEvents = computed(() => {
 }
 
 .event-dot.term {
-  background: var(--nord14);
+  background: var(--color-success);
 }
 
 .event-dot.festival {
-  background: var(--nord11);
+  background: var(--color-danger);
 }
 
 .event-name {
@@ -212,5 +217,37 @@ const upcomingEvents = computed(() => {
   color: var(--text-placeholder);
   text-align: center;
   padding: 10px 0;
+}
+
+/* Tab Header */
+.tab-header {
+  display: flex;
+  gap: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 4px 0 6px;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-bottom: 2px solid transparent;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.tab-btn:hover {
+  color: var(--text-secondary);
+}
+
+.tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 </style>

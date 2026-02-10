@@ -311,7 +311,7 @@ watch(calendar.viewDate, () => {
 
 .datetime-input:hover {
   background: var(--bg-hover);
-  border-color: rgba(var(--nord6-rgb), 0.2);
+  border-color: var(--color-divider);
 }
 
 .input-icon {

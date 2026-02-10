@@ -506,23 +506,23 @@ onUnmounted(() => {
 }
 
 .status-icon.info {
-  color: var(--nord8);
+  color: var(--color-relax);
 }
 
 .status-icon.success {
-  color: var(--nord14);
+  color: var(--color-success);
 }
 
 .status-icon.warning {
-  color: var(--nord13);
+  color: var(--color-warning);
 }
 
 .status-icon.error {
-  color: var(--nord11);
+  color: var(--color-danger);
 }
 
 .status-icon.confirm {
-  color: var(--nord10);
+  color: var(--color-primary);
 }
 
 .close-btn {

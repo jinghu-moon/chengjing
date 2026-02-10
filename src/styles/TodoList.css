@@ -255,7 +255,7 @@
 
 .select-priority option,
 .select-tag option {
-  background: var(--nord1);
+  background: var(--bg-panel-dark);
   color: var(--text-primary);
 }
 
@@ -493,11 +493,11 @@
 }
 
 .badge.priority {
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .badge.tag {
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .badge.due-date {
@@ -508,12 +508,12 @@
 
 .badge.due-date.urgent {
   background: var(--color-warning);
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .badge.due-date.overdue {
   background: var(--color-danger);
-  color: var(--nord6);
+  color: var(--btn-text-color);
 }
 
 .description {

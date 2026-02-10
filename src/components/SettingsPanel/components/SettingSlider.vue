@@ -207,12 +207,12 @@ input[type='range']::-webkit-slider-thumb {
   height: 18px;
   width: 18px;
   border-radius: var(--radius-full);
-  background: var(--nord6);
+  background: var(--control-indicator);
   border: 3px solid var(--color-primary);
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -7px;
-  box-shadow: 0 2px 8px rgba(var(--nord10-rgb), 0.3);
+  box-shadow: 0 2px 8px rgb(from var(--color-primary) r g b / 0.3);
   transition:
     transform 0.1s,
     box-shadow 0.2s;
@@ -220,11 +220,11 @@ input[type='range']::-webkit-slider-thumb {
 
 input[type='range']::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(var(--nord10-rgb), 0.4);
+  box-shadow: 0 4px 12px rgb(from var(--color-primary) r g b / 0.4);
 }
 
 input[type='range']:active::-webkit-slider-thumb {
   transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(var(--nord10-rgb), 0.5);
+  box-shadow: 0 2px 8px rgb(from var(--color-primary) r g b / 0.5);
 }
 </style>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, defineAsyncComponent } from 'vue'
-import { IconSettings, IconBookmarks, IconDatabase } from '@tabler/icons-vue'
+import { IconSettings, IconBookmarks, IconDatabase, IconSun, IconMoon } from '@tabler/icons-vue'
 import DynamicCalendarIcon from './components/DynamicCalendarIcon.vue'
 
 import Background from './components/Background.vue'
@@ -23,9 +23,11 @@ const DataBackupPanel = defineAsyncComponent(() => import('./components/DataBack
 
 import { useImageGC } from './composables/useImageGC'
 import { useSettings } from './composables/useSettings'
+import { useTheme } from './composables/useTheme'
 import './styles/variables.css'
 
 const { settings } = useSettings()
+const { isDark, toggleTheme } = useTheme()
 const { scheduleImageGC } = useImageGC()
 
 onMounted(() => {
@@ -82,6 +84,13 @@ const handleBlur = () => {
         <IconDatabase size="20" />
       </button>
 
+      <button class="icon-btn" :title="isDark ? '切换到浅色模式' : '切换到深色模式'" @click="toggleTheme">
+        <Transition name="theme-icon" mode="out-in">
+          <IconMoon v-if="isDark" :size="20" :key="'moon'" />
+          <IconSun v-else :size="20" :key="'sun'" />
+        </Transition>
+      </button>
+
       <button class="icon-btn" title="设置" @click="isSettingsOpen = true">
         <IconSettings size="20" />
       </button>
@@ -95,7 +104,7 @@ const handleBlur = () => {
         gap: settings.layoutGap + 'px',
       }"
     >
-      <ClockWeather class="app-component" :class="{ dimmed: isFocusMode }" />
+      <ClockWeather class="app-component" :class="{ dimmed: isFocusMode }" @open-calendar="isCalendarOpen = true" />
 
       <Pomodoro class="app-component" :class="{ dimmed: isFocusMode }" />
 
@@ -171,5 +180,21 @@ const handleBlur = () => {
   opacity: 0.3;
   filter: blur(2px);
   pointer-events: none;
+}
+
+/* 主题图标切换动画 */
+.theme-icon-enter-active,
+.theme-icon-leave-active {
+  transition: all 0.2s var(--ease-smooth);
+}
+
+.theme-icon-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+
+.theme-icon-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
 }
 </style>

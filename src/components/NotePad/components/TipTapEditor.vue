@@ -491,7 +491,7 @@ const triggerImageInput = () => {
   font-size: 1.4em;
   font-weight: 700;
   margin: 12px 0 8px;
-  color: var(--nord6);
+  color: var(--text-heading);
   line-height: 1.2;
 }
 
@@ -499,7 +499,7 @@ const triggerImageInput = () => {
   font-size: 1.2em;
   font-weight: 600;
   margin: 10px 0 6px;
-  color: var(--nord5);
+  color: var(--text-heading-sub);
   line-height: 1.3;
 }
 
@@ -507,7 +507,7 @@ const triggerImageInput = () => {
   font-size: 1.1em;
   font-weight: 600;
   margin: 8px 0 6px;
-  color: var(--nord5);
+  color: var(--text-heading-sub);
   line-height: 1.3;
 }
 
@@ -535,7 +535,7 @@ const triggerImageInput = () => {
 
 :deep(.ProseMirror strong) {
   font-weight: 700;
-  color: var(--nord6);
+  color: var(--text-heading);
 }
 
 :deep(.ProseMirror em) {
@@ -672,7 +672,7 @@ const triggerImageInput = () => {
 
 /* ================= Syntax Highlighting (Nord Theme) ================= */
 :deep(pre) {
-  color: var(--nord4);
+  color: var(--code-foreground);
   font-family: var(--font-family-mono);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
@@ -688,7 +688,7 @@ const triggerImageInput = () => {
 
 :deep(.hljs-comment),
 :deep(.hljs-quote) {
-  color: var(--nord3);
+  color: var(--code-comment);
 }
 
 :deep(.hljs-variable),
@@ -699,7 +699,7 @@ const triggerImageInput = () => {
 :deep(.hljs-selector-class),
 :deep(.hljs-regexp),
 :deep(.hljs-deletion) {
-  color: var(--nord11);
+  color: var(--code-variable);
 }
 
 :deep(.hljs-number),
@@ -710,34 +710,34 @@ const triggerImageInput = () => {
 :deep(.hljs-params),
 :deep(.hljs-meta),
 :deep(.hljs-link) {
-  color: var(--nord12);
+  color: var(--code-number);
 }
 
 :deep(.hljs-attribute) {
-  color: var(--nord13);
+  color: var(--code-attribute);
 }
 
 :deep(.hljs-string),
 :deep(.hljs-symbol),
 :deep(.hljs-bullet),
 :deep(.hljs-addition) {
-  color: var(--nord14);
+  color: var(--code-string);
 }
 
 :deep(.hljs-title),
 :deep(.hljs-section) {
-  color: var(--nord8);
+  color: var(--code-function);
 }
 
 :deep(.hljs-keyword),
 :deep(.hljs-selector-tag) {
-  color: var(--nord9);
+  color: var(--code-keyword);
 }
 
 :deep(.hljs) {
   display: block;
   overflow-x: auto;
-  color: var(--nord4);
+  color: var(--code-foreground);
   padding: 0.5em;
 }
 

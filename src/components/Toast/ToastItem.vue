@@ -90,7 +90,7 @@ const handleAction = () => {
   background: var(--bg-toast);
 
   /* 增强边框视觉层次 */
-  border: 1px solid rgb(from var(--nord6) r g b / 0.25);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
 
   /* 增强阴影，突出层次感 */
@@ -158,51 +158,51 @@ const handleAction = () => {
    类型配色 (Nord 主题)
    ================================================================= */
 .toast-item.success::before {
-  background: var(--nord14, #a3be8c);
+  background: var(--color-success);
 }
 
 .toast-item.success {
-  color: var(--nord14, #a3be8c);
+  color: var(--color-success);
 }
 
 .toast-item.error::before {
-  background: var(--nord11, #bf616a);
+  background: var(--color-danger);
 }
 
 .toast-item.error {
-  color: var(--nord11, #bf616a);
+  color: var(--color-danger);
 }
 
 .toast-item.warning::before {
-  background: var(--nord13, #ebcb8b);
+  background: var(--color-warning);
 }
 
 .toast-item.warning {
-  color: var(--nord13, #ebcb8b);
+  color: var(--color-warning);
 }
 
 .toast-item.info::before {
-  background: var(--nord8, #88c0d0);
+  background: var(--color-relax);
 }
 
 .toast-item.info {
-  color: var(--nord8, #88c0d0);
+  color: var(--color-relax);
 }
 
 .toast-item.success .toast-icon {
-  color: var(--nord14, #a3be8c);
+  color: var(--color-success);
 }
 
 .toast-item.error .toast-icon {
-  color: var(--nord11, #bf616a);
+  color: var(--color-danger);
 }
 
 .toast-item.warning .toast-icon {
-  color: var(--nord13, #ebcb8b);
+  color: var(--color-warning);
 }
 
 .toast-item.info .toast-icon {
-  color: var(--nord8, #88c0d0);
+  color: var(--color-relax);
 }
 
 /* =================================================================
@@ -249,15 +249,15 @@ const handleAction = () => {
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
-  border: 1px solid var(--nord4, #d8dee9);
+  border: 1px solid var(--text-secondary);
   background: transparent;
-  color: var(--nord10, #5e81ac);
+  color: var(--color-primary);
   align-self: center;
 }
 
 .toast-action:hover {
-  background: var(--nord6, #eceff4);
-  color: var(--nord9, #81a1c1);
+  background: var(--bg-active);
+  color: var(--color-primary-hover);
 }
 
 .toast-action.primary {
@@ -273,7 +273,7 @@ const handleAction = () => {
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  color: var(--nord4, #d8dee9);
+  color: var(--text-secondary);
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -310,29 +310,29 @@ const handleAction = () => {
   }
 
   .toast-title {
-    color: var(--nord6, #eceff4);
+    color: var(--text-heading);
   }
 
   .toast-message {
-    color: var(--nord4, #d8dee9);
+    color: var(--text-secondary);
   }
 
   .toast-action {
-    border-color: var(--nord2, #434c5e);
-    color: var(--nord8, #88c0d0);
+    border-color: var(--color-info-hover);
+    color: var(--color-relax);
   }
 
   .toast-action:hover {
-    background: var(--nord1, #3b4252);
+    background: var(--bg-panel-dark);
   }
 
   .toast-close {
-    color: var(--nord3, #4c566a);
+    color: var(--text-tertiary);
   }
 
   .toast-close:hover {
-    color: var(--nord6, #eceff4);
-    background: var(--nord2, #434c5e);
+    color: var(--text-heading);
+    background: var(--color-info-hover);
   }
 }
 </style>

@@ -67,7 +67,7 @@ const emit = defineEmits(['update:modelValue'])
   width: 20px;
   left: 2px;
   bottom: 2px;
-  background-color: var(--nord6);
+  background-color: var(--control-indicator);
   transition: 0.3s;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
