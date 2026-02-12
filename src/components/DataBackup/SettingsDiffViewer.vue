@@ -7,7 +7,6 @@ import { computed, ref } from 'vue'
 import {
   CATEGORY_LABELS,
   formatSettingValue,
-  getSettingLabel,
   getSettingCategory,
   groupSettingsByCategory,
   type SettingCategory

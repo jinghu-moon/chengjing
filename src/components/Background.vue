@@ -3,7 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { getImageUrl } from '../utils/db'
 import { useSettings } from '../composables/useSettings'
 
-const props = defineProps<{ isFocus: boolean }>()
+// const props = defineProps<{ isFocus: boolean }>() // Removed
 
 const { settings, wallpaperTrigger } = useSettings()
 
@@ -33,19 +33,15 @@ const loadWallpaper = async () => {
 
 // 计算壁纸样式（处理模糊、缩放、变暗）
 const bgStyle = computed(() => {
-  const blurAmount = props.isFocus ? 30 : settings.wallpaperBlur || 0
+  const blurAmount = settings.wallpaperBlur || 0
 
   // 聚焦或模糊时稍微放大，防止边缘露白
   let scale = 1
-  if (props.isFocus) scale = 1.1
-  else if (blurAmount > 0) scale = 1.05
-
-  // 聚焦模式下，背景本身变暗一点，配合遮罩效果更好
-  const brightness = props.isFocus ? 0.8 : 1
+  if (blurAmount > 0) scale = 1.05
 
   const filterParts = []
   if (blurAmount > 0) filterParts.push(`blur(${blurAmount}px)`)
-  if (brightness < 1) filterParts.push(`brightness(${brightness})`)
+  // Removed focus brightness logic
 
   return {
     backgroundImage: `url(${wallpaperUrl.value})`,
@@ -56,9 +52,6 @@ const bgStyle = computed(() => {
 
 // 计算遮罩样式
 const maskStyle = computed(() => {
-  // 聚焦模式时隐藏此遮罩，交由 App.vue 的聚焦层接管
-  if (props.isFocus) return { opacity: 0 }
-
   // 将 0-100 的数值转换为 0-1 的透明度
   return { opacity: (settings.wallpaperMask || 0) / 100 }
 })

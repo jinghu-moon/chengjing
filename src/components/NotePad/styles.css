@@ -146,20 +146,20 @@
   border-bottom: 1px solid var(--border-glass);
 }
 
-.search-bar {
+.sidebar .search-bar {
   flex: 1;
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.search-icon {
+.sidebar .search-icon {
   position: absolute;
   left: 8px;
   color: var(--text-tertiary);
 }
 
-.search-bar input {
+.sidebar .search-bar input {
   width: 100%;
   background: var(--bg-input);
   border: 1px solid transparent;
@@ -170,7 +170,7 @@
   transition: all 0.2s;
 }
 
-.search-bar input:focus {
+.sidebar .search-bar input:focus {
   background: var(--bg-active);
   border-color: var(--color-primary-alpha);
   outline: none;

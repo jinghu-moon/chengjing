@@ -27,7 +27,7 @@ const emit = defineEmits(['update:modelValue'])
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: var(--height-xs);
+  min-height: var(--height-sm);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);

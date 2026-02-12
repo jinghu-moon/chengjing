@@ -612,7 +612,7 @@ import ToastProvider from './components/Toast/index.vue'
 import { useToast } from './components/Toast/composables/useToast'
 import { DialogProvider, useDialog, Dialog, dialogPresets } from './components/Dialog'
 // import { Button, ButtonGroup } from './components/Button'
-import { Card, Collapse, List, ContainerGroup, cardPresets, listPresets } from './components/Container'
+import { Card, Collapse, List, ContainerGroup, listPresets } from './components/Container'
 
 const toast = useToast()
 const dialog = useDialog()

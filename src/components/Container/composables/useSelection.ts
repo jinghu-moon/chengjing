@@ -1,4 +1,4 @@
-import { computed, inject } from 'vue'
+import { computed, inject, type ComputedRef } from 'vue'
 import type { Ref } from 'vue'
 import { CONTAINER_GROUP_KEY } from '../shared/types'
 import type { ContainerGroupContext } from '../shared/types'
@@ -10,10 +10,10 @@ export interface UseSelectionOptions {
 }
 
 export interface UseSelectionReturn {
-  isChecked: ReturnType<typeof computed<boolean>>
-  isInGroup: ReturnType<typeof computed<boolean>>
-  isMultiple: ReturnType<typeof computed<boolean>>
-  shouldShowIndicator: ReturnType<typeof computed<boolean>>
+  isChecked: ComputedRef<boolean>
+  isInGroup: ComputedRef<boolean>
+  isMultiple: ComputedRef<boolean>
+  shouldShowIndicator: ComputedRef<boolean>
   handleSelect: () => void
 }
 

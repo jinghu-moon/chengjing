@@ -3,6 +3,16 @@ import type { Component } from 'vue'
 // ==================== 选项类型 ====================
 export type OptionType = 'default' | 'checkbox' | 'radio'
 
+/** 拖拽数据标识 */
+export interface DragData {
+  /** 拖拽类型：引擎盒子或分组 header */
+  type: 'engine' | 'group'
+  /** 引擎 ID 或分组名 */
+  id: string
+  /** 所属分组名 */
+  group: string
+}
+
 export interface SelectOption {
   value: string
   label?: string
@@ -17,11 +27,19 @@ export interface SelectOption {
   prefixIcon?: Component
   suffixIcon?: Component
   children?: OptionItem[]
+  /** 拖拽标识数据 */
+  dragData?: DragData
 }
 
 export interface DividerOption {
   value: 'divider'
   label?: string
+  // [新增] 交互支持
+  actionValue?: string // e.g. 'activate-combo:xyz'
+  checked?: boolean
+  type?: 'radio' | 'checkbox'
+  /** 拖拽标识数据 */
+  dragData?: DragData
 }
 
 export type OptionItem = SelectOption | DividerOption
@@ -73,6 +91,12 @@ export interface CustomSelectProps {
 
   // [新增] 自定义触发器模式 - 完全使用 slot 内容作为触发器
   customTrigger?: boolean
+
+  // Grid 布局下是否在图标下方显示文本标签
+  showGridLabel?: boolean
+
+  /** 启用拖拽排序 */
+  draggable?: boolean
 }
 
 // ==================== 常量配置 ====================

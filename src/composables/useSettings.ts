@@ -1,5 +1,5 @@
 import { reactive, ref, watch } from 'vue'
-import type { Settings, IconConfig, DesktopPreset, FolderLayoutMode } from '../types'
+import type { Settings, IconConfig } from '../types'
 
 // 桌面预设
 export const DESKTOP_PRESETS = {
@@ -63,6 +63,12 @@ const defaultSettings: Settings = {
   searchBarHeight: 64,
   searchBarRadius: 32,
   searchBarOpacity: 15,
+  searchSuggestionProvider: 'google',
+  searchBarShowEngineTitle: true,
+  searchBangPrefix: '!',
+  searchBangSymbolEquiv: true,
+  searchClipboardAware: true,
+  searchClipboardHistoryCount: 3,
 
   // Weather
   weatherAutoLocation: true,

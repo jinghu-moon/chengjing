@@ -55,7 +55,7 @@ export function useDataSync() {
 
       // 2. Fill Data based on Mode
       if (mode === 'theme') {
-        const themeKeys = ['wallpaperBlur', 'wallpaperMask', 'searchBarOpacity', 'searchBarRadius'] 
+        // themeKeys reserved for future theme-only export filtering
         // Need a better way to filter theme vs full? 
         // Current logic in QRSync was: theme = iconConfig + layout settings. 
         // Simplified here for now: always export minimal if theme, or we can reuse logic.

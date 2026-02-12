@@ -9,15 +9,47 @@ Chrome/Firefox 新标签页扩展，基于 Vue 3 + TypeScript + Vite + CRXJS 构
 
 ### 可调用 Skills
 
+#### 变更日志 (changelog)
+**触发词**: `记录变更`、`记一下`、`log`、`changelog`、`变更日志`
+
+遵循规范: `.agent/skills/changelog/SKILL.md`
+
+以功能为粒度记录变更，输出到 `change-log.txt`。支持查看、合并（同日期/跨日期）、清空。
+
 #### Git 提交 (git-commit)
 **触发词**: `提交`、`commit`、`release`
 
 遵循规范: `.agent/skills/git-commit/SKILL.md`
 
+**changelog 联动**:
+- 触发时自动检测 `change-log.txt`，默认基于日志生成 commit message（Enter=确认 / n=跳过）
+- 多 scope 按文件数排序推荐，单键选择
+- 支持 brief（默认）/ verbose（`详细提交`，附文件列表，上限 15 条）两种输出模式
+- 提交成功后提示清空日志
+
 输出格式:
 ```bash
 npm run release "<type>(<scope>): <中文描述>"
 ```
+
+#### 代码理解 (code-understanding)
+**触发词**: `编写文档 <路径>`、`更新文档 <路径>`、`理解 <路径>`
+
+遵循规范: `.agent/skills/code-understanding/SKILL.md`
+
+三种操作模式:
+
+| 操作 | 前提条件 | 行为 | 副作用 |
+|------|---------|------|--------|
+| 编写文档 | README.md 不存在 | 分析代码 → 创建 README.md | 创建文件 |
+| 更新文档 | README.md 已存在 | 分析代码 → 更新 README.md | 修改文件 |
+| 理解 | — | 分析源码（+ 交叉参考 README） → 输出 JSON | 只读 |
+
+智能检测: 若只说"更新 \<路径\>"不指定操作:
+- README 存在 → 执行"更新文档"
+- README 不存在 → 执行"编写文档"
+
+README.md 核心作用: 不是人类文档，是 AI Agent 的上下文注入载体。包含 Context / Architecture / Interface Schema / Constraints / State Logic / Dependencies / Patterns。复杂度自适应: Simple (< 100 行) / Medium (100-500 行) / Complex (500+ 行)。
 
 #### 上下文工程 (context-zh)
 **触发词**: `省token`、`压缩上下文`、`优化上下文`、`太长了`、`为什么忘了`

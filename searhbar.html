@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lime Search - Advanced Demo</title>
+  
+  <!-- CSS 变量与基础样式 -->
+  <style>
+    /* --- variables-dark.css (Nord Glassmorphism) --- */
+    :root {
+      --nord: #1f232a; --nord0: #2e3440; --nord1: #3b4252; --nord4: #d8dee9; --nord6: #eceff4; --nord9: #81a1c1; --nord10: #5e81ac; --nord11: #bf616a; --nord15: #b48ead;
+      --color-primary: var(--nord10); --color-primary-alpha: rgb(from var(--nord10) r g b / 0.2);
+      --color-purple-bg: rgb(from var(--nord15) r g b / 0.2);
+      --text-primary: rgb(from var(--nord6) r g b / 0.95);
+      --text-secondary: rgb(from var(--nord4) r g b / 0.75);
+      --text-tertiary: rgb(from var(--nord4) r g b / 0.45);
+      --text-placeholder: rgb(from var(--nord4) r g b / 0.3);
+      --bg-panel: rgb(from var(--nord0) r g b / 0.85);
+      --bg-input: rgb(from var(--nord6) r g b / 0.05);
+      --bg-header-active: rgba(0, 0, 0, 0.2); 
+      --bg-hover: rgba(255, 255, 255, 0.08); 
+      --bg-selected: rgba(129, 161, 193, 0.25); 
+      --bg-selected-border: rgba(129, 161, 193, 0.6);
+      --bg-hover-card: rgb(from var(--nord0) r g b / 0.5);
+      --bg-active: rgb(from var(--nord6) r g b / 0.12);
+      --bg-page: var(--nord0); --bg-tag: var(--nord);
+      --color-border-glass: rgba(255, 255, 255, 0.08); --color-divider: rgb(from var(--nord6) r g b / 0.15);
+      --border-glass: 1px solid var(--color-border-glass);
+      --radius-md: 8px; --radius-xl: 24px; --radius-pill: 28px; 
+      --glass-sm: blur(8px) saturate(150%) brightness(110%);
+      --glass-md: blur(16px) saturate(150%) brightness(110%);
+      --shadow-sm: 0 2px 4px rgb(from var(--nord0) r g b / 0.2);
+      --shadow-md: 0 8px 16px rgb(from var(--nord0) r g b / 0.3);
+      --shadow-lg: 0 16px 48px rgb(from var(--nord0) r g b / 0.5);
+      --height-xl: 3.5rem; --icon-lg: 1.5rem; --icon-md: 1.25rem; --icon-sm: 0.875rem;
+      --font-family-base: 'HarmonyOS Sans SC', sans-serif;
+      --text-sm: 0.8125rem; --text-md: 1rem; --text-xs: 0.75rem;
+      --z-widget: 100; --z-dropdown: 300;
+      --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    html.light {
+      --gray-0: #ffffff; --gray-1: #f6f8fa; --gray-2: #eaeef2; --gray-3: #d0d7de; --gray-4: #afb8c1; --gray-7: #57606a; --gray-10: #24292f;
+      --blue: #0052d9; --blue-active: #002a7c;
+      --color-primary: var(--blue); --color-primary-alpha: rgba(0, 82, 217, 0.12);
+      --color-purple-bg: rgba(142, 86, 221, 0.1);
+      --text-primary: var(--gray-10); --text-secondary: var(--gray-7); --text-tertiary: var(--gray-4); --text-placeholder: var(--gray-4);
+      --bg-panel: rgba(255, 255, 255, 0.95); --bg-input: rgba(246, 248, 250, 0.9); --bg-header-active: var(--gray-1);
+      --bg-hover: rgba(0, 0, 0, 0.06);
+      --bg-selected: rgba(0, 82, 217, 0.12);
+      --bg-selected-border: rgba(0, 82, 217, 0.4);
+      --bg-hover-card: rgba(208, 215, 222, 0.3); --bg-active: rgba(175, 184, 193, 0.2);
+      --bg-page: var(--gray-0); --bg-tag: var(--gray-2);
+      --color-border-glass: var(--gray-3); --color-divider: var(--gray-3);
+      --shadow-color: var(--gray-8); --shadow-sm: 0 1px 3px rgba(36, 41, 47, 0.08); --shadow-lg: 0 8px 24px rgba(36, 41, 47, 0.12);
+    }
+
+    /* 布局样式 */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-page); color: var(--text-primary); font-family: var(--font-family-base);
+      height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      background-image: radial-gradient(circle at 20% 20%, var(--color-primary-alpha) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 80%, var(--color-purple-bg) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+    .theme-toggle {
+      position: absolute; top: 2rem; right: 2rem; padding: 8px 12px;
+      background: var(--bg-panel); border: 1px solid var(--color-border-glass); border-radius: var(--radius-pill);
+      color: var(--text-primary); cursor: pointer; backdrop-filter: blur(8px);
+      display: flex; align-items: center; gap: 8px; font-size: var(--text-xs);
+    }
+
+    /* Search Widget */
+    .search-widget { width: 100%; max-width: 680px; position: relative; z-index: var(--z-widget); }
+    
+    .search-bar {
+      position: relative; display: flex; align-items: center;
+      background: var(--bg-input); border: 1px solid var(--color-border-glass); border-radius: var(--radius-pill);
+      backdrop-filter: var(--glass-sm); -webkit-backdrop-filter: var(--glass-sm);
+      box-shadow: var(--shadow-sm); height: var(--height-xl); padding: 0 20px;
+      z-index: calc(var(--z-dropdown) + 1); transition: all 0.25s var(--ease-smooth);
+    }
+    .search-bar:hover { background: var(--bg-hover-card); }
+
+    .search-widget.is-active .search-bar {
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      background: var(--bg-header-active); border-color: var(--color-primary); border-bottom-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .left-icon { color: var(--text-secondary); width: var(--icon-lg); height: var(--icon-lg); margin-right: 16px; flex-shrink: 0; }
+    .search-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: var(--text-md); height: 100%; }
+    .search-input::placeholder { color: var(--text-placeholder); }
+    
+    .right-icon-btn {
+      background: transparent; border: none; cursor: pointer; padding: 8px; margin-right: -8px; border-radius: 50%;
+      color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .right-icon-btn svg { width: var(--icon-md); height: var(--icon-md); }
+    .right-icon-btn:hover { background-color: var(--bg-hover); color: var(--color-primary); }
+
+    /* Panel */
+    .history-panel {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: var(--bg-panel); backdrop-filter: var(--glass-md); -webkit-backdrop-filter: var(--glass-md);
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl); border: 1px solid transparent; border-top: none;
+      box-shadow: var(--shadow-lg); padding: 16px;
+      opacity: 0; visibility: hidden; transform: scale(0.99); transform-origin: top center; transition: all 0.25s var(--ease-smooth);
+      z-index: var(--z-dropdown); margin-top: -1px;
+      max-height: 400px; display: flex; flex-direction: column;
+    }
+    .search-widget.is-active .history-panel {
+      opacity: 1; visibility: visible; transform: scale(1);
+      border-color: var(--color-primary); border-top: none;
+    }
+
+    .history-panel-content {
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .history-panel-content::-webkit-scrollbar { width: 6px; }
+    .history-panel-content::-webkit-scrollbar-track { background: transparent; }
+    .history-panel-content::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.2); border-radius: 20px; }
+
+    /* Content & Items */
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: var(--text-secondary); font-size: var(--text-xs); font-weight: 600; flex-shrink: 0; }
+    .clear-btn { cursor: pointer; transition: color 0.2s; } .clear-btn:hover { color: #bf616a; }
+
+    .history-list { list-style: none; }
+    .history-item {
+      display: flex; align-items: center; justify-content: space-between; padding: 10px 12px;
+      border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer; transition: all 0.15s ease; margin-bottom: 2px;
+      border-left: 3px solid transparent; 
+    }
+    .hidden { display: none !important; }
+
+    .history-item:hover { background-color: var(--bg-hover); }
+
+    .history-item.is-selected {
+      background-color: var(--bg-selected);
+      border-left-color: var(--bg-selected-border);
+      color: var(--text-primary);
+    }
+    
+    .item-content { display: flex; align-items: center; gap: 12px; }
+    
+    /* 新增：视觉指引箭头 */
+    .nav-indicator {
+      width: 1.5rem; text-align: center; color: var(--color-primary); opacity: 0;
+      transform: translateX(-8px); transition: all 0.2s var(--ease-smooth); font-weight: bold;
+    }
+    .history-item.is-selected .nav-indicator {
+      opacity: 1; transform: translateX(0);
+    }
+
+    .item-icon { color: var(--text-tertiary); font-size: var(--icon-sm); }
+    .delete-icon { color: var(--text-placeholder); opacity: 0; font-size: 16px; padding: 4px; border-radius: 4px; transition: all 0.2s; }
+    .history-item:hover .delete-icon, .history-item.is-selected .delete-icon { opacity: 1; }
+    .delete-icon:hover { background-color: var(--bg-active); color: #bf616a; }
+
+    .tags-container { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--color-divider); flex-shrink: 0; }
+    .tags-label { font-size: var(--text-xs); color: var(--text-tertiary); margin-bottom: 8px; display: block; }
+    .tags-wrapper { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: var(--text-xs); padding: 4px 12px; border-radius: var(--radius-pill);
+      background: var(--bg-tag); color: var(--text-secondary); border: 1px solid transparent; cursor: pointer; transition: all 0.2s;
+    }
+    .tag:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--color-border-glass); }
+    .tag.is-selected { background: var(--bg-selected); color: var(--color-primary); border-color: var(--bg-selected-border); font-weight: 500; }
+
+    .no-results {
+      text-align: center; padding: 2rem 0; color: var(--text-tertiary); font-size: var(--text-sm);
+      display: none;
+    }
+    .no-results svg { width: 32px; height: 32px; margin-bottom: 8px; opacity: 0.5; }
+    .no-results.visible { display: block; }
+
+    .shortcut-badge {
+      font-family: monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px;
+      background: var(--bg-active); color: var(--text-tertiary); border: 1px solid var(--color-divider);
+      margin-left: auto; margin-right: 8px; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="theme-toggle" id="themeToggle">
+    <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+  </button>
+
+  <div class="search-widget" id="searchWidget">
+    
+    <div class="search-bar">
+      <svg class="left-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+         <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+         <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search docs, files, or settings..." 
+        id="searchInput"
+        autocomplete="off" 
+        spellcheck="false"
+      >
+      
+      <div class="shortcut-badge">Ctrl K</div>
+
+      <button class="right-icon-btn" id="searchBtn" aria-label="Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle> <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="history-panel">
+      <div class="history-panel-content">
+        <div class="panel-header">
+          <span>Recent History</span> <span class="clear-btn" id="clearHistoryBtn">Clear All</span>
+        </div>
+        
+        <ul class="history-list" id="historyList">
+          <!-- JS 将在此处生成列表 -->
+        </ul>
+
+        <div class="tags-container">
+          <span class="tags-label">SUGGESTED</span>
+          <div class="tags-wrapper" id="tagsList">
+            <span class="tag" data-value="React">React</span>
+            <span class="tag" data-value="Vue 3">Vue 3</span>
+            <span class="tag" data-value="TypeScript">TypeScript</span>
+            <span class="tag" data-value="Glassmorphism">Glassmorphism</span>
+          </div>
+        </div>
+
+        <div class="no-results" id="noResults">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <p>No results found.</p>
+          <button class="clear-btn" id="clearSearchBtn" style="color: var(--color-primary); margin-top: 4px;">Clear search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------------------------
+    // 配置与初始化
+    // ------------------------------------------------
+    const STORAGE_KEY = 'lime_search_history_v1';
+    // 默认历史记录，如果是第一次访问
+    const defaultHistory = [
+      'Project Nord Design System',
+      'variables-dark.css',
+      'User Authentication Flow'
+    ];
+
+    const searchWidget = document.getElementById('searchWidget');
+    const searchInput = document.getElementById('searchInput');
+    const themeToggle = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+    const historyListEl = document.getElementById('historyList');
+
+    let historyData = [];
+
+    // 1. 初始化：从 LocalStorage 加载数据
+    const loadHistory = () => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        historyData = stored ? JSON.parse(stored) : [...defaultHistory];
+      } catch (e) {
+        historyData = [...defaultHistory];
+      }
+      renderHistoryList();
+    };
+
+    // 2. 渲染历史记录列表
+    const renderHistoryList = () => {
+      historyListEl.innerHTML = '';
+      historyData.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+        li.setAttribute('data-value', item);
+        // 注意：这里使用 .nav-indicator 来放置动态箭头
+        li.innerHTML = `
+          <div class="item-content">
+            <span class="nav-indicator">→</span>
+            <span class="item-icon">🕒</span> 
+            <span>${escapeHtml(item)}</span>
+          </div>
+          <span class="delete-icon">×</span>
+        `;
+        historyListEl.appendChild(li);
+      });
+      // 重新应用过滤状态（如果当前有输入）
+      filterItems(searchInput.value);
+    };
+
+    // 3. 保存数据到 LocalStorage
+    const saveHistory = () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(historyData));
+    };
+
+    // 4. 添加新记录到历史
+    const addToHistory = (value) => {
+      if (!value || value.trim() === '') return;
+      
+      // 如果已存在，先移除旧的（为了提到最前面）
+      const idx = historyData.indexOf(value);
+      if (idx > -1) {
+        historyData.splice(idx, 1);
+      }
+      // 添加到开头
+      historyData.unshift(value);
+      // 限制历史记录长度（例如保留最近10条）
+      if (historyData.length > 10) historyData.pop();
+      
+      saveHistory();
+      renderHistoryList();
+    };
+
+    // 工具：防止 XSS
+    const escapeHtml = (unsafe) => {
+      return unsafe
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    }
+
+    // ------------------------------------------------
+    // UI 交互逻辑
+    // ------------------------------------------------
+    const openPanel = () => {
+      searchWidget.classList.add('is-active');
+      searchInput.focus();
+      filterItems(searchInput.value);
+    };
+
+    const closePanel = () => {
+      searchWidget.classList.remove('is-active');
+      searchInput.blur();
+      selectedIndex = -1;
+      updateSelection();
+    };
+
+    searchInput.addEventListener('focus', openPanel);
+    document.addEventListener('click', (e) => {
+      if (!searchWidget.contains(e.target)) closePanel();
+    });
+
+    themeToggle.addEventListener('click', () => {
+      htmlEl.classList.toggle('light');
+      const isLight = htmlEl.classList.contains('light');
+      themeIcon.textContent = isLight ? '☀️' : '🌙';
+      themeText.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+    });
+
+    // ------------------------------------------------
+    // 核心逻辑
+    // ------------------------------------------------
+    
+    const getNavigableItems = () => {
+      return [
+        ...document.querySelectorAll('.history-item:not(.hidden)'),
+        ...document.querySelectorAll('.tag:not(.hidden)')
+      ];
+    };
+
+    let selectedIndex = -1;
+
+    const updateSelection = () => {
+      const items = getNavigableItems();
+      items.forEach((item, index) => {
+        if (index === selectedIndex) {
+          item.classList.add('is-selected');
+          item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        } else {
+          item.classList.remove('is-selected');
+        }
+      });
+    };
+
+    // 过滤逻辑
+    const filterItems = (query) => {
+      const lowerQuery = query.toLowerCase();
+      const items = document.querySelectorAll('.history-item, .tag');
+      const noResults = document.getElementById('noResults');
+      const tagsContainer = document.querySelector('.tags-container');
+      const historyList = document.querySelector('.history-list');
+      
+      let visibleCount = 0;
+      let hasHistory = false;
+      let hasTags = false;
+
+      items.forEach(item => {
+        const value = item.getAttribute('data-value').toLowerCase();
+        const isMatch = value.includes(lowerQuery);
+        
+        if (isMatch) {
+          item.classList.remove('hidden');
+          visibleCount++;
+          if(item.classList.contains('history-item')) hasHistory = true;
+          if(item.classList.contains('tag')) hasTags = true;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount === 0) {
+        noResults.classList.add('visible');
+        tagsContainer.classList.add('hidden');
+        historyList.classList.add('hidden');
+      } else {
+        noResults.classList.remove('visible');
+        tagsContainer.classList.toggle('hidden', !hasTags);
+        historyList.classList.toggle('hidden', !hasHistory);
+      }
+
+      selectedIndex = -1;
+      updateSelection();
+    };
+
+    searchInput.addEventListener('input', (e) => {
+      filterItems(e.target.value);
+      openPanel();
+    });
+
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+      searchInput.value = '';
+      searchInput.focus();
+      filterItems('');
+    });
+
+    // 键盘事件
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openPanel();
+      }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      const items = getNavigableItems();
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!searchWidget.classList.contains('is-active')) openPanel();
+        selectedIndex++;
+        if (selectedIndex >= items.length) selectedIndex = 0;
+        updateSelection();
+      } 
+      else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex--;
+        if (selectedIndex < 0) selectedIndex = items.length - 1;
+        updateSelection();
+      }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        let searchValue = '';
+        
+        if (selectedIndex > -1) {
+          const selectedItem = items[selectedIndex];
+          searchValue = selectedItem.getAttribute('data-value');
+        } else {
+          searchValue = searchInput.value;
+        }
+
+        if (searchValue) {
+          // 核心功能：添加到历史记录
+          addToHistory(searchValue);
+          searchInput.value = searchValue;
+          console.log(`[Action] Searching: ${searchValue}`);
+          closePanel();
+        }
+      }
+      else if (e.key === 'Escape') {
+        e.preventDefault();
+        closePanel();
+      }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIndex > -1) {
+        e.preventDefault(); 
+        const selectedItem = items[selectedIndex];
+        const deleteBtn = selectedItem.querySelector('.delete-icon');
+        if (deleteBtn) {
+          deleteBtn.click();
+          selectedIndex = selectedIndex >= items.length - 1 ? Math.max(0, selectedIndex - 1) : selectedIndex;
+          updateSelection();
+        }
+      }
+    });
+
+    // 点击事件
+    const handleItemClick = (e) => {
+      const item = e.target.closest('.history-item, .tag');
+      const deleteBtn = e.target.closest('.delete-icon');
+
+      if (deleteBtn) {
+        e.stopPropagation();
+        const listItem = deleteBtn.closest('.history-item');
+        const val = listItem.getAttribute('data-value');
+        // 从数据数组中移除
+        const idx = historyData.indexOf(val);
+        if (idx > -1) historyData.splice(idx, 1);
+        saveHistory();
+        renderHistoryList(); // 重新渲染以更新 DOM
+        return;
+      }
+
+      if (item) {
+        const value = item.getAttribute('data-value');
+        addToHistory(value);
+        searchInput.value = value;
+        console.log(`[Action] Clicked: ${value}`);
+        closePanel();
+      }
+    };
+
+    document.getElementById('historyList').addEventListener('click', handleItemClick);
+    document.getElementById('tagsList').addEventListener('click', handleItemClick);
+
+    document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+      historyData = []; // 清空数据
+      saveHistory();    // 持久化
+      renderHistoryList(); // 更新界面
+      console.log('[Action] History Cleared');
+    });
+
+    document.getElementById('searchBtn').addEventListener('click', () => {
+       const val = searchInput.value;
+       if(val) {
+         addToHistory(val);
+         console.log(`[Action] Search: ${val}`);
+         closePanel();
+       }
+    });
+
+    // 启动时加载
+    loadHistory();
+
+  </script>
+</body>
+</html>

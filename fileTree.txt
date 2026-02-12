@@ -1,0 +1,64 @@
+ChengJing/
+├── A_backups/
+├── design/
+│   ├── CHANGELOG.md
+│   ├── SKILL.md
+│   └── variables.css
+├── docs/
+│   ├── encryption_design.md
+│   ├── HMR_WORKFLOW.md
+│   ├── hybrid_qr_protocol.md
+│   ├── implementation_plan_v1.2.md
+│   ├── implementation_plan.md
+│   ├── multipart_qr_design.md
+│   └── qr-sync-design.md
+├── Manifest-v3-best-practices/
+│   ├── Audit-Report.md
+│   ├── Chrome Extension 2026：AI 原生架构与 MV3 成熟期最佳实践.md
+│   ├── Chrome Extension Manifest V3 最佳实践.md
+│   ├── chrome_extension_manifest_v_3_最佳实践与深度架构白皮书.md
+│   └── Chrome-Extension-Manifest-V3-Best-Practices.md
+├── releases/
+├── scripts/
+│   ├── pack.mjs
+│   └── release.mjs
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── composables/
+│   ├── constants/
+│   ├── data/
+│   ├── styles/
+│   ├── types/
+│   ├── utils/
+│   ├── App.vue
+│   ├── auto-imports.d.ts
+│   ├── background.ts
+│   ├── components.d.ts
+│   ├── demo.vue
+│   ├── main.ts
+│   ├── manifest.json
+│   └── manifest.json.backup
+├── TDesign/
+│   ├── 价值观 - TDesign (2026_1_29 00：33：16).html
+│   ├── Color 色彩 - TDesign (2026_1_29 00：33：25).html
+│   ├── Color-TDesign.html
+│   ├── Dark Mode 深色模式 - TDesign (2026_1_29 00：34：12).html
+│   ├── Fonts 字体 - TDesign (2026_1_29 00：33：34).html
+│   ├── Icon 图标 - TDesign (2026_1_29 00：33：51).html
+│   ├── Layout 布局 - TDesign (2026_1_29 00：33：59).html
+│   ├── Motion 动效 - TDesign (2026_1_29 00：33：42).html
+│   ├── TDesign 组件库技术方案指北 (2026_1_29 00：35：05).html
+│   └── TDesign-Design-Token.md
+├── vite/
+│   └── vite-plugin-settings-labels.ts
+├── CLAUDE.md
+├── index.html
+├── package-lock.json
+├── package.json
+├── test-bookmarks.json
+├── test.html
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts

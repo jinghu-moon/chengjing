@@ -35,14 +35,19 @@ const props = withDefaults(defineProps<CustomSelectProps>(), {
   multiple: false,
   showPath: false,
   customTrigger: false,
+  showGridLabel: false,
+  draggable: false,
 })
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   change: [value: string]
   clear: []
-  check: [value: string, checked: boolean] // Checkbox 状态变化
-  'radio-change': [group: string, value: string] // Radio 选中变化
+  check: [value: string, checked: boolean]
+  'radio-change': [group: string, value: string]
+  'header-click': [value: string]
+  'check-item': [value: string]
+  'drag-pointer-down': [event: PointerEvent, el: HTMLElement]
 }>()
 
 // 定义 Slots 类型 (Vue 3.3+)
@@ -56,7 +61,11 @@ defineSlots<{
   }) => unknown
   header?: () => unknown
   option?: (props: { option: SelectOption }) => unknown
-  footer?: () => unknown
+  footer?: (props: {
+    close: () => void
+    open: () => void
+    toggle: () => void
+  }) => unknown
 }>()
 
 // ==================== State ====================
@@ -351,17 +360,29 @@ const handleClickOutside = (event: MouseEvent) => {
   if (!isTrigger && !isDropdown) isOpen.value = false
 }
 
+// ==================== customTrigger 模式下的全局键盘监听 ====================
+// customTrigger 模式下 SelectTrigger 不渲染，handleKeydown 无绑定目标
+// 需要在下拉框打开时挂载 document 级别监听
+const setupKeyboardListener = () => {
+  if (props.customTrigger) document.addEventListener('keydown', handleKeydown)
+}
+const removeKeyboardListener = () => {
+  if (props.customTrigger) document.removeEventListener('keydown', handleKeydown)
+}
+
 // ==================== 监听器 ====================
 watch(isOpen, val => {
   if (val) {
     throttledUpdatePosition()
     window.addEventListener('scroll', throttledUpdatePosition, true)
     window.addEventListener('resize', throttledUpdatePosition)
+    setupKeyboardListener()
     // 打开时，如果不在搜索中，初始化高亮选中项
     if (!searchQuery.value) initFocusedIndex()
   } else {
     window.removeEventListener('scroll', throttledUpdatePosition, true)
     window.removeEventListener('resize', throttledUpdatePosition)
+    removeKeyboardListener()
     resetCache()
     focusedIndex.value = -1
     // 关闭时清空搜索词，保持状态纯净
@@ -418,10 +439,17 @@ onMounted(() => {
 
 onUnmounted(() => {
   removeClickListener() // 总是移除，避免内存泄漏
+  removeKeyboardListener() // customTrigger 模式下的全局键盘监听
   window.removeEventListener('scroll', throttledUpdatePosition, true)
   window.removeEventListener('resize', throttledUpdatePosition)
   throttledUpdatePosition.cancel()
   clearAllTimers()
+})
+
+defineExpose({
+  open: openDropdown,
+  close: closeDropdown,
+  toggle: toggleDropdown,
 })
 
 // ==================== 类型导出 ====================
@@ -504,10 +532,16 @@ export type { SelectOption, DividerOption, OptionItem, TriggerMode, PlacementPos
           :empty-text="emptyText"
           :dropdown-max-height="dropdownMaxHeight"
           :search-query="searchQuery"
+          :show-grid-label="showGridLabel"
+          :draggable="draggable"
           @mouseenter="handleDropdownEnter"
           @mouseleave="handleMouseLeave"
           @update:focused-index="focusedIndex = $event"
+
           @select="handleSelect"
+          @header-click="$emit('header-click', $event)"
+          @check-item="$emit('check-item', $event)"
+          @drag-pointer-down="(ev: PointerEvent, el: HTMLElement) => $emit('drag-pointer-down', ev, el)"
         >
           <template v-if="$slots.header" #header>
             <slot name="header" />
@@ -516,7 +550,12 @@ export type { SelectOption, DividerOption, OptionItem, TriggerMode, PlacementPos
             <slot name="option" v-bind="slotProps" />
           </template>
           <template v-if="$slots.footer" #footer>
-            <slot name="footer" />
+            <slot
+              name="footer"
+              :close="closeDropdown"
+              :open="openDropdown"
+              :toggle="toggleDropdown"
+            />
           </template>
         </SelectDropdown>
       </transition>

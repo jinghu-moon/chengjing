@@ -207,7 +207,7 @@ watch(isOpen, (val) => {
     :icon="IconBookmarks"
     width="700px"
     :on-before-close="handleBeforeClose"
-    :body-style="{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }"
+    :body-style="{ padding: '0', overflow: 'hidden', display: 'flex', flexDirection: 'column' }"
   >
     <!-- Search -->
     <div class="search-section">

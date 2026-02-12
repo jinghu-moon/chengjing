@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import {
   IconPhoto,
   IconRefresh,
@@ -28,12 +28,20 @@ import LayoutSettingsModal from './components/LayoutSettingsModal.vue'
 import CapsuleTabs from './components/CapsuleTabs.vue'
 import SelectMenu from '@/components/SelectMenu/index.vue'
 import PresetManager from '@/components/DataBackup/PresetManager.vue'
+import { useEngines } from '@/components/SearchBar/composables/useEngines'
+import { SUGGESTION_PROVIDER_OPTIONS } from '@/components/SearchBar/composables/useSuggestions'
 // Select 组件由 unplugin-vue-components 自动导入
 
 const isOpen = defineModel<boolean>('open', { default: false })
 
 const { settings, iconConfig, forceWallpaperUpdate, resetSettings } = useSettings()
 const { isDark } = useTheme()
+const { engines, currentEngine, selectEngine } = useEngines()
+
+// 默认搜索引擎选项
+const engineSelectOptions = computed(() =>
+  engines.value.map(e => ({ value: e.id, label: e.name }))
+)
 
 const {
   settings: poemSettings,
@@ -57,6 +65,7 @@ const sourceOptions = [
   { label: '今日诗词 (智能推荐)', value: 'jinrishici' },
   { label: '一言 (Hitokoto)', value: 'hitokoto' },
 ]
+
 
 // 动态计算分类选项（Checkbox 状态）
 const hitokotoCategoryOptions = computed(() => {
@@ -151,6 +160,22 @@ const resetNotePadPos = () => {
     window.dispatchEvent(new Event('reset-notepad-position'))
   }
 }
+
+/** 英文→中文标点映射（用于提示文本） */
+const EN_TO_ZH_PUNCT: Record<string, string> = {
+  '!': '！', '?': '？', ':': '：', ';': '；',
+  ',': '，', '.': '。',
+  '(': '（', ')': '）', '[': '【', ']': '】',
+  '{': '｛', '}': '｝', '<': '《', '>': '》',
+  '@': '＠', '#': '＃', '$': '＄', '%': '％',
+  '&': '＆', '*': '＊', '/': '／', '~': '～',
+}
+
+/** 获取前缀的等价中文字符（用于提示） */
+function getEquivChar(prefix: string): string {
+  if (!prefix) return ''
+  return EN_TO_ZH_PUNCT[prefix[0]] || prefix[0]
+}
 </script>
 
 <template>
@@ -165,7 +190,7 @@ const resetNotePadPos = () => {
           title="配置预设"
           :icon="IconPackage"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -176,7 +201,7 @@ const resetNotePadPos = () => {
           title="番茄钟设置"
           :icon="IconFocus2"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -203,7 +228,7 @@ const resetNotePadPos = () => {
           title="待办清单设置"
           :icon="IconListCheck"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -236,7 +261,7 @@ const resetNotePadPos = () => {
           title="便签设置"
           :icon="IconNotes"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -292,7 +317,7 @@ const resetNotePadPos = () => {
           title="每日诗词设置"
           :icon="IconSparkles"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -407,7 +432,7 @@ const resetNotePadPos = () => {
           title="图标风格"
           :icon="IconPalette"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -448,13 +473,25 @@ const resetNotePadPos = () => {
           title="搜索框样式"
           :icon="IconSearch"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
           <SettingSwitch v-model="settings.searchBarShow" label="显示搜索栏" />
           <transition name="slide-fade">
             <div v-if="settings.searchBarShow" class="sub-settings">
+              <div class="config-row" style="margin-bottom: 4px">
+                <label>默认引擎</label>
+                <div class="config-control">
+                  <SelectMenu
+                    :model-value="currentEngine.id"
+                    :options="engineSelectOptions"
+                    trigger-width="100%"
+                    :show-arrow="true"
+                    @update:model-value="selectEngine($event)"
+                  />
+                </div>
+              </div>
               <div class="divider"></div>
               <SettingSwitch v-model="settings.searchBarShowIcon" label="显示右侧搜索按钮" />
               <div class="divider"></div>
@@ -486,6 +523,63 @@ const resetNotePadPos = () => {
                 :max="100"
                 unit="%"
               />
+              <div class="divider"></div>
+              <SettingSwitch
+                :model-value="settings.searchSuggestionProvider !== 'off'"
+                label="搜索联想建议"
+                @update:model-value="settings.searchSuggestionProvider = $event ? 'google' : 'off'"
+              />
+              <SettingSwitch v-model="settings.searchBarShowEngineTitle" label="显示引擎标题" />
+              <transition name="slide-fade">
+                <div v-if="settings.searchSuggestionProvider !== 'off'" class="config-row" style="margin-top: 4px">
+                  <label>数据源</label>
+                  <div class="config-control">
+                    <SelectMenu
+                      :model-value="settings.searchSuggestionProvider"
+                      :options="SUGGESTION_PROVIDER_OPTIONS"
+                      trigger-width="100%"
+                      :show-arrow="true"
+                      @update:model-value="settings.searchSuggestionProvider = $event"
+                    />
+                  </div>
+                </div>
+              </transition>
+              <div class="divider"></div>
+              <div class="config-row">
+                <label>Bang 前缀</label>
+                <div class="config-control">
+                  <input
+                    v-model="settings.searchBangPrefix"
+                    type="text"
+                    class="bang-prefix-input"
+                    maxlength="2"
+                    placeholder="!"
+                  />
+                </div>
+              </div>
+              <SettingSwitch
+                v-model="settings.searchBangSymbolEquiv"
+                label="中英文标点等价"
+              />
+              <div class="bang-hint" style="margin-bottom: 8px">
+                输入 <code>{{ getEquivChar(settings.searchBangPrefix) }}</code> 等同于 <code>{{ settings.searchBangPrefix }}</code>
+              </div>
+              <SettingSwitch
+                v-model="settings.searchClipboardAware"
+                label="剪贴板感知"
+                description="聚焦搜索框时自动读取剪贴板内容"
+              />
+              <transition name="fade">
+                <div v-if="settings.searchClipboardAware" class="config-row" style="margin-top: 8px;">
+                  <SettingSlider
+                    v-model="settings.searchClipboardHistoryCount"
+                    label="历史记录数量"
+                    :min="1"
+                    :max="10"
+                    style="width: 100%"
+                  />
+                </div>
+              </transition>
             </div>
           </transition>
         </Collapse>
@@ -494,7 +588,7 @@ const resetNotePadPos = () => {
           title="布局与壁纸"
           :icon="IconLayoutDashboard"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -593,7 +687,7 @@ const resetNotePadPos = () => {
           title="功能模块"
           :icon="IconApps"
           :default-expanded="true"
-          size="sm"
+          size="md"
           :show-switch="false"
           :show-collapse-icon="true"
         >
@@ -696,5 +790,38 @@ const resetNotePadPos = () => {
   margin-top: 8px;
   margin-bottom: 4px;
   padding-left: 4px;
+}
+
+/* Bang 前缀输入框 */
+.bang-prefix-input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  background: var(--bg-active);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: var(--font-family-mono);
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.bang-prefix-input:focus {
+  border-color: var(--color-primary);
+}
+
+.bang-hint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 0 4px;
+  margin-top: -2px;
+}
+
+.bang-hint code {
+  background: var(--bg-active);
+  padding: 0 4px;
+  border-radius: 2px;
+  font-family: var(--font-family-mono);
 }
 </style>

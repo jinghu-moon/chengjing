@@ -6,7 +6,7 @@ import DynamicCalendarIcon from './components/DynamicCalendarIcon.vue'
 import Background from './components/Background.vue'
 import ClockWeather from './components/ClockWeather.vue'
 import Pomodoro from './components/Pomodoro.vue'
-import SearchBar from './components/SearchBar.vue'
+import SearchBar from './components/SearchBar'
 import ShortcutGrid from './components/ShortcutGrid'
 import TodoList from './components/TodoList.vue'
 
@@ -38,20 +38,16 @@ const isSettingsOpen = ref(false)
 const isCalendarOpen = ref(false)
 const isBookmarkOpen = ref(false)
 const isDataBackupOpen = ref(false)
-const isFocusMode = ref(false)
+// const isFocusMode = ref(false) // Removed
 
-const handleFocus = () => {
-  isFocusMode.value = true
-}
-
-const handleBlur = () => {
-  isFocusMode.value = false
-}
+// const handleFocus = () => { ... } // Removed
+// const handleBlur = () => { ... } // Removed
 </script>
 
 <template>
   <div class="app-wrapper">
-    <Background :is-focus="isFocusMode" />
+    <!-- Removed :is-focus binding -->
+    <Background />
 
     <ToastProvider />
     <DialogProvider />
@@ -71,7 +67,8 @@ const handleBlur = () => {
 
     <DataBackupPanel v-model:open="isDataBackupOpen" />
 
-    <div class="top-actions" :class="{ hidden: isFocusMode }">
+    <!-- Removed :class="{ hidden: isFocusMode }" -->
+    <div class="top-actions">
       <button class="icon-btn" title="日历" @click="isCalendarOpen = true">
         <DynamicCalendarIcon />
       </button>
@@ -104,15 +101,17 @@ const handleBlur = () => {
         gap: settings.layoutGap + 'px',
       }"
     >
-      <ClockWeather class="app-component" :class="{ dimmed: isFocusMode }" @open-calendar="isCalendarOpen = true" />
+      <!-- Removed :class="{ hidden: isFocusMode }" from all components -->
+      <ClockWeather class="app-component" @open-calendar="isCalendarOpen = true" />
 
-      <Pomodoro class="app-component" :class="{ dimmed: isFocusMode }" />
+      <Pomodoro class="app-component" />
 
-      <Calculator v-if="settings.calculatorShow" class="app-component" :class="{ dimmed: isFocusMode }" />
+      <Calculator v-if="settings.calculatorShow" class="app-component" />
 
-      <SearchBar @focus="handleFocus" @blur="handleBlur" />
+      <!-- Removed @focus / @blur handlers -->
+      <SearchBar />
 
-      <ShortcutGrid class="app-component transition-all" :class="{ dimmed: isFocusMode }" />
+      <ShortcutGrid class="app-component transition-all" />
     </div>
 
   </div>
@@ -136,10 +135,10 @@ const handleBlur = () => {
 
 
 .top-actions {
-  position: absolute;
+  position: fixed;
   top: 24px;
   right: 28px;
-  z-index: 30;
+  z-index: var(--z-panel);
   transition: opacity 0.3s;
   display: flex;
   gap: 12px;

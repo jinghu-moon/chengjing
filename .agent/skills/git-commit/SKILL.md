@@ -106,8 +106,21 @@ npm run release "style(styles): 新增语义化间距与无障碍令牌"
 
 When user says "提交", "commit", or "release":
 
-1. Summarize what was accomplished in conversation
-2. Check which files/components were modified
-3. Pick most specific scope
+1. Check if `change-log.txt` exists and has entries
+   - **Has entries**: Default behavior is **use changelog**. Show one-line confirmation:
+     `"基于变更日志生成 commit message (Enter=确认 / n=跳过)"`
+   - **No file / empty**: Proceed to step 2 normally
+
+2. Analyze source (priority: changelog entries > conversation context > git diff)
+3. Scope resolution:
+   - Single scope → use directly
+   - Multiple scopes → sort by file count desc, recommend top one:
+     `"检测到多个 scope: 1) SearchBar (5 files) ★ 2) NotePad (2 files) 3) Settings (1 file). 回车使用推荐 / 输入序号选择:"`
 4. Generate message in **Chinese**
 5. Output: `npm run release "message"`
+6. On success, prompt user to clear `change-log.txt` if it was used
+
+### Output Modes
+
+- **brief** (default): `type(scope): description` — single most significant change
+- **verbose** (trigger: `详细提交`): Same title + file change list as commit body (max 15 files; if exceeded, show top 15 + `... and N more`). If entries span multiple dates, append summary: `"(合并了 N 天的变更)"`

@@ -70,6 +70,24 @@ export default defineConfig({
       clientPort: 5173,
     },
     cors: true, // 允许扩展跨域访问
+    proxy: {
+      // 搜索建议 API 代理（开发环境绕过 CORS）
+      '/__suggest/google': {
+        target: 'https://suggestqueries.google.com',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace('/__suggest/google', ''),
+      },
+      '/__suggest/bing': {
+        target: 'https://api.bing.com',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace('/__suggest/bing', ''),
+      },
+      '/__suggest/baidu': {
+        target: 'https://suggestion.baidu.com',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace('/__suggest/baidu', ''),
+      },
+    },
   },
   build: {
     outDir: 'dist',

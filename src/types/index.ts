@@ -93,6 +93,18 @@ export interface Settings {
   searchBarRadius: number
   /** 搜索栏透明度 */
   searchBarOpacity: number
+  /** 搜索建议数据源（'google' | 'baidu' | 'bing' | 'off'） */
+  searchSuggestionProvider: string
+  /** 是否在菜单中显示引擎标题 */
+  searchBarShowEngineTitle: boolean
+  /** Bang 指令前缀（默认 '!'） */
+  searchBangPrefix: string
+  /** 标点符号中英文等价（如 '！' 等同于 '!'） */
+  searchBangSymbolEquiv: boolean
+  /** 剪贴板感知（聚焦时检测剪贴板内容） */
+  searchClipboardAware: boolean
+  /** 剪贴板历史记录数量（0 为不限制，推荐 3-5） */
+  searchClipboardHistoryCount: number
 
   // ===== Weather =====
   /** 自动定位 */

@@ -32,15 +32,22 @@ const props = defineProps<{
   focusedIndex: number
   emptyText?: string
   dropdownMaxHeight?: string | number
-  // [新增] 接收搜索词
   searchQuery?: string
+  showGridLabel?: boolean
+  /** 启用拖拽排序 */
+  draggable?: boolean
 }>()
 
 const emit = defineEmits<{
   mouseenter: []
   mouseleave: []
   'update:focusedIndex': [index: number]
-  select: [option: SelectOption] // 传递完整选项对象
+
+  select: [option: SelectOption]
+  'header-click': [value: string]
+  'check-item': [value: string]
+  /** 拖拽开始：传递 PointerEvent、DragData、源元素和滚动容器 */
+  'drag-pointer-down': [event: PointerEvent, el: HTMLElement]
 }>()
 
 // ==================== 子菜单状态 ====================
@@ -307,8 +314,44 @@ const getTransitionName = (parentRect: DOMRect | null) => {
             class="dropdown-group-label"
             :class="{ 'is-grid': layout === 'grid' }"
             title="点击全选/取消全选该组"
-            @click="handleGroupClick(idx)"
+            v-bind="
+              draggable && (opt as DividerOption).dragData
+                ? {
+                    'data-drag-type': (opt as DividerOption).dragData!.type,
+                    'data-drag-id': (opt as DividerOption).dragData!.id,
+                    'data-drag-group': (opt as DividerOption).dragData!.group,
+                  }
+                : {}
+            "
+            @click="
+              (opt as DividerOption).actionValue
+                ? $emit('header-click', (opt as DividerOption).actionValue!)
+                : handleGroupClick(idx)
+            "
+            @pointerdown="
+              draggable && (opt as DividerOption).dragData
+                ? $emit('drag-pointer-down', $event, $event.currentTarget as HTMLElement)
+                : undefined
+            "
           >
+            <!-- 渲染 Radio/Checkbox -->
+            <div
+              v-if="(opt as DividerOption).type === 'radio'"
+              class="type-icon radio-icon"
+              :class="{ checked: (opt as DividerOption).checked }"
+              style="margin-right: 8px"
+            >
+              <div v-if="(opt as DividerOption).checked" class="radio-dot" />
+            </div>
+            <!-- Checkbox -->
+            <div
+              v-else-if="(opt as DividerOption).type === 'checkbox'"
+              class="type-icon radio-icon"
+              :class="{ checked: (opt as DividerOption).checked }"
+              style="margin-right: 8px; border-radius: 4px;"
+            >
+              <IconCheck v-if="(opt as DividerOption).checked" :size="10" stroke-width="4" color="white" />
+            </div>
             <span>{{ (opt as DividerOption).label }}</span>
           </div>
 
@@ -335,6 +378,15 @@ const getTransitionName = (parentRect: DOMRect | null) => {
               'is-checked': (opt as SelectOption).checked,
               ...getMergeClass(opt, idx),
             }"
+            v-bind="
+              draggable && (opt as SelectOption).dragData
+                ? {
+                    'data-drag-type': (opt as SelectOption).dragData!.type,
+                    'data-drag-id': (opt as SelectOption).dragData!.id,
+                    'data-drag-group': (opt as SelectOption).dragData!.group,
+                  }
+                : {}
+            "
             :role="
               (opt as SelectOption).type === 'checkbox'
                 ? 'menuitemcheckbox'
@@ -352,9 +404,24 @@ const getTransitionName = (parentRect: DOMRect | null) => {
             @mouseenter="handleItemMouseEnter(idx)"
             @mouseleave="handleItemMouseLeave()"
             @click.stop="handleItemClick(opt)"
+            @pointerdown="
+              draggable && (opt as SelectOption).dragData
+                ? $emit('drag-pointer-down', $event, $event.currentTarget as HTMLElement)
+                : undefined
+            "
           >
             <slot name="option" :option="opt" :selected="modelValue === opt.value">
               <div v-if="layout === 'grid'" class="grid-content">
+                <!-- Grid Item Checkbox -->
+                <div
+                  v-if="(opt as SelectOption).type === 'checkbox'"
+                  class="grid-checkbox"
+                  :class="{ checked: (opt as SelectOption).checked }"
+                  @click.stop="$emit('check-item', (opt as SelectOption).value)"
+                >
+                  <IconCheck v-if="(opt as SelectOption).checked" :size="10" stroke-width="4" />
+                </div>
+
                 <component
                   :is="(opt as SelectOption).prefixIcon"
                   v-if="(opt as SelectOption).prefixIcon"
@@ -363,6 +430,9 @@ const getTransitionName = (parentRect: DOMRect | null) => {
                 />
                 <span v-else class="grid-initial">
                   {{ (opt as SelectOption).label?.slice(0, 1) || '?' }}
+                </span>
+                <span v-if="showGridLabel && (opt as SelectOption).label" class="grid-label">
+                  {{ (opt as SelectOption).label }}
                 </span>
               </div>
 
@@ -681,6 +751,37 @@ const getTransitionName = (parentRect: DOMRect | null) => {
   min-width: 0;
   min-height: 0;
   box-sizing: border-box;
+  position: relative; /* 为 checkbox 定位 */
+}
+
+/* Grid Checkbox - 始终半透明可见，hover/checked 时完全不透明 */
+.grid-checkbox {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-tertiary);
+  background: var(--bg-panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transform: scale(1);
+  transition: all 0.2s;
+  z-index: 2;
+  color: white;
+}
+
+.dropdown-item.is-grid:hover .grid-checkbox {
+  opacity: 1;
+}
+
+.grid-checkbox.checked {
+  opacity: 1;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .grid-content {
@@ -701,6 +802,24 @@ const getTransitionName = (parentRect: DOMRect | null) => {
   font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
+}
+
+/* Grid 模式下的文本标签 */
+.grid-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* 有标签时取消正方形约束，允许内容自然撑高 */
+.dropdown-item.is-grid:has(.grid-label) {
+  aspect-ratio: auto;
+  padding: 8px 6px 6px;
 }
 
 .dropdown-item.is-grid:hover .grid-icon {
@@ -1072,4 +1191,6 @@ const getTransitionName = (parentRect: DOMRect | null) => {
   grid-column: 1 / -1;
   margin: 4px 0;
 }
+
+/* 拖拽排序样式已迁移至全局 src/styles/drag.css */
 </style>
